@@ -59,8 +59,6 @@ const mainNav = [
 const managementNav = [
   { title: 'Alerts', icon: 'mdi-bell-alert-outline', to: '/alerts' },
   { title: 'Analytics', icon: 'mdi-chart-line', to: '/analytics' },
-  { title: 'Users', icon: 'mdi-account-group-outline', to: '/users' },
-  { title: 'Settings', icon: 'mdi-cog-outline', to: '/settings' },
 ]
 </script>
 
