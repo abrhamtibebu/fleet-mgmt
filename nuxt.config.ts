@@ -28,4 +28,10 @@ export default defineNuxtConfig({
       ],
     },
   },
+  runtimeConfig: {
+    public: {
+      baseURL: process.env.BASE_API_URL,
+      authURL: process.env.AUTH_URL
+    },
+  },
 })

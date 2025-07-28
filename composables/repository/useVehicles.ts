@@ -21,6 +21,7 @@ interface Vehicle {
 }
 
 export const useVehicles = () => {
+  const { $apiFetch } = useNuxtApp();
   const vehicles = ref<Vehicle[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
@@ -28,8 +29,10 @@ export const useVehicles = () => {
   const getVehicles = async () => {
     loading.value = true
     try {
-      const response = await fetch('/api/vehicles')
-      const data = await response.json()
+
+      const data = await $apiFetch<Vehicle>("/vehicle/all", {
+        method: "GET"
+      });
       vehicles.value = Array.isArray(data) ? data : []
     } catch (e) {
       vehicles.value = []
