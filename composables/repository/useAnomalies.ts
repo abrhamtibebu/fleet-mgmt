@@ -15,6 +15,7 @@ interface Anomaly {
 }
 
 export const useAnomalies = () => {
+  const { $apiFetch } = useNuxtApp();
   const anomalies = ref<Anomaly[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
@@ -22,8 +23,9 @@ export const useAnomalies = () => {
   const getAnomalies = async () => {
     loading.value = true
     try {
-      const response = await fetch('/api/anomalies')
-      const data = await response.json()
+      const data = await $apiFetch<Anomaly[]>('/anomalies', {
+        method: "GET"
+      });
       anomalies.value = Array.isArray(data) ? data : []
     } catch (e) {
       anomalies.value = []

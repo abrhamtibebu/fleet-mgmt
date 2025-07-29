@@ -7,8 +7,8 @@
 
 html, body {
   font-family: 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-  background: #F5F7F8;
-  color: #333;
+  background: #f8f9fa;
+  color: #1a1a1a;
   letter-spacing: 0.01em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -21,10 +21,13 @@ html, body {
 
 ::-webkit-scrollbar {
   width: 8px;
-  background: #f0f1f3;
+  background: #e9ecef;
 }
 ::-webkit-scrollbar-thumb {
-  background: #e0e0e0;
+  background: #6c757d;
   border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #495057;
 }
 </style>

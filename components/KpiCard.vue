@@ -30,28 +30,28 @@ defineProps<{
   min-height: 90px;
   padding: 24px 28px;
   border-radius: 18px;
-  background: linear-gradient(135deg, #fffde7 0%, #f8fafb 100%);
-  box-shadow: 0 2px 12px rgba(16, 30, 54, 0.06);
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
   transition: box-shadow 0.2s, transform 0.2s;
 }
 .kpi-card:hover {
-  box-shadow: 0 6px 24px rgba(80, 80, 80, 0.10);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
   transform: translateY(-2px) scale(1.02);
 }
 .kpi-icon-bg {
-  background: linear-gradient(135deg, #ffd60022 0%, #fffde7 100%);
+  background: linear-gradient(135deg, #ffc107 0%, #ffca2c 100%);
   border-radius: 50%;
   width: 54px;
   height: 54px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(255, 214, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
 }
 .kpi-icon {
-  color: #FFD600;
+  color: #ffffff;
 }
 .kpi-title {
   margin-bottom: 2px;

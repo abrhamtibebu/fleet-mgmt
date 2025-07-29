@@ -30,7 +30,7 @@ export const useVehicles = () => {
     loading.value = true
     try {
 
-      const data = await $apiFetch<Vehicle>("/vehicle/all", {
+      const data = await $apiFetch<Vehicle>("/vehicles", {
         method: "GET"
       });
       vehicles.value = Array.isArray(data) ? data : []

@@ -157,22 +157,27 @@
                 ></v-text-field>
               </v-col>
               <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model="vehicleForm.brand"
+                <v-select
+                  v-model="vehicleForm.brandId"
+                  :items="brandOptions"
                   label="Brand"
                   variant="outlined"
                   :rules="[v => !!v || 'Brand is required']"
                   required
-                ></v-text-field>
+                  @update:model-value="onBrandChange"
+                ></v-select>
               </v-col>
               <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model="vehicleForm.model"
+                <v-select
+                  v-model="vehicleForm.modelId"
+                  :items="modelOptions"
                   label="Model"
                   variant="outlined"
                   :rules="[v => !!v || 'Model is required']"
                   required
-                ></v-text-field>
+                  :disabled="!vehicleForm.brandId"
+                  @update:model-value="onModelChange"
+                ></v-select>
               </v-col>
               <v-col cols="12" sm="6">
                 <v-text-field
@@ -234,6 +239,16 @@
                   required
                 ></v-select>
       </v-col>
+              <v-col cols="12">
+                <v-select
+                  v-model="vehicleForm.vendorCardId"
+                  :items="vendorCardOptions"
+                  label="Select from Vendor Cards (Optional)"
+                  variant="outlined"
+                  placeholder="Choose an existing vendor card or leave empty"
+                  clearable
+                ></v-select>
+              </v-col>
     </v-row>
           </v-form>
         </v-card-text>
@@ -265,6 +280,7 @@ import { ref, computed, onMounted } from 'vue'
 // Composables
 const { vehicles, loading, getVehicles } = useVehicles()
 const { fuelCards, getFuelCards } = useFuel()
+const { brands, models, cards: vendorCards, getModelsByBrand, maskCardNumber, initializeData } = useVendorData()
 
 // Reactive data
 const searchQuery = ref('')
@@ -274,6 +290,8 @@ const saving = ref(false)
 const formValid = ref(false)
 const vehicleForm = ref({
   licensePlate: '',
+  brandId: '',
+  modelId: '',
   brand: '',
   model: '',
   year: new Date().getFullYear(),
@@ -281,7 +299,8 @@ const vehicleForm = ref({
   location: '',
   currentMileage: 0,
   serviceInterval: 10000,
-  fuelCardId: ''
+  fuelCardId: '',
+  vendorCardId: ''
 })
 
 // Computed properties
@@ -295,6 +314,29 @@ const filteredVehicles = computed(() => {
     vehicle.model.toLowerCase().includes(query) ||
     vehicle.assignedDriver.toLowerCase().includes(query)
   )
+})
+
+const brandOptions = computed(() => {
+  return brands.value.map(brand => ({
+    title: brand.name,
+    value: brand.id
+  }))
+})
+
+const modelOptions = computed(() => {
+  if (!vehicleForm.value.brandId) return []
+  const models = getModelsByBrand(vehicleForm.value.brandId)
+  return models.map(model => ({
+    title: `${model.name} (${model.year})`,
+    value: model.id
+  }))
+})
+
+const vendorCardOptions = computed(() => {
+  return vendorCards.value.map(card => ({
+    title: `${card.cardHolder} - ${maskCardNumber(card.cardNumber)}`,
+    value: card.id
+  }))
 })
 
 // Methods
@@ -344,9 +386,32 @@ const saveVehicle = async () => {
   }
 }
 
+const onBrandChange = () => {
+  // Reset model when brand changes
+  vehicleForm.value.modelId = ''
+  vehicleForm.value.model = ''
+  
+  // Set brand name
+  const selectedBrand = brands.value.find(b => b.id === vehicleForm.value.brandId)
+  if (selectedBrand) {
+    vehicleForm.value.brand = selectedBrand.name
+  }
+}
+
+const onModelChange = () => {
+  // Set model details
+  const selectedModel = models.value.find(m => m.id === vehicleForm.value.modelId)
+  if (selectedModel) {
+    vehicleForm.value.model = selectedModel.name
+    vehicleForm.value.year = selectedModel.year
+  }
+}
+
 const resetForm = () => {
   vehicleForm.value = {
     licensePlate: '',
+    brandId: '',
+    modelId: '',
     brand: '',
     model: '',
     year: new Date().getFullYear(),
@@ -354,7 +419,8 @@ const resetForm = () => {
     location: '',
     currentMileage: 0,
     serviceInterval: 10000,
-    fuelCardId: ''
+    fuelCardId: '',
+    vendorCardId: ''
   }
   editingVehicle.value = null
 }
@@ -365,6 +431,11 @@ onMounted(async () => {
     getVehicles(),
     getFuelCards()
   ])
+  
+  // Initialize vendor data
+  initializeData()
+  
+
 })
 </script> 
 

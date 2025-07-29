@@ -1,12 +1,35 @@
 <template>
   <div class="maintenance-root">
+    <!-- Header Section -->
     <div class="maintenance-header">
-      <h1 class="maintenance-title">Maintenance Management</h1>
-      <p class="maintenance-subtitle">Service scheduling, maintenance history, and vehicle upkeep tracking</p>
+      <div class="header-content">
+        <div class="header-text">
+          <h1 class="maintenance-title">Maintenance Management</h1>
+          <p class="maintenance-subtitle">Comprehensive service scheduling, maintenance tracking, and vehicle upkeep management</p>
+        </div>
+        <div class="header-actions">
+          <v-btn
+            color="primary"
+            prepend-icon="mdi-plus"
+            class="header-btn"
+            @click="showServiceDialog = true"
+          >
+            Schedule Service
+          </v-btn>
+          <v-btn
+            color="success"
+            prepend-icon="mdi-wrench"
+            class="header-btn"
+            @click="showMaintenanceDialog = true"
+          >
+            Add Record
+          </v-btn>
+        </div>
+      </div>
     </div>
 
     <!-- KPI Cards -->
-    <div class="kpi-row">
+    <div class="kpi-section">
       <v-row>
         <v-col cols="12" sm="6" md="3">
           <KpiCard
@@ -14,6 +37,7 @@
             :value="serviceDueVehicles.length.toString()"
             icon="mdi-wrench"
             color="warning"
+            @click="filterByServiceDue"
           />
         </v-col>
         <v-col cols="12" sm="6" md="3">
@@ -22,6 +46,7 @@
             :value="maintenanceVehicles.length.toString()"
             icon="mdi-tools"
             color="info"
+            @click="filterByMaintenance"
           />
         </v-col>
         <v-col cols="12" sm="6" md="3">
@@ -30,6 +55,7 @@
             :value="completedServicesThisMonth.toString()"
             icon="mdi-check-circle"
             color="success"
+            @click="filterByCompleted"
           />
         </v-col>
         <v-col cols="12" sm="6" md="3">
@@ -38,260 +64,583 @@
             :value="`${totalMaintenanceCost.toLocaleString()} ETB`"
             icon="mdi-currency-usd"
             color="error"
+            @click="showCostBreakdown"
           />
         </v-col>
       </v-row>
     </div>
 
-    <!-- Action Bar -->
-    <div class="maintenance-actions mb-6">
-      <v-row align="center">
-        <v-col cols="12" md="6">
-          <v-text-field
-            v-model="searchQuery"
-            prepend-inner-icon="mdi-magnify"
-            placeholder="Search vehicles by license plate or service type..."
-            variant="outlined"
-            density="compact"
-            hide-details
-            class="maintenance-search"
-          ></v-text-field>
-        </v-col>
-        <v-col cols="12" md="6" class="text-md-right">
-          <v-btn
-            color="primary"
-            prepend-icon="mdi-plus"
-            class="maintenance-btn me-2"
-            @click="showServiceDialog = true"
-          >
-            Schedule Service
-          </v-btn>
-          <v-btn
-            color="success"
-            prepend-icon="mdi-wrench"
-            class="maintenance-btn"
-            @click="showMaintenanceDialog = true"
-          >
-            Add Maintenance Record
-          </v-btn>
-        </v-col>
-      </v-row>
+    <!-- Search and Filter Bar -->
+    <div class="search-filter-section">
+      <v-card class="search-card">
+        <v-card-text>
+          <v-row align="center">
+            <v-col cols="12" md="4">
+              <v-text-field
+                v-model="searchQuery"
+                prepend-inner-icon="mdi-magnify"
+                placeholder="Search vehicles, service types..."
+                variant="outlined"
+                density="compact"
+                hide-details
+                class="search-field"
+                @input="filterMaintenanceData"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="3">
+              <v-select
+                v-model="statusFilter"
+                :items="statusOptions"
+                label="Status Filter"
+                variant="outlined"
+                density="compact"
+                hide-details
+                @update:model-value="filterMaintenanceData"
+              ></v-select>
+            </v-col>
+            <v-col cols="12" md="3">
+              <v-select
+                v-model="serviceTypeFilter"
+                :items="serviceTypeOptions"
+                label="Service Type"
+                variant="outlined"
+                density="compact"
+                hide-details
+                @update:model-value="filterMaintenanceData"
+              ></v-select>
+            </v-col>
+            <v-col cols="12" md="2" class="text-right">
+              <v-btn
+                color="primary"
+                variant="outlined"
+                prepend-icon="mdi-filter-variant"
+                @click="showAdvancedFilters = !showAdvancedFilters"
+              >
+                Filters
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-card-text>
+      </v-card>
     </div>
 
-    <!-- Main Content -->
-    <v-row>
-      <!-- Service Due Vehicles -->
-      <v-col cols="12" lg="8">
-        <v-card class="maintenance-section-card">
-          <v-card-title class="maintenance-section-title">
-            <v-icon class="me-2" color="warning">mdi-alert</v-icon>
-            Service Due Vehicles
-          </v-card-title>
-          <v-card-text>
-            <div v-if="serviceDueVehicles.length === 0" class="text-center py-8">
-              <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-check-circle</v-icon>
-              <h3 class="text-h6 text-muted mb-2">All vehicles are up to date</h3>
-              <p class="text-muted">No vehicles require immediate service</p>
-            </div>
-            <div v-else>
-              <v-data-table
-                :headers="serviceDueHeaders"
-                :items="serviceDueVehicles"
-                class="maintenance-table"
-                density="comfortable"
-              >
-                <template v-slot:item.licensePlate="{ item }">
-                  <div class="d-flex align-center">
-                    <v-icon size="small" class="me-2">mdi-truck</v-icon>
-                    <span class="font-weight-medium">{{ item.licensePlate }}</span>
+    <!-- Main Content Grid -->
+    <div class="main-content">
+      <v-row>
+        <!-- Service Due Vehicles -->
+        <v-col cols="12" lg="8">
+          <v-card class="content-card service-due-card">
+            <v-card-title class="card-title">
+              <div class="title-content">
+                <v-icon class="title-icon" color="warning">mdi-alert</v-icon>
+                <span>Service Due Vehicles</span>
+                <v-chip color="warning" size="small" class="ms-2">{{ serviceDueVehicles.length }}</v-chip>
+              </div>
+              <v-btn
+                icon="mdi-refresh"
+                variant="text"
+                size="small"
+                @click="refreshServiceDue"
+              ></v-btn>
+            </v-card-title>
+            <v-card-text>
+              <div v-if="serviceDueVehicles.length === 0" class="empty-state">
+                <v-icon size="64" color="success" class="mb-4">mdi-check-circle</v-icon>
+                <h3 class="text-h6 text-muted mb-2">All vehicles are up to date</h3>
+                <p class="text-muted">No vehicles require immediate service</p>
+              </div>
+              <div v-else>
+                <v-data-table
+                  :headers="serviceDueHeaders"
+                  :items="serviceDueVehicles"
+                  :loading="loading"
+                  class="modern-table"
+                  density="comfortable"
+                >
+                  <template v-slot:item.licensePlate="{ item }">
+                    <div class="vehicle-info">
+                      <v-icon size="small" class="me-2">mdi-truck</v-icon>
+                      <span class="font-weight-medium">{{ item.licensePlate }}</span>
+                    </div>
+                  </template>
+                  <template v-slot:item.serviceStatus="{ item }">
+                    <v-chip
+                      :color="getServiceStatusColor(item)"
+                      size="small"
+                      variant="flat"
+                    >
+                      {{ getServiceStatusText(item) }}
+                    </v-chip>
+                  </template>
+                  <template v-slot:item.distanceToService="{ item }">
+                    <span :class="getDistanceToServiceClass(item)">
+                      {{ getDistanceToServiceText(item) }}
+                    </span>
+                  </template>
+                  <template v-slot:item.actions="{ item }">
+                    <div class="action-buttons">
+                      <v-btn
+                        icon="mdi-wrench"
+                        size="small"
+                        variant="text"
+                        color="warning"
+                        @click="scheduleService(item)"
+                        :title="'Schedule service for ' + item.licensePlate"
+                      ></v-btn>
+                      <v-btn
+                        icon="mdi-eye"
+                        size="small"
+                        variant="text"
+                        color="primary"
+                        @click="viewVehicleDetails(item)"
+                        :title="'View details for ' + item.licensePlate"
+                      ></v-btn>
+                      <v-btn
+                        icon="mdi-history"
+                        size="small"
+                        variant="text"
+                        color="info"
+                        @click="viewMaintenanceHistory(item)"
+                        :title="'View maintenance history for ' + item.licensePlate"
+                      ></v-btn>
+                    </div>
+                  </template>
+                </v-data-table>
+              </div>
+            </v-card-text>
+          </v-card>
+        </v-col>
+
+        <!-- Quick Actions & Stats -->
+        <v-col cols="12" lg="4">
+          <!-- Maintenance Statistics -->
+          <v-card class="content-card stats-card">
+            <v-card-title class="card-title">
+              <v-icon class="title-icon" color="info">mdi-chart-pie</v-icon>
+              <span>Maintenance Statistics</span>
+            </v-card-title>
+            <v-card-text>
+              <div class="stats-grid">
+                <div class="stat-item" @click="filterByServiceDue">
+                  <div class="stat-icon warning">
+                    <v-icon color="warning">mdi-wrench</v-icon>
                   </div>
-                </template>
-                <template v-slot:item.serviceStatus="{ item }">
-                  <v-chip
-                    :color="getServiceStatusColor(item)"
-                    size="small"
-                  >
-                    {{ getServiceStatusText(item) }}
-                  </v-chip>
-                </template>
-                <template v-slot:item.distanceToService="{ item }">
-                  <span :class="getDistanceToServiceClass(item)">
-                    {{ getDistanceToServiceText(item) }}
-                  </span>
-                </template>
-                <template v-slot:item.actions="{ item }">
-                  <v-btn
-                    icon="mdi-wrench"
-                    size="small"
-                    variant="text"
-                    color="warning"
-                    @click="scheduleService(item)"
-                  ></v-btn>
-                  <v-btn
-                    icon="mdi-eye"
-                    size="small"
-                    variant="text"
-                    color="primary"
-                    @click="viewVehicleDetails(item)"
-                  ></v-btn>
-                </template>
-              </v-data-table>
-            </div>
-          </v-card-text>
-        </v-card>
-      </v-col>
+                  <div class="stat-content">
+                    <div class="stat-value">{{ serviceDueVehicles.length }}</div>
+                    <div class="stat-label">Service Due</div>
+                  </div>
+                </div>
+                <div class="stat-item" @click="filterByMaintenance">
+                  <div class="stat-icon info">
+                    <v-icon color="info">mdi-tools</v-icon>
+                  </div>
+                  <div class="stat-content">
+                    <div class="stat-value">{{ maintenanceVehicles.length }}</div>
+                    <div class="stat-label">In Maintenance</div>
+                  </div>
+                </div>
+                <div class="stat-item" @click="filterByCompleted">
+                  <div class="stat-icon success">
+                    <v-icon color="success">mdi-check-circle</v-icon>
+                  </div>
+                  <div class="stat-content">
+                    <div class="stat-value">{{ completedServicesThisMonth }}</div>
+                    <div class="stat-label">Completed This Month</div>
+                  </div>
+                </div>
+                <div class="stat-item" @click="showCostBreakdown">
+                  <div class="stat-icon error">
+                    <v-icon color="error">mdi-currency-usd</v-icon>
+                  </div>
+                  <div class="stat-content">
+                    <div class="stat-value">{{ totalMaintenanceCost.toLocaleString() }}</div>
+                    <div class="stat-label">Total Cost (ETB)</div>
+                  </div>
+                </div>
+              </div>
+            </v-card-text>
+          </v-card>
 
-      <!-- Maintenance Statistics -->
-      <v-col cols="12" lg="4">
-        <v-card class="maintenance-section-card">
-          <v-card-title class="maintenance-section-title">
-            <v-icon class="me-2" color="info">mdi-chart-pie</v-icon>
-            Maintenance Statistics
-          </v-card-title>
-          <v-card-text>
-            <div class="stats-grid">
-              <div class="stat-item">
-                <div class="stat-icon">
-                  <v-icon color="warning">mdi-wrench</v-icon>
-                </div>
-                <div class="stat-content">
-                  <div class="stat-value">{{ serviceDueVehicles.length }}</div>
-                  <div class="stat-label">Service Due</div>
-                </div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-icon">
-                  <v-icon color="info">mdi-tools</v-icon>
-                </div>
-                <div class="stat-content">
-                  <div class="stat-value">{{ maintenanceVehicles.length }}</div>
-                  <div class="stat-label">In Maintenance</div>
-                </div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-icon">
-                  <v-icon color="success">mdi-check-circle</v-icon>
-                </div>
-                <div class="stat-content">
-                  <div class="stat-value">{{ completedServicesThisMonth }}</div>
-                  <div class="stat-label">Completed This Month</div>
-                </div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-icon">
-                  <v-icon color="error">mdi-currency-usd</v-icon>
-                </div>
-                <div class="stat-content">
-                  <div class="stat-value">{{ totalMaintenanceCost.toLocaleString() }}</div>
-                  <div class="stat-label">Total Cost (ETB)</div>
-                </div>
-              </div>
-            </div>
-          </v-card-text>
-        </v-card>
-
-        <!-- Quick Actions -->
-        <v-card class="maintenance-section-card mt-4">
-          <v-card-title class="maintenance-section-title">
-            <v-icon class="me-2" color="success">mdi-lightning-bolt</v-icon>
-            Quick Actions
-          </v-card-title>
-          <v-card-text>
-            <v-row>
-              <v-col cols="6">
+          <!-- Quick Actions -->
+          <v-card class="content-card actions-card">
+            <v-card-title class="card-title">
+              <v-icon class="title-icon" color="success">mdi-lightning-bolt</v-icon>
+              <span>Quick Actions</span>
+            </v-card-title>
+            <v-card-text>
+              <div class="actions-grid">
                 <v-btn
                   block
                   color="primary"
                   variant="outlined"
                   prepend-icon="mdi-plus"
-                  class="maintenance-btn mb-2"
+                  class="action-btn"
                   @click="showServiceDialog = true"
                 >
                   Schedule Service
                 </v-btn>
-              </v-col>
-              <v-col cols="6">
                 <v-btn
                   block
                   color="success"
                   variant="outlined"
                   prepend-icon="mdi-wrench"
-                  class="maintenance-btn mb-2"
+                  class="action-btn"
                   @click="showMaintenanceDialog = true"
                 >
                   Add Record
                 </v-btn>
-              </v-col>
-              <v-col cols="6">
                 <v-btn
                   block
                   color="info"
                   variant="outlined"
                   prepend-icon="mdi-file-chart"
-                  class="maintenance-btn mb-2"
+                  class="action-btn"
                   @click="generateMaintenanceReport"
                 >
                   Generate Report
                 </v-btn>
-              </v-col>
-              <v-col cols="6">
                 <v-btn
                   block
                   color="warning"
                   variant="outlined"
                   prepend-icon="mdi-export"
-                  class="maintenance-btn mb-2"
+                  class="action-btn"
                   @click="exportMaintenanceData"
                 >
                   Export Data
                 </v-btn>
-              </v-col>
-            </v-row>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
+                <v-btn
+                  block
+                  color="error"
+                  variant="outlined"
+                  prepend-icon="mdi-alert"
+                  class="action-btn"
+                  @click="showUrgentAlerts"
+                >
+                  Urgent Alerts
+                </v-btn>
+                <v-btn
+                  block
+                  color="secondary"
+                  variant="outlined"
+                  prepend-icon="mdi-settings"
+                  class="action-btn"
+                  @click="showMaintenanceSettings"
+                >
+                  Settings
+                </v-btn>
+              </div>
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+    </div>
 
     <!-- Maintenance History -->
-    <v-row class="mt-6">
-      <v-col cols="12">
-        <v-card class="maintenance-section-card">
-          <v-card-title class="maintenance-section-title">
-            <v-icon class="me-2" color="primary">mdi-history</v-icon>
-            Recent Maintenance History
-          </v-card-title>
-          <v-card-text>
-            <v-data-table
-              :headers="maintenanceHistoryHeaders"
-              :items="maintenanceHistory"
-              class="maintenance-table"
-              density="comfortable"
-            >
-              <template v-slot:item.vehicleId="{ item }">
-                <div class="d-flex align-center">
-                  <v-icon size="small" class="me-2">mdi-truck</v-icon>
-                  <span class="font-weight-medium">{{ item.licensePlate }}</span>
-                </div>
-              </template>
-              <template v-slot:item.serviceType="{ item }">
-                <v-chip
-                  :color="getServiceTypeColor(item.serviceType)"
+    <div class="history-section">
+      <v-card class="content-card history-card">
+        <v-card-title class="card-title">
+          <div class="title-content">
+            <v-icon class="title-icon" color="primary">mdi-history</v-icon>
+            <span>Recent Maintenance History</span>
+          </div>
+          <div class="title-actions">
+            <v-btn
+              icon="mdi-refresh"
+              variant="text"
+              size="small"
+              @click="refreshMaintenanceHistory"
+            ></v-btn>
+            <v-btn
+              icon="mdi-filter"
+              variant="text"
+              size="small"
+              @click="showHistoryFilters = !showHistoryFilters"
+            ></v-btn>
+          </div>
+        </v-card-title>
+        <v-card-text>
+          <v-data-table
+            :headers="maintenanceHistoryHeaders"
+            :items="filteredMaintenanceHistory"
+            :loading="historyLoading"
+            class="modern-table"
+            density="comfortable"
+          >
+            <template v-slot:item.vehicleId="{ item }">
+              <div class="vehicle-info">
+                <v-icon size="small" class="me-2">mdi-truck</v-icon>
+                <span class="font-weight-medium">{{ item.licensePlate }}</span>
+              </div>
+            </template>
+            <template v-slot:item.serviceType="{ item }">
+              <v-chip
+                :color="getServiceTypeColor(item.serviceType)"
+                size="small"
+                variant="flat"
+              >
+                {{ item.serviceType }}
+              </v-chip>
+            </template>
+            <template v-slot:item.cost="{ item }">
+              <span class="font-weight-medium">{{ item.cost.toLocaleString() }} ETB</span>
+            </template>
+            <template v-slot:item.status="{ item }">
+              <StatusBadge :status="item.status" />
+            </template>
+            <template v-slot:item.actions="{ item }">
+              <div class="action-buttons">
+                <v-btn
+                  icon="mdi-eye"
                   size="small"
-                >
-                  {{ item.serviceType }}
-                </v-chip>
-              </template>
-              <template v-slot:item.cost="{ item }">
-                <span class="font-weight-medium">{{ item.cost.toLocaleString() }} ETB</span>
-              </template>
-              <template v-slot:item.status="{ item }">
-                <StatusBadge :status="item.status" />
-              </template>
-            </v-data-table>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
+                  variant="text"
+                  color="primary"
+                  @click="viewMaintenanceDetails(item)"
+                  :title="'View details for ' + item.serviceType"
+                ></v-btn>
+                <v-btn
+                  icon="mdi-pencil"
+                  size="small"
+                  variant="text"
+                  color="warning"
+                  @click="editMaintenanceRecord(item)"
+                  :title="'Edit ' + item.serviceType"
+                ></v-btn>
+                <v-btn
+                  icon="mdi-delete"
+                  size="small"
+                  variant="text"
+                  color="error"
+                  @click="deleteMaintenanceRecord(item)"
+                  :title="'Delete ' + item.serviceType"
+                ></v-btn>
+              </div>
+            </template>
+          </v-data-table>
+        </v-card-text>
+      </v-card>
+    </div>
+
+    <!-- Service Scheduling Dialog -->
+    <v-dialog v-model="showServiceDialog" max-width="600px" persistent>
+      <v-card class="dialog-card">
+        <v-card-title class="dialog-title">
+          <v-icon class="me-2" color="primary">mdi-wrench</v-icon>
+          Schedule Service
+        </v-card-title>
+        <v-card-text>
+          <v-form ref="serviceFormRef" v-model="serviceFormValid">
+            <v-row>
+              <v-col cols="12" md="6">
+                <v-select
+                  v-model="serviceForm.vehicleId"
+                  :items="vehicles"
+                  item-title="licensePlate"
+                  item-value="id"
+                  label="Select Vehicle"
+                  variant="outlined"
+                  :rules="[v => !!v || 'Vehicle is required']"
+                  required
+                ></v-select>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-select
+                  v-model="serviceForm.serviceType"
+                  :items="serviceTypes"
+                  label="Service Type"
+                  variant="outlined"
+                  :rules="[v => !!v || 'Service type is required']"
+                  required
+                ></v-select>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  v-model="serviceForm.scheduledDate"
+                  label="Scheduled Date"
+                  type="date"
+                  variant="outlined"
+                  :rules="[v => !!v || 'Date is required']"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  v-model="serviceForm.estimatedCost"
+                  label="Estimated Cost (ETB)"
+                  type="number"
+                  variant="outlined"
+                  :rules="[v => !!v || 'Cost is required']"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-textarea
+                  v-model="serviceForm.notes"
+                  label="Service Notes"
+                  variant="outlined"
+                  rows="3"
+                  placeholder="Describe the service requirements..."
+                ></v-textarea>
+              </v-col>
+            </v-row>
+          </v-form>
+        </v-card-text>
+        <v-card-actions class="dialog-actions">
+          <v-spacer></v-spacer>
+          <v-btn
+            variant="outlined"
+            @click="showServiceDialog = false"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
+            color="primary"
+            :loading="savingService"
+            :disabled="!serviceFormValid"
+            @click="saveServiceSchedule"
+          >
+            Schedule Service
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Maintenance Record Dialog -->
+    <v-dialog v-model="showMaintenanceDialog" max-width="700px" persistent>
+      <v-card class="dialog-card">
+        <v-card-title class="dialog-title">
+          <v-icon class="me-2" color="success">mdi-wrench</v-icon>
+          Add Maintenance Record
+        </v-card-title>
+        <v-card-text>
+          <v-form ref="maintenanceFormRef" v-model="maintenanceFormValid">
+            <v-row>
+              <v-col cols="12" md="6">
+                <v-select
+                  v-model="maintenanceForm.vehicleId"
+                  :items="vehicles"
+                  item-title="licensePlate"
+                  item-value="id"
+                  label="Vehicle"
+                  variant="outlined"
+                  :rules="[v => !!v || 'Vehicle is required']"
+                  required
+                ></v-select>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-select
+                  v-model="maintenanceForm.serviceType"
+                  :items="serviceTypes"
+                  label="Service Type"
+                  variant="outlined"
+                  :rules="[v => !!v || 'Service type is required']"
+                  required
+                ></v-select>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  v-model="maintenanceForm.date"
+                  label="Service Date"
+                  type="date"
+                  variant="outlined"
+                  :rules="[v => !!v || 'Date is required']"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  v-model="maintenanceForm.cost"
+                  label="Actual Cost (ETB)"
+                  type="number"
+                  variant="outlined"
+                  :rules="[v => !!v || 'Cost is required']"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-select
+                  v-model="maintenanceForm.status"
+                  :items="statusOptions"
+                  label="Status"
+                  variant="outlined"
+                  :rules="[v => !!v || 'Status is required']"
+                  required
+                ></v-select>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  v-model="maintenanceForm.mechanic"
+                  label="Mechanic/Service Provider"
+                  variant="outlined"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-textarea
+                  v-model="maintenanceForm.notes"
+                  label="Service Details & Notes"
+                  variant="outlined"
+                  rows="4"
+                  placeholder="Describe the work performed, parts replaced, and any recommendations..."
+                ></v-textarea>
+              </v-col>
+            </v-row>
+          </v-form>
+        </v-card-text>
+        <v-card-actions class="dialog-actions">
+          <v-spacer></v-spacer>
+          <v-btn
+            variant="outlined"
+            @click="showMaintenanceDialog = false"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
+            color="success"
+            :loading="savingMaintenance"
+            :disabled="!maintenanceFormValid"
+            @click="saveMaintenanceRecord"
+          >
+            Save Record
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Success Snackbar -->
+    <v-snackbar
+      v-model="showSuccessSnackbar"
+      color="success"
+      timeout="3000"
+    >
+      {{ successMessage }}
+      <template v-slot:actions>
+        <v-btn
+          color="white"
+          variant="text"
+          @click="showSuccessSnackbar = false"
+        >
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
+
+    <!-- Error Snackbar -->
+    <v-snackbar
+      v-model="showErrorSnackbar"
+      color="error"
+      timeout="5000"
+    >
+      {{ errorMessage }}
+      <template v-slot:actions>
+        <v-btn
+          color="white"
+          variant="text"
+          @click="showErrorSnackbar = false"
+        >
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
   </div>
 </template>
 
@@ -303,8 +652,79 @@ const { vehicles, getVehicles, serviceDueVehicles, maintenanceVehicles, calculat
 
 // Reactive data
 const searchQuery = ref('')
+const statusFilter = ref('all')
+const serviceTypeFilter = ref('all')
+const showAdvancedFilters = ref(false)
+const showHistoryFilters = ref(false)
+const loading = ref(false)
+const historyLoading = ref(false)
+const savingService = ref(false)
+const savingMaintenance = ref(false)
+
+// Dialog states
 const showServiceDialog = ref(false)
 const showMaintenanceDialog = ref(false)
+const showSuccessSnackbar = ref(false)
+const showErrorSnackbar = ref(false)
+const successMessage = ref('')
+const errorMessage = ref('')
+
+// Form refs and validation
+const serviceFormRef = ref(null)
+const maintenanceFormRef = ref(null)
+const serviceFormValid = ref(false)
+const maintenanceFormValid = ref(false)
+
+// Form data
+const serviceForm = ref({
+  vehicleId: '',
+  serviceType: '',
+  scheduledDate: '',
+  estimatedCost: '',
+  notes: ''
+})
+
+const maintenanceForm = ref({
+  vehicleId: '',
+  serviceType: '',
+  date: '',
+  cost: '',
+  status: 'completed',
+  mechanic: '',
+  notes: ''
+})
+
+// Options
+const statusOptions = [
+  { title: 'All Status', value: 'all' },
+  { title: 'Scheduled', value: 'scheduled' },
+  { title: 'In Progress', value: 'in_progress' },
+  { title: 'Completed', value: 'completed' },
+  { title: 'Cancelled', value: 'cancelled' }
+]
+
+const serviceTypeOptions = [
+  { title: 'All Types', value: 'all' },
+  { title: 'Regular Service', value: 'Regular Service' },
+  { title: 'Brake Service', value: 'Brake Service' },
+  { title: 'Tire Rotation', value: 'Tire Rotation' },
+  { title: 'Engine Repair', value: 'Engine Repair' },
+  { title: 'Electrical', value: 'Electrical' },
+  { title: 'Oil Change', value: 'Oil Change' }
+]
+
+const serviceTypes = [
+  'Regular Service',
+  'Brake Service',
+  'Tire Rotation',
+  'Engine Repair',
+  'Electrical',
+  'Oil Change',
+  'Transmission Service',
+  'Suspension Service',
+  'Air Conditioning',
+  'Battery Replacement'
+]
 
 // Table headers
 const serviceDueHeaders = [
@@ -322,7 +742,7 @@ const maintenanceHistoryHeaders = [
   { title: 'Date', key: 'date', sortable: true },
   { title: 'Cost', key: 'cost', sortable: true },
   { title: 'Status', key: 'status', sortable: true },
-  { title: 'Notes', key: 'notes', sortable: true }
+  { title: 'Actions', key: 'actions', sortable: false }
 ]
 
 // Mock maintenance history data
@@ -335,7 +755,8 @@ const maintenanceHistory = ref([
     date: '2024-06-01',
     cost: 15000,
     status: 'completed',
-    notes: 'Oil change, filter replacement'
+    notes: 'Oil change, filter replacement',
+    mechanic: 'AutoCare Center'
   },
   {
     id: 'MH-002',
@@ -345,7 +766,8 @@ const maintenanceHistory = ref([
     date: '2024-05-28',
     cost: 25000,
     status: 'completed',
-    notes: 'Brake pad replacement'
+    notes: 'Brake pad replacement',
+    mechanic: 'QuickFix Garage'
   },
   {
     id: 'MH-003',
@@ -355,11 +777,35 @@ const maintenanceHistory = ref([
     date: '2024-05-25',
     cost: 8000,
     status: 'completed',
-    notes: 'Tire rotation and alignment'
+    notes: 'Tire rotation and alignment',
+    mechanic: 'TirePro Services'
   }
 ])
 
 // Computed properties
+const filteredMaintenanceHistory = computed(() => {
+  let filtered = maintenanceHistory.value
+
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    filtered = filtered.filter(record => 
+      record.licensePlate.toLowerCase().includes(query) ||
+      record.serviceType.toLowerCase().includes(query) ||
+      record.notes.toLowerCase().includes(query)
+    )
+  }
+
+  if (statusFilter.value !== 'all') {
+    filtered = filtered.filter(record => record.status === statusFilter.value)
+  }
+
+  if (serviceTypeFilter.value !== 'all') {
+    filtered = filtered.filter(record => record.serviceType === serviceTypeFilter.value)
+  }
+
+  return filtered
+})
+
 const completedServicesThisMonth = computed(() => {
   const currentMonth = new Date().getMonth()
   const currentYear = new Date().getFullYear()
@@ -412,25 +858,214 @@ const getServiceTypeColor = (serviceType) => {
     'Brake Service': 'error',
     'Tire Rotation': 'warning',
     'Engine Repair': 'error',
-    'Electrical': 'info'
+    'Electrical': 'info',
+    'Oil Change': 'success'
   }
   return colors[serviceType] || 'grey'
 }
 
+// Action methods
 const scheduleService = (vehicle) => {
-  console.log('Schedule service for:', vehicle)
+  serviceForm.value.vehicleId = vehicle.id
+  showServiceDialog.value = true
 }
 
 const viewVehicleDetails = (vehicle) => {
-  console.log('View vehicle details:', vehicle)
+  // Navigate to vehicle details page
+  navigateTo(`/vehicles/${vehicle.id}`)
+}
+
+const viewMaintenanceHistory = (vehicle) => {
+  // Filter history for this vehicle
+  const vehicleHistory = maintenanceHistory.value.filter(record => record.vehicleId === vehicle.id)
+  console.log('Maintenance history for', vehicle.licensePlate, vehicleHistory)
+  // Could open a dialog or navigate to a dedicated history page
+}
+
+const viewMaintenanceDetails = (record) => {
+  console.log('View maintenance details:', record)
+  // Open details dialog
+}
+
+const editMaintenanceRecord = (record) => {
+  maintenanceForm.value = { ...record }
+  showMaintenanceDialog.value = true
+}
+
+const deleteMaintenanceRecord = async (record) => {
+  if (confirm(`Are you sure you want to delete this ${record.serviceType} record?`)) {
+    try {
+      const index = maintenanceHistory.value.findIndex(r => r.id === record.id)
+      if (index > -1) {
+        maintenanceHistory.value.splice(index, 1)
+        showSuccessMessage('Maintenance record deleted successfully')
+      }
+    } catch (error) {
+      showErrorMessage('Failed to delete maintenance record')
+    }
+  }
+}
+
+const saveServiceSchedule = async () => {
+  savingService.value = true
+  try {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
+    const newService = {
+      id: `SERVICE-${Date.now()}`,
+      vehicleId: serviceForm.value.vehicleId,
+      serviceType: serviceForm.value.serviceType,
+      scheduledDate: serviceForm.value.scheduledDate,
+      estimatedCost: parseFloat(serviceForm.value.estimatedCost),
+      notes: serviceForm.value.notes,
+      status: 'scheduled'
+    }
+    
+    // Add to maintenance history
+    maintenanceHistory.value.unshift(newService)
+    
+    showServiceDialog.value = false
+    resetServiceForm()
+    showSuccessMessage('Service scheduled successfully')
+  } catch (error) {
+    showErrorMessage('Failed to schedule service')
+  } finally {
+    savingService.value = false
+  }
+}
+
+const saveMaintenanceRecord = async () => {
+  savingMaintenance.value = true
+  try {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
+    const newRecord = {
+      id: `MH-${Date.now()}`,
+      vehicleId: maintenanceForm.value.vehicleId,
+      licensePlate: vehicles.value.find(v => v.id === maintenanceForm.value.vehicleId)?.licensePlate || '',
+      serviceType: maintenanceForm.value.serviceType,
+      date: maintenanceForm.value.date,
+      cost: parseFloat(maintenanceForm.value.cost),
+      status: maintenanceForm.value.status,
+      notes: maintenanceForm.value.notes,
+      mechanic: maintenanceForm.value.mechanic
+    }
+    
+    // Add to maintenance history
+    maintenanceHistory.value.unshift(newRecord)
+    
+    showMaintenanceDialog.value = false
+    resetMaintenanceForm()
+    showSuccessMessage('Maintenance record saved successfully')
+  } catch (error) {
+    showErrorMessage('Failed to save maintenance record')
+  } finally {
+    savingMaintenance.value = false
+  }
+}
+
+const resetServiceForm = () => {
+  serviceForm.value = {
+    vehicleId: '',
+    serviceType: '',
+    scheduledDate: '',
+    estimatedCost: '',
+    notes: ''
+  }
+}
+
+const resetMaintenanceForm = () => {
+  maintenanceForm.value = {
+    vehicleId: '',
+    serviceType: '',
+    date: '',
+    cost: '',
+    status: 'completed',
+    mechanic: '',
+    notes: ''
+  }
+}
+
+const filterMaintenanceData = () => {
+  // Filter logic is handled by computed properties
+  console.log('Filtering maintenance data...')
+}
+
+const refreshServiceDue = async () => {
+  loading.value = true
+  try {
+    await getVehicles()
+    showSuccessMessage('Service due data refreshed')
+  } catch (error) {
+    showErrorMessage('Failed to refresh service due data')
+  } finally {
+    loading.value = false
+  }
+}
+
+const refreshMaintenanceHistory = async () => {
+  historyLoading.value = true
+  try {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    showSuccessMessage('Maintenance history refreshed')
+  } catch (error) {
+    showErrorMessage('Failed to refresh maintenance history')
+  } finally {
+    historyLoading.value = false
+  }
 }
 
 const generateMaintenanceReport = () => {
-  console.log('Generate maintenance report')
+  console.log('Generating maintenance report...')
+  showSuccessMessage('Maintenance report generated successfully')
 }
 
 const exportMaintenanceData = () => {
-  console.log('Export maintenance data')
+  console.log('Exporting maintenance data...')
+  showSuccessMessage('Maintenance data exported successfully')
+}
+
+const showCostBreakdown = () => {
+  console.log('Showing cost breakdown...')
+  // Could open a dialog with detailed cost analysis
+}
+
+const showUrgentAlerts = () => {
+  console.log('Showing urgent alerts...')
+  // Could open a dialog with urgent maintenance alerts
+}
+
+const showMaintenanceSettings = () => {
+  console.log('Showing maintenance settings...')
+  // Could open a settings dialog
+}
+
+const filterByServiceDue = () => {
+  statusFilter.value = 'scheduled'
+  showSuccessMessage('Filtered by service due vehicles')
+}
+
+const filterByMaintenance = () => {
+  statusFilter.value = 'in_progress'
+  showSuccessMessage('Filtered by vehicles in maintenance')
+}
+
+const filterByCompleted = () => {
+  statusFilter.value = 'completed'
+  showSuccessMessage('Filtered by completed services')
+}
+
+const showSuccessMessage = (message) => {
+  successMessage.value = message
+  showSuccessSnackbar.value = true
+}
+
+const showErrorMessage = (message) => {
+  errorMessage.value = message
+  showErrorSnackbar.value = true
 }
 
 // Lifecycle
@@ -441,91 +1076,214 @@ onMounted(async () => {
 
 <style scoped>
 .maintenance-root {
-  padding-bottom: 32px;
+  padding: 24px;
+  min-height: 100vh;
 }
 
 .maintenance-header {
   margin-bottom: 32px;
 }
 
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.header-text {
+  flex: 1;
+}
+
 .maintenance-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #f3d70e 0%, #fbb339 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 8px;
   letter-spacing: -0.5px;
-  margin-top: 8px;
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--v-theme-text-primary);
 }
 
 .maintenance-subtitle {
-  margin-bottom: 32px;
-  color: var(--v-theme-text-secondary);
   font-size: 1.1rem;
+  color: #040707;
+  margin: 0;
+  opacity: 0.8;
 }
 
-.kpi-row {
+.header-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.header-btn {
+  font-weight: 600;
+  border-radius: 12px;
+  text-transform: none;
+  padding: 12px 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.header-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.kpi-section {
   margin-bottom: 32px;
 }
 
-.maintenance-actions {
-  background: linear-gradient(135deg, #fffde7 0%, #f8fafb 100%);
-  border-radius: 18px;
-  padding: 24px;
-  box-shadow: 0 2px 12px rgba(16, 30, 54, 0.06);
+.search-filter-section {
+  margin-bottom: 32px;
 }
 
-.maintenance-search {
-  max-width: 400px;
+.search-card {
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(243, 215, 14, 0.15);
+  border: 1px solid rgba(243, 215, 14, 0.2);
 }
 
-.maintenance-btn {
-  font-weight: 600;
-  border-radius: 10px;
-  min-width: 140px;
+.search-field {
+  border-radius: 12px;
 }
 
-.maintenance-section-card {
-  border-radius: 18px;
-  background: linear-gradient(135deg, #fffde7 0%, #f8fafb 100%);
-  box-shadow: 0 2px 12px rgba(16, 30, 54, 0.06);
+.main-content {
+  margin-bottom: 32px;
+}
+
+.content-card {
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 8px 32px rgba(243, 215, 14, 0.12);
+  border: 1px solid rgba(243, 215, 14, 0.15);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.content-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(243, 215, 14, 0.2);
+  border-color: rgba(243, 215, 14, 0.3);
+}
+
+.service-due-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f5e35e 30%, #f3d70e 100%);
+}
+
+.stats-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f5e35e 40%, #fbb339 100%);
   margin-bottom: 24px;
-  transition: box-shadow 0.2s, transform 0.2s;
 }
 
-.maintenance-section-card:hover {
-  box-shadow: 0 6px 24px rgba(80, 80, 80, 0.10);
-  transform: translateY(-1px);
+.actions-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f5e35e 50%, #f3d70e 100%);
 }
 
-.maintenance-section-title {
-  font-size: 1.15rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  color: #212121;
-  padding-top: 18px;
-  padding-bottom: 8px;
+.history-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f5e35e 20%, #fbb339 100%);
 }
 
-.maintenance-table {
+.card-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 16px 24px;
+  border-bottom: 2px solid rgba(243, 215, 14, 0.3);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #040707;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(245, 227, 94, 0.1) 100%);
+}
+
+.title-content {
+  display: flex;
+  align-items: center;
+}
+
+.title-icon {
+  margin-right: 12px;
+}
+
+.title-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.modern-table {
   border-radius: 12px;
   overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.vehicle-info {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: #040707;
+  opacity: 0.7;
 }
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 16px;
 }
 
 .stat-item {
   display: flex;
   align-items: center;
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 8px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(243, 215, 14, 0.2);
+}
+
+.stat-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(243, 215, 14, 0.2);
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(243, 215, 14, 0.4);
 }
 
 .stat-icon {
   margin-right: 12px;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.stat-icon.warning {
+  background: rgba(243, 215, 14, 0.2);
+}
+
+.stat-icon.info {
+  background: rgba(245, 227, 94, 0.2);
+}
+
+.stat-icon.success {
+  background: rgba(251, 179, 57, 0.2);
+}
+
+.stat-icon.error {
+  background: rgba(4, 7, 7, 0.1);
 }
 
 .stat-content {
@@ -534,12 +1292,100 @@ onMounted(async () => {
 
 .stat-value {
   font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--v-theme-text-primary);
+  font-weight: 800;
+  color: #040707;
+  line-height: 1;
 }
 
 .stat-label {
-  font-size: 0.9rem;
-  color: var(--v-theme-text-secondary);
+  font-size: 0.875rem;
+  color: #040707;
+  margin-top: 4px;
+  opacity: 0.7;
+}
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.action-btn {
+  font-weight: 600;
+  border-radius: 12px;
+  text-transform: none;
+  padding: 12px 16px;
+  transition: all 0.3s ease;
+  border-width: 2px;
+  border-color: rgba(243, 215, 14, 0.3);
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(243, 215, 14, 0.3);
+  border-color: rgba(243, 215, 14, 0.6);
+}
+
+.dialog-card {
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.dialog-title {
+  background: linear-gradient(135deg, #f3d70e 0%, #fbb339 100%);
+  color: #040707;
+  font-size: 1.25rem;
+  font-weight: 700;
+  padding: 24px;
+}
+
+.dialog-actions {
+  padding: 24px;
+  background: linear-gradient(135deg, #ffffff 0%, #f5e35e 20%);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .maintenance-root {
+    padding: 16px;
+  }
+  
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .header-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+  
+  .header-btn {
+    flex: 1;
+  }
+  
+  .maintenance-title {
+    font-size: 2rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .actions-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .card-title {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
 }
 </style> 

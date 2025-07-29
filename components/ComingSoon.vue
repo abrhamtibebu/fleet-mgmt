@@ -41,13 +41,13 @@ defineProps<{
   max-width: 500px;
   width: 100%;
   border-radius: 18px;
-  background: linear-gradient(135deg, #fffde7 0%, #f8fafb 100%);
-  box-shadow: 0 2px 12px rgba(16, 30, 54, 0.06);
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   transition: box-shadow 0.2s, transform 0.2s;
 }
 
 .coming-soon-card:hover {
-  box-shadow: 0 6px 24px rgba(80, 80, 80, 0.10);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
   transform: translateY(-2px);
 }
 

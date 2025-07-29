@@ -15,14 +15,14 @@ defineProps<{
 
 <style scoped>
 .status-badge {
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: capitalize;
   padding: 0 14px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #fffde7 0%, #f8fafb 100%);
-  box-shadow: 0 1px 4px rgba(255, 214, 0, 0.08);
-  border: 1px solid #ffe082;
+  background: linear-gradient(90deg, #ffffff 0%, #f8f9fa 100%);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #dee2e6;
   display: flex;
   align-items: center;
   min-height: 28px;

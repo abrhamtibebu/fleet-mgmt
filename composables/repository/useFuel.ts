@@ -30,6 +30,7 @@ interface FuelCard {
 }
 
 export const useFuel = () => {
+  const { $apiFetch } = useNuxtApp();
   const fuelRecords = ref<FuelRecord[]>([])
   const fuelCards = ref<FuelCard[]>([])
   const loading = ref(false)
@@ -38,9 +39,10 @@ export const useFuel = () => {
   const getFuelRecords = async (vehicleId?: string) => {
     loading.value = true
     try {
-      const url = vehicleId ? `/api/fuel-records?vehicleId=${vehicleId}` : '/api/fuel-records'
-      const response = await fetch(url)
-      const data = await response.json()
+      const url = vehicleId ? `/fuel-records?vehicleId=${vehicleId}` : '/fuel-records'
+      const data = await $apiFetch<FuelRecord[]>(url, {
+        method: "GET"
+      });
       fuelRecords.value = Array.isArray(data) ? data : []
     } catch (e) {
       fuelRecords.value = []
@@ -54,8 +56,9 @@ export const useFuel = () => {
   const getFuelCards = async () => {
     loading.value = true
     try {
-      const response = await fetch('/api/fuel-cards')
-      const data = await response.json()
+      const data = await $apiFetch<FuelCard[]>('/fuel-cards', {
+        method: "GET"
+      });
       fuelCards.value = Array.isArray(data) ? data : []
     } catch (e) {
       fuelCards.value = []
