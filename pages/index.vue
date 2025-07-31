@@ -310,7 +310,9 @@ import * as echarts from 'echarts'
 const { vehicles, loading, getVehicles, activeVehicles, serviceDueVehicles, calculateServiceDue } = useVehicles()
 const { fuelCards, getFuelCards, lowBalanceCards } = useFuel()
 const { anomalies, getAnomalies, openAnomalies } = useAnomalies()
-const { cards: vendorCards, initializeData } = useVendorData()
+const { cards, vendorCards, initializeData } = useVendorData()
+const { vendorList,getVendor,error } = useVendor()
+
 
 // Chart refs
 const fleetUtilizationChart = ref(null)
@@ -629,7 +631,8 @@ onMounted(async () => {
   await Promise.all([
     getVehicles(),
     getFuelCards(),
-    getAnomalies()
+    getAnomalies(),
+    getVendor(),
   ])
   initializeData()
   

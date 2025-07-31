@@ -139,6 +139,8 @@
     </div>
 
     <!-- Add/Edit Vehicle Dialog -->
+    <!-- <v-form ref="vehicleFormRef" v-model="formValid"> -->
+
     <v-dialog v-model="showAddDialog" max-width="600px">
       <v-card>
         <v-card-title class="text-h6 pa-4">
@@ -159,10 +161,10 @@
               <v-col cols="12" sm="6">
                 <v-select
                   v-model="vehicleForm.brandId"
-                  :items="brandOptions"
-                  label="Brand"
+                  :items="vendorList"
+                  label="Vendor"
                   variant="outlined"
-                  :rules="[v => !!v || 'Brand is required']"
+                  :rules="[v => !!v || 'Vendor is required']"
                   required
                   @update:model-value="onBrandChange"
                 ></v-select>
@@ -198,7 +200,7 @@
                   required
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" sm="6">
+              <!-- <v-col cols="12" sm="6">
                 <v-text-field
                   v-model="vehicleForm.location"
                   label="Location"
@@ -206,7 +208,7 @@
                   :rules="[v => !!v || 'Location is required']"
                   required
                 ></v-text-field>
-              </v-col>
+              </v-col> -->
               <v-col cols="12" sm="6">
                 <v-text-field
                   v-model="vehicleForm.currentMileage"
@@ -252,18 +254,18 @@
     </v-row>
           </v-form>
         </v-card-text>
-        <v-card-actions class="pa-4">
-          <v-spacer></v-spacer>
+        <v-card-actions class=" pa-4 justify-center">
           <v-btn
             variant="outlined"
             @click="showAddDialog = false"
           >
             Cancel
           </v-btn>
+          <!-- :disabled="!formValid" -->
+
           <v-btn
-            color="primary"
+          variant="outlined"
             :loading="saving"
-            :disabled="!formValid"
             @click="saveVehicle"
           >
             {{ editingVehicle ? 'Update' : 'Add' }} Vehicle
@@ -271,16 +273,19 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <!-- </v-form> -->
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+const { $apiFetch } = useNuxtApp()
+const vehicleFormRef = ref()
 
 // Composables
 const { vehicles, loading, getVehicles } = useVehicles()
 const { fuelCards, getFuelCards } = useFuel()
-const { brands, models, cards: vendorCards, getModelsByBrand, maskCardNumber, initializeData } = useVendorData()
+const { brands, models, cards,vendorList ,getVendor,getModelsByBrand, maskCardNumber, initializeData } = useVendor()
 
 // Reactive data
 const searchQuery = ref('')
@@ -325,19 +330,20 @@ const brandOptions = computed(() => {
 
 const modelOptions = computed(() => {
   if (!vehicleForm.value.brandId) return []
-  const models = getModelsByBrand(vehicleForm.value.brandId)
+  const models = getModelsByBrand(vehicleForm.value.brandId) || []
   return models.map(model => ({
     title: `${model.name} (${model.year})`,
     value: model.id
   }))
 })
 
-const vendorCardOptions = computed(() => {
-  return vendorCards.value.map(card => ({
-    title: `${card.cardHolder} - ${maskCardNumber(card.cardNumber)}`,
-    value: card.id
-  }))
-})
+// const vendorCardOptions = computed(() => {
+
+//   return vendorCards.value.map(card => ({
+//     title: `${card.cardHolder} - ${maskCardNumber(card.cardNumber)}`,
+//     value: card.id
+//   }))
+// })
 
 // Methods
 const getServiceProgress = (vehicle) => {
@@ -372,19 +378,43 @@ const addMileageEntry = (vehicle) => {
   console.log('Add mileage entry for:', vehicle)
 }
 
+// const saveVehicle = async () => {
+//   saving.value = true
+//   try {
+//     // TODO: Implement save logic
+//     console.log('Saving vehicle:', vehicleForm.value)
+//     showAddDialog.value = false
+//     resetForm()
+//   } catch (error) {
+//     console.error('Error saving vehicle:', error)
+//   } finally {
+//     saving.value = false
+//   }
+// }
 const saveVehicle = async () => {
-  saving.value = true
+  // const form = vehicleFormRef.value // defined below
+  // const isValid = await form.validate()
+
+  // if (!isValid.valid) return
+
+  // saving.value = true
   try {
-    // TODO: Implement save logic
-    console.log('Saving vehicle:', vehicleForm.value)
-    showAddDialog.value = false
-    resetForm()
+    const response = await $apiFetch('/vehicle/add', {
+      method: 'POST',
+      body: vehicleForm.value,
+    });
+
+    console.log('Vehicle saved successfully:', response);
+    showAddDialog.value = false;
+    resetForm();
+    // await getVehicles(); 
   } catch (error) {
-    console.error('Error saving vehicle:', error)
+    console.error('Error saving vehicle:', error);
   } finally {
-    saving.value = false
+    saving.value = false;
   }
-}
+};
+
 
 const onBrandChange = () => {
   // Reset model when brand changes
@@ -429,11 +459,11 @@ const resetForm = () => {
 onMounted(async () => {
   await Promise.all([
     getVehicles(),
-    getFuelCards()
+    getFuelCards(),
+    getVendor(),
+    // initializeData()
   ])
   
-  // Initialize vendor data
-  initializeData()
   
 
 })

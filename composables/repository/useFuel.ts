@@ -56,7 +56,7 @@ export const useFuel = () => {
   const getFuelCards = async () => {
     loading.value = true
     try {
-      const data = await $apiFetch<FuelCard[]>('/fuel-cards', {
+      const data = await $apiFetch<FuelCard[]>('/card/all', {
         method: "GET"
       });
       fuelCards.value = Array.isArray(data) ? data : []

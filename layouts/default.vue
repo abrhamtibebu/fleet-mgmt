@@ -81,7 +81,21 @@
             :class="{ 'rotated': collapsed }"
           ></v-btn>
           <v-btn icon variant="text"><v-icon>mdi-bell-outline</v-icon></v-btn>
-          <v-btn icon variant="text"><v-icon>mdi-account-circle-outline</v-icon></v-btn>
+          <!-- <v-btn icon variant="text"><v-icon>mdi-account-circle-outline</v-icon></v-btn> -->
+          <v-menu offset-y>
+  <template >
+    <v-btn icon variant="text">
+      <v-icon>mdi-account-circle-outline</v-icon>
+    </v-btn>
+  </template>
+  <v-list>
+    <!-- Logout item -->
+    <v-list-item @click="handleLogout">
+      <v-list-item-title>Logout</v-list-item-title>
+    </v-list-item>
+  </v-list>
+</v-menu>
+
         </div>
       </div>
     </v-app-bar>

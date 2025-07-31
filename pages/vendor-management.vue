@@ -291,16 +291,22 @@
                   class="modern-table"
                   density="comfortable"
                 >
-                  <template v-slot:item.cardNumber="{ item }">
+                  <!-- <template v-slot:item.cardNumber="{ item }"> -->
+                    <template v-slot:item_cardNumber="{ item }">
+
                     <div class="card-info">
                       <v-icon size="small" class="me-2">mdi-credit-card</v-icon>
                       <span class="font-weight-medium">{{ maskCardNumber(item.cardNumber) }}</span>
                     </div>
                   </template>
-                  <template v-slot:item.balance="{ item }">
+                  <!-- <template v-slot:item.balance="{ item }"> -->
+                    <template v-slot:item_balance="{ item }">
+
                     <span class="font-weight-medium">{{ item.balance.toLocaleString() }} ETB</span>
                   </template>
-                  <template v-slot:item.status="{ item }">
+                  <!-- <template v-slot:item.status="{ item }"> -->
+                    <template v-slot:item_status="{ item }">
+
                     <v-chip
                       :color="getCardStatusColor(item.status)"
                       size="small"
@@ -309,7 +315,9 @@
                       {{ item.status }}
                     </v-chip>
                   </template>
-                  <template v-slot:item.actions="{ item }">
+                  <!-- <template v-slot:item.actions="{ item }"> -->
+                    <template v-slot:item_actions="{ item }">
+
                     <div class="action-buttons">
                       <v-btn
                         icon="mdi-eye"

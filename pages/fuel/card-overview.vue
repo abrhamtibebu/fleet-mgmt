@@ -101,8 +101,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { useFuel } from '~/composables/useFuel'
-import { useVehicles } from '~/composables/useVehicles'
+import { useFuel } from '~/composables/repository/useFuel'
+import { useVehicles } from '~/composables/repository/useVehicles'
 import type { FuelCard } from '~/types/fleet'
 
 const { fuelCards, lowBalanceCards, getFuelCards } = useFuel()

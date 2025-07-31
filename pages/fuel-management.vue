@@ -67,19 +67,27 @@
                       class="fuel-table"
                       density="comfortable"
                     >
-                      <template v-slot:item.vehicleId="{ item }">
+                      <!-- <template v-slot:item.vehicleId="{ item }"> -->
+                        <template v-slot:item_vehicleId="{ item }">
+
                         <div class="d-flex align-center">
                           <v-icon size="small" class="me-2">mdi-truck</v-icon>
                           <span>{{ item.licensePlate }}</span>
                         </div>
                       </template>
-                      <template v-slot:item.quantity="{ item }">
+                      <!-- <template v-slot:item.quantity="{ item }"> -->
+                        <template v-slot:item_quantity="{ item }">
+
                         <span class="font-weight-medium">{{ item.quantity }} L</span>
                       </template>
-                      <template v-slot:item.amount="{ item }">
+                      <!-- <template v-slot:item.amount="{ item }"> -->
+                        <template v-slot:item_amount="{ item }">
+
                         <span class="font-weight-medium">{{ item.amount.toLocaleString() }} ETB</span>
                       </template>
-                      <template v-slot:item.fuelEfficiency="{ item }">
+                      <!-- <template v-slot:item.fuelEfficiency="{ item }"> -->
+                        <template v-slot:item_fuelEfficiency="{ item }">
+
                         <v-chip
                           :color="getEfficiencyColor(item.fuelEfficiency)"
                           size="small"
@@ -280,7 +288,9 @@
                       class="efficiency-table"
                       density="comfortable"
                     >
-                      <template v-slot:item.fuelEfficiency="{ item }">
+                      <!-- <template v-slot:item.fuelEfficiency="{ item }"> -->
+                        <template v-slot:item_fuelEfficiency="{ item }">
+
                         <v-chip
                           :color="getEfficiencyColor(item.fuelEfficiency)"
                           size="small"
@@ -288,7 +298,9 @@
                           {{ item.fuelEfficiency.toFixed(1) }} km/l
                         </v-chip>
                       </template>
-                      <template v-slot:item.status="{ item }">
+                      <!-- <template v-slot:item.status="{ item }"> -->
+                        <template v-slot:item_status="{ item }">
+
                         <StatusBadge :status="item.status" />
                       </template>
                     </v-data-table>
