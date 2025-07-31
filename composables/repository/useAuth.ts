@@ -3,7 +3,7 @@ import type { LoginResult, SignupForm, SignupResult,forgotPasswordForm } from "~
 import { useAuthState } from "~/composables/auth/useAuthState";
 
 export const useAuthRepository = () => {
-  const { $authFetch } = useNuxtApp();
+  const { $authFetch, $apiFetch } = useNuxtApp();
   return {
     login: async (
       identifier: string,

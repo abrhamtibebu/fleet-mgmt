@@ -1,48 +1,52 @@
 import { ref } from 'vue'
 
-interface Vendor {
+interface Model {
   id: number
-  name: string
+  name: string,
+  vendorId: number,
+  year: number,
+  engine: number,
+  description: string
 }
 
-export function useVendor() {
+export function useModel() {
   const { $apiFetch } = useNuxtApp();
-  const vendorList = ref<Vendor[]>([])
+  const modelList = ref<Model[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  const getVendor = async () => {
+  const getModel = async () => {
     loading.value = true
     error.value = null
     try {
-      const data = await $apiFetch<{ result: Vendor[] }>('/vendor/all', {
+      const data = await $apiFetch<{ result: Model[] }>('/model/all', {
         method: 'GET'
       })
       
       // vendorList.value = Array.isArray(data.result) ? data.result : []
-      vendorList.value = Array.isArray(data) ? data : []
+      modelList.value = Array.isArray(data) ? data : []
 
       return data.result;
     } catch (e) {
-      error.value = 'Failed to fetch vendors'
+      error.value = 'Failed to fetch models'
       console.error(e)
     } finally {
       loading.value = false
     }
   }
-  const createVendor = async (body: any) => {
+  const createModel = async (body: any) => {
     loading.value = true
     error.value = null
     try {
-      const data = await $apiFetch<{ result: Vendor[] }>('/vendor/add', {
+      const data = await $apiFetch<{ result: Model[] }>('/model/add', {
         method: 'POST',
         body
       })
       // vendorList.value = Array.isArray(data.result) ? data.result : []
-      vendorList.value = Array.isArray(data) ? data : []
+      modelList.value = Array.isArray(data) ? data : []
 
     } catch (e) {
-      error.value = 'Failed to create vendors'
+      error.value = 'Failed to create model'
       console.error(e)
     } finally {
       loading.value = false
@@ -50,9 +54,9 @@ export function useVendor() {
   }
 
   return {
-    vendorList,
-    getVendor,
-    createVendor,
+    modelList,
+    getModel,
+    createModel,
     loading,
     error
   }

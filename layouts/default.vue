@@ -13,8 +13,8 @@
       <div class="sidebar-header d-flex align-center px-4 py-3">
         <v-icon icon="mdi-car" size="32" class="mr-2 text-primary" />
         <div v-show="!collapsed">
-          <div class="text-h6 font-weight-bold">FleetPro</div>
-          <div class="text-caption text-medium-emphasis">ISP Fleet Management</div>
+          <div class="text-h6 font-weight-bold">WebSprix</div>
+          <div class="text-caption text-medium-emphasis">Fleet Management</div>
         </div>
       </div>
       <v-divider></v-divider>
@@ -44,8 +44,7 @@
       </v-list>
       <template v-slot:append>
         <div v-show="!collapsed" class="pa-4 text-caption text-medium-emphasis sidebar-footer">
-          <div>Fleet Management v2.0</div>
-          <div>NOC Integration Active</div>
+          <div>Fleet Management v1.0</div>
         </div>
         <div v-show="collapsed" class="pa-2 text-center">
           <v-btn

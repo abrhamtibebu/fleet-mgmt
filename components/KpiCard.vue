@@ -60,6 +60,7 @@ defineProps<{
 .kpi-value {
   margin-bottom: 2px;
   font-size: 1.7rem;
+  color: #000
 }
 .kpi-trend {
   margin-top: 2px;

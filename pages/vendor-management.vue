@@ -42,7 +42,7 @@
         <v-col cols="12" sm="6" md="3">
           <KpiCard
             title="Total Brands"
-            :value="brands.length.toString()"
+            :value="vendorList.length.toString()"
             icon="mdi-tag"
             color="primary"
             @click="filterByBrands"
@@ -51,7 +51,7 @@
         <v-col cols="12" sm="6" md="3">
           <KpiCard
             title="Total Models"
-            :value="models.length.toString()"
+            :value="modelList.length.toString()"
             icon="mdi-car"
             color="success"
             @click="filterByModels"
@@ -60,7 +60,7 @@
         <v-col cols="12" sm="6" md="3">
           <KpiCard
             title="Active Cards"
-            :value="activeCards.length.toString()"
+            :value="cardList.length.toString()"
             icon="mdi-credit-card"
             color="info"
             @click="filterByActiveCards"
@@ -142,7 +142,7 @@
               <div class="title-content">
                 <v-icon class="title-icon" color="primary">mdi-tag</v-icon>
                 <span>Vehicle Brands</span>
-                <v-chip color="primary" size="small" class="ms-2">{{ brands.length }}</v-chip>
+                <v-chip color="primary" size="small" class="ms-2">{{ vendorList.length }}</v-chip>
               </div>
               <v-btn
                 icon="mdi-plus"
@@ -152,7 +152,7 @@
               ></v-btn>
             </v-card-title>
             <v-card-text>
-              <div v-if="brands.length === 0" class="empty-state">
+              <div v-if="vendorList.length === 0" class="empty-state">
                 <v-icon size="64" color="primary" class="mb-4">mdi-tag-outline</v-icon>
                 <h3 class="text-h6 text-muted mb-2">No brands added yet</h3>
                 <p class="text-muted">Add your first vehicle brand to get started</p>
@@ -160,7 +160,7 @@
               <div v-else>
                 <v-list class="brand-list">
                   <v-list-item
-                    v-for="brand in brands"
+                    v-for="brand in vendorList"
                     :key="brand.id"
                     class="brand-item"
                     @click="editBrand(brand)"
@@ -171,7 +171,8 @@
                       </v-avatar>
                     </template>
                     <v-list-item-title class="font-weight-medium">{{ brand.name }}</v-list-item-title>
-                    <v-list-item-subtitle>{{ brand.models.length }} models</v-list-item-subtitle>
+                    <!-- <v-list-item-subtitle>{{ brand.models.length }} models</v-list-item-subtitle> -->
+                    <v-list-item-subtitle>{{modelList.filter(x => x.vendorId == brand.id).length}} {{modelList.filter(x => x.vendorId == brand.id).length <= 1 ? 'model' : 'models'}}</v-list-item-subtitle>
                     <template v-slot:append>
                       <div class="brand-actions">
                         <v-btn
@@ -204,7 +205,7 @@
               <div class="title-content">
                 <v-icon class="title-icon" color="success">mdi-car</v-icon>
                 <span>Vehicle Models</span>
-                <v-chip color="success" size="small" class="ms-2">{{ models.length }}</v-chip>
+                <v-chip color="success" size="small" class="ms-2">{{ modelList.length }}</v-chip>
               </div>
               <v-btn
                 icon="mdi-plus"
@@ -214,7 +215,7 @@
               ></v-btn>
             </v-card-title>
             <v-card-text>
-              <div v-if="models.length === 0" class="empty-state">
+              <div v-if="modelList.length === 0" class="empty-state">
                 <v-icon size="64" color="success" class="mb-4">mdi-car-outline</v-icon>
                 <h3 class="text-h6 text-muted mb-2">No models added yet</h3>
                 <p class="text-muted">Add vehicle models to your brands</p>
@@ -222,7 +223,7 @@
               <div v-else>
                 <v-list class="model-list">
                   <v-list-item
-                    v-for="model in models"
+                    v-for="model in modelList"
                     :key="model.id"
                     class="model-item"
                     @click="editModel(model)"
@@ -233,7 +234,7 @@
                       </v-avatar>
                     </template>
                     <v-list-item-title class="font-weight-medium">{{ model.name }}</v-list-item-title>
-                    <v-list-item-subtitle>{{ model.brandName }} • {{ model.year }}</v-list-item-subtitle>
+                    <v-list-item-subtitle>{{ model.year }} • {{ model.engine }}cc</v-list-item-subtitle>
                     <template v-slot:append>
                       <div class="model-actions">
                         <v-btn
@@ -268,7 +269,7 @@
               <div class="title-content">
                 <v-icon class="title-icon" color="info">mdi-credit-card</v-icon>
                 <span>Fuel Cards</span>
-                <v-chip color="info" size="small" class="ms-2">{{ cards.length }}</v-chip>
+                <v-chip color="info" size="small" class="ms-2">{{ cardList.length }}</v-chip>
               </div>
               <v-btn
                 icon="mdi-plus"
@@ -278,7 +279,7 @@
               ></v-btn>
             </v-card-title>
             <v-card-text>
-              <div v-if="cards.length === 0" class="empty-state">
+              <div v-if="cardList.length === 0" class="empty-state">
                 <v-icon size="64" color="info" class="mb-4">mdi-credit-card-outline</v-icon>
                 <h3 class="text-h6 text-muted mb-2">No fuel cards added yet</h3>
                 <p class="text-muted">Add fuel cards for your fleet operations</p>
@@ -286,7 +287,7 @@
               <div v-else>
                 <v-data-table
                   :headers="cardHeaders"
-                  :items="cards"
+                  :items="cardList"
                   :loading="loading"
                   class="modern-table"
                   density="comfortable"
@@ -305,16 +306,21 @@
                     <span class="font-weight-medium">{{ item.balance.toLocaleString() }} ETB</span>
                   </template>
                   <!-- <template v-slot:item.status="{ item }"> -->
-                    <template v-slot:item_status="{ item }">
+                  <template v-slot:item.status="{ item }">
 
                     <v-chip
                       :color="getCardStatusColor(item.status)"
                       size="small"
                       variant="flat"
                     >
-                      {{ item.status }}
+                      {{ getCardStatusLabel(item.status) }}
                     </v-chip>
                   </template>
+
+                    <template v-slot:item.holder="{ item }">
+                      {{usersList.find(x => x.id == item.holder).name}}
+                    </template>
+
                   <!-- <template v-slot:item.actions="{ item }"> -->
                     <template v-slot:item_actions="{ item }">
 
@@ -381,16 +387,6 @@
                   placeholder="Brief description of the brand..."
                 ></v-text-field>
               </v-col>
-              <v-col cols="12">
-                <v-text-field
-                  v-model="brandForm.icon"
-                  label="Icon (Material Design Icon)"
-                  variant="outlined"
-                  placeholder="mdi-tag"
-                  hint="Enter Material Design icon name"
-                  persistent-hint
-                ></v-text-field>
-              </v-col>
             </v-row>
           </v-form>
         </v-card-text>
@@ -426,8 +422,8 @@
             <v-row>
               <v-col cols="12" md="6">
                 <v-select
-                  v-model="modelForm.brandId"
-                  :items="brands"
+                  v-model="modelForm.vendorId"
+                  :items="vendorList"
                   item-title="name"
                   item-value="id"
                   label="Brand"
@@ -447,6 +443,7 @@
               </v-col>
               <v-col cols="12" md="6">
                 <v-text-field
+                  hide-spin-buttons
                   v-model="modelForm.year"
                   label="Year"
                   type="number"
@@ -457,7 +454,7 @@
               </v-col>
               <v-col cols="12" md="6">
                 <v-text-field
-                  v-model="modelForm.engineSize"
+                  v-model="modelForm.engine"
                   label="Engine Size (L)"
                   variant="outlined"
                   placeholder="2.0"
@@ -506,8 +503,21 @@
           <v-form ref="cardFormRef" v-model="cardFormValid">
             <v-row>
               <v-col cols="12" md="6">
+                <v-autocomplete
+                  v-model="cardForm.vendorId"
+                  label="Vendor"
+                  variant="outlined"
+                  :rules="[v => !!v || 'Vendor is required']"
+                  required
+                  :items="cardVendors"
+                  item-title="name"
+                  item-value="id"
+                >
+                </v-autocomplete>
+              </v-col>
+              <v-col cols="12" md="6">
                 <v-text-field
-                  v-model="cardForm.cardNumber"
+                  v-model="cardForm.number"
                   label="Card Number"
                   variant="outlined"
                   :rules="[v => !!v || 'Card number is required']"
@@ -515,16 +525,20 @@
                 ></v-text-field>
               </v-col>
               <v-col cols="12" md="6">
-                <v-text-field
-                  v-model="cardForm.cardHolder"
+                <v-autocomplete
+                  v-model="cardForm.holder"
                   label="Card Holder"
                   variant="outlined"
                   :rules="[v => !!v || 'Card holder is required']"
                   required
-                ></v-text-field>
+                  item-title="name"
+                  item-value="id"
+                  :items="usersList"
+                ></v-autocomplete>
               </v-col>
               <v-col cols="12" md="6">
                 <v-text-field
+                  hide-spin-buttons
                   v-model="cardForm.balance"
                   label="Balance (ETB)"
                   type="number"
@@ -543,9 +557,9 @@
                   required
                 ></v-select>
               </v-col>
-              <v-col cols="12">
+              <v-col cols="12" md="6">
                 <v-textarea
-                  v-model="cardForm.notes"
+                  v-model="cardForm.remark"
                   label="Notes"
                   variant="outlined"
                   rows="3"
@@ -622,7 +636,6 @@ const {
   models, 
   cards, 
   activeCards, 
-  totalCardValue,
   addBrand,
   updateBrand,
   deleteBrand,
@@ -636,7 +649,12 @@ const {
   initializeData
 } = useVendorData()
 
+const {createVendor, getVendor} = useVendor()
+const {createModel, getModel} = useModel()
+const {createCard, getCard, getUsers} = useCard()
+
 // Reactive data
+const totalCardValue = ref(0)
 const searchQuery = ref('')
 const categoryFilter = ref('all')
 const statusFilter = ref('all')
@@ -645,6 +663,10 @@ const loading = ref(false)
 const savingBrand = ref(false)
 const savingModel = ref(false)
 const savingCard = ref(false)
+const cardVendors = ref([{
+  id: 1,
+  name: "NOC"
+}])
 
 // Dialog states
 const showBrandDialog = ref(false)
@@ -672,23 +694,27 @@ const editingCard = ref(null)
 const brandForm = ref({
   name: '',
   description: '',
-  icon: 'mdi-tag'
 })
+const vendorList = ref([])
+const modelList = ref([])
+const cardList = ref([])
+const usersList = ref([])
 
 const modelForm = ref({
-  brandId: '',
+  vendorId: '',
   name: '',
   year: '',
-  engineSize: '',
+  engine: '',
   description: ''
 })
 
 const cardForm = ref({
-  cardNumber: '',
-  cardHolder: '',
+  vendorId: 1,
+  number: '',
+  holder: '',
   balance: '',
-  status: 'active',
-  notes: ''
+  status: 1,
+  remark: ''
 })
 
 // Options
@@ -707,16 +733,16 @@ const statusOptions = [
 ]
 
 const cardStatusOptions = [
-  { title: 'Active', value: 'active' },
-  { title: 'Inactive', value: 'inactive' },
-  { title: 'Suspended', value: 'suspended' },
-  { title: 'Expired', value: 'expired' }
+  { title: 'Active', value: 1 },
+  { title: 'Inactive', value: 2 },
+  { title: 'Suspended', value: 3 },
+  { title: 'Expired', value: 4 }
 ]
 
 // Table headers
 const cardHeaders = [
-  { title: 'Card Number', key: 'cardNumber', sortable: true },
-  { title: 'Card Holder', key: 'cardHolder', sortable: true },
+  { title: 'Card Number', key: 'number', sortable: true },
+  { title: 'Card Holder', key: 'holder', sortable: true },
   { title: 'Balance', key: 'balance', sortable: true },
   { title: 'Status', key: 'status', sortable: true },
   { title: 'Actions', key: 'actions', sortable: false }
@@ -728,12 +754,16 @@ const cardHeaders = [
 
 const getCardStatusColor = (status) => {
   const colors = {
-    'active': 'success',
-    'inactive': 'grey',
-    'suspended': 'warning',
-    'expired': 'error'
+    1: 'success',
+    2: 'grey',
+    3: 'warning',
+    4: 'error'
   }
   return colors[status] || 'grey'
+}
+
+const getCardStatusLabel = (status) => {
+    return cardStatusOptions.find(x => x.value = status).title
 }
 
 // Action methods
@@ -798,8 +828,10 @@ const saveBrand = async () => {
       // Update existing brand
       updateBrand(editingBrand.value.id, brandForm.value)
     } else {
+      console.log('brandForm.value', brandForm.value);
+      
       // Add new brand
-      addBrand(brandForm.value)
+      await createVendor(brandForm.value)
     }
     
     showBrandDialog.value = false
@@ -824,7 +856,8 @@ const saveModel = async () => {
       updateModel(editingModel.value.id, modelForm.value)
     } else {
       // Add new model
-      addModel(modelForm.value)
+      // addModel(modelForm.value)
+      createModel(modelForm.value)
     }
     
 
@@ -854,10 +887,7 @@ const saveCard = async () => {
       })
     } else {
       // Add new card
-      addCard({
-        ...cardForm.value,
-        balance: parseFloat(cardForm.value.balance)
-      })
+      await createCard(cardForm.value)
     }
     
     showCardDialog.value = false
@@ -939,10 +969,37 @@ const showErrorMessage = (message) => {
   showErrorSnackbar.value = true
 }
 
+const getVendors = async () => {
+  const res = await getVendor()
+  vendorList.value = res
+}
+
+const getModels = async () => {
+   const res = await getModel()
+   modelList.value = res
+}
+
+const getUsersHandler = async () => {
+  const res = await getUsers()
+  usersList.value = res
+}
+
+const getCards = async () => {
+  const res = await getCard()
+  cardList.value = res
+
+  cardList.value.forEach(aa => {
+      totalCardValue.value += aa.balance
+  });
+}
 // Lifecycle
-onMounted(() => {
+onMounted(async () => {
   // Initialize vendor data
-  initializeData()
+ await getVendors()
+ await getModels()
+ await getUsersHandler()
+ await getCards()
+  
 
 })
 </script>
