@@ -9,7 +9,7 @@
     <div class="kpi-row">
       <v-row>
         <v-col cols="12" sm="6" md="3">
-          <KpiCard title="Total Vehicles" :value="vehicles.length.toString()" icon="mdi-truck" color="primary" />
+          <KpiCard title="Total Vehicles" :value="vehicleList.length.toString()" icon="mdi-truck" color="primary" />
         </v-col>
         <v-col cols="12" sm="6" md="3">
           <KpiCard title="Active Vehicles" :value="activeVehicles.length.toString()" icon="mdi-check-circle" color="success" />
@@ -307,7 +307,7 @@ import * as echarts from 'echarts'
 
 
 
-const { vehicles, loading, getVehicles, activeVehicles, serviceDueVehicles, calculateServiceDue } = useVehicles()
+const { vehicleList, loading, getVehicles, activeVehicles, serviceDueVehicles, calculateServiceDue } = useVehicles()
 const { fuelCards, getFuelCards, lowBalanceCards } = useFuel()
 const { anomalies, getAnomalies, openAnomalies } = useAnomalies()
 const { cards, vendorCards, initializeData } = useVendorData()
@@ -323,7 +323,7 @@ const alertsTimelineChart = ref(null)
 
 // KPI/Stats
 const totalFuelSpent = computed(() => fuelCards.value.reduce((sum, card) => sum + card.amountSpent, 0))
-const averageEfficiency = computed(() => vehicles.value.length === 0 ? 0 : vehicles.value.reduce((sum, v) => sum + v.fuelEfficiency, 0) / vehicles.value.length)
+const averageEfficiency = computed(() => vehicleList.value.length === 0 ? 0 : vehicleList.value.reduce((sum, v) => sum + v.fuelEfficiency, 0) / vehicleList.value.length)
 const maintenanceCost = ref(150000)
 const otherCosts = ref(50000)
 
@@ -568,7 +568,7 @@ const initializeCharts = () => {
   if (statusDonutChart.value) {
     const chart = echarts.init(statusDonutChart.value)
     const statusCounts = { active: 0, maintenance: 0, inactive: 0 }
-    vehicles.value.forEach(v => statusCounts[v.status] = (statusCounts[v.status] || 0) + 1)
+    vehicleList.value.forEach(v => statusCounts[v.status] = (statusCounts[v.status] || 0) + 1)
     chart.setOption({
       tooltip: { trigger: 'item' },
       legend: { top: 'bottom' },
@@ -591,7 +591,7 @@ const initializeCharts = () => {
   // Top Vehicles Bar Chart
   if (topVehiclesBarChart.value) {
     const chart = echarts.init(topVehiclesBarChart.value)
-    const top = [...vehicles.value].sort((a, b) => b.fuelEfficiency - a.fuelEfficiency).slice(0, 5)
+    const top = [...vehicleList.value].sort((a, b) => b.fuelEfficiency - a.fuelEfficiency).slice(0, 5)
     chart.setOption({
       tooltip: { trigger: 'axis' },
       xAxis: { type: 'category', data: top.map(v => v.licensePlate) },
@@ -631,7 +631,7 @@ onMounted(async () => {
   await Promise.all([
     getVehicles(),
     getFuelCards(),
-    getAnomalies(),
+    // getAnomalies(),
     getVendor(),
   ])
   initializeData()

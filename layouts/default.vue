@@ -1,6 +1,7 @@
 <template>
   <v-app>
     <!-- Sidebar Navigation -->
+    <client-only>
     <v-navigation-drawer 
       v-model="drawer" 
       app 
@@ -57,6 +58,7 @@
         </div>
       </template>
     </v-navigation-drawer>
+    </client-only>
 
     <!-- Top Bar -->
     <v-app-bar app color="#fff" elevation="0" class="topbar">
@@ -71,14 +73,14 @@
           <span class="text-h6 font-weight-bold text-primary">Fleet Management System</span>
         </div>
         <div class="d-flex align-center">
-          <v-btn 
+          <!-- <v-btn 
             v-show="$vuetify.display.lgAndUp"
             icon="mdi-chevron-left" 
             variant="text"
             @click="toggleCollapse"
             class="mr-2"
             :class="{ 'rotated': collapsed }"
-          ></v-btn>
+          ></v-btn> -->
           <v-btn icon variant="text"><v-icon>mdi-bell-outline</v-icon></v-btn>
           <!-- <v-btn icon variant="text"><v-icon>mdi-account-circle-outline</v-icon></v-btn> -->
           <v-menu offset-y>
@@ -124,7 +126,7 @@ const drawerWidth = computed(() => {
 const mainNav = [
   { title: 'Dashboard', icon: 'mdi-view-dashboard-outline', to: '/' },
   { title: 'Fleet Overview', icon: 'mdi-car-multiple', to: '/vehicles' },
-  { title: 'Live Tracking', icon: 'mdi-map-marker-radius-outline', to: '/tracking' },
+  // { title: 'Live Tracking', icon: 'mdi-map-marker-radius-outline', to: '/tracking' },
   { title: 'Fuel Management', icon: 'mdi-fuel', to: '/fuel-management' },
   { title: 'Maintenance', icon: 'mdi-wrench-outline', to: '/maintenance' },
   { title: 'Analytics & Reports', icon: 'mdi-chart-box', to: '/analytics-reports' },

@@ -10,9 +10,15 @@ interface Card {
   remark: string
 }
 
+interface User{
+  name: string,
+  id: string
+}
+
 export function useCard() {
   const { $apiFetch } = useNuxtApp();
   const cardList = ref<Card[]>([])
+  const usersList = ref<User[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -24,8 +30,7 @@ export function useCard() {
         method: 'GET'
       })
       
-      // vendorList.value = Array.isArray(data.result) ? data.result : []
-      cardList.value = Array.isArray(data) ? data : []
+      cardList.value = Array.isArray(data.result) ? data.result : []
 
       return data.result;
     } catch (e) {
@@ -43,8 +48,8 @@ export function useCard() {
         method: 'POST',
         body
       })
-      // vendorList.value = Array.isArray(data.result) ? data.result : []
-      cardList.value = Array.isArray(data) ? data : []
+   
+      cardList.value.push(data.result)
 
     } catch (e) {
       error.value = 'Failed to create card'
@@ -59,6 +64,8 @@ export function useCard() {
       const data = await $apiFetch<{ result: any[] }>('/user/all', {
         method: 'GET'
       })
+      usersList.value = Array.isArray(data.result) ? data.result : []
+      
       return data.result;
     } catch (e) {
       console.error(e)
@@ -68,6 +75,7 @@ export function useCard() {
 
   return {
     cardList,
+    usersList,
     getCard,
     createCard,
     getUsers,

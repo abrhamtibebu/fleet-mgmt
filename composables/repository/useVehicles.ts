@@ -2,27 +2,21 @@ import { ref, computed } from 'vue'
 
 interface Vehicle {
   id: string
-  licensePlate: string
-  brand: string
-  model: string
-  year: number
-  status: 'active' | 'maintenance' | 'inactive'
-  currentMileage: number
-  lastServiceMileage: number
-  lastServiceDate: string
-  nextServiceMileage: number
-  serviceInterval: number
-  fuelCardId: string
-  assignedDriver: string
-  location: string
-  fuelEfficiency: number
-  createdAt: string
-  updatedAt: string
+  plateNo: string,
+  vendorId: number,
+  modelId: number,
+  cardId: number,
+  year: number,
+  driver: string,
+  status: number,
+  currentMileage: number,
+  serviceInterval: number,
+  type: number
 }
 
 export const useVehicles = () => {
   const { $apiFetch } = useNuxtApp();
-  const vehicles = ref<Vehicle[]>([])
+  const vehicleList = ref<Vehicle[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -33,9 +27,10 @@ export const useVehicles = () => {
       const data = await $apiFetch<Vehicle>("/vehicle/all", {
         method: "GET"
       });
-      vehicles.value = Array.isArray(data) ? data : []
+      vehicleList.value = Array.isArray(data.result) ? data.result : []
+    
     } catch (e) {
-      vehicles.value = []
+      vehicleList.value = []
       error.value = 'Failed to fetch vehicles'
       console.error(e)
     } finally {
@@ -43,26 +38,45 @@ export const useVehicles = () => {
     }
   }
 
+    const createVehicle = async (body: any) => {
+    loading.value = true
+    error.value = null
+    try {
+      const data = await $apiFetch<{ result: Vehicle[] }>('/vehicle/add', {
+        method: 'POST',
+        body
+      })
+
+      vehicleList.value.push(data.result)
+
+    } catch (e) {
+      error.value = 'Failed to create vendors'
+      console.error(e)
+    } finally {
+      loading.value = false
+    }
+  }
+
   const activeVehicles = computed(() => 
-    vehicles.value.filter(v => v.status === 'active')
+    vehicleList.value.filter(v => v.status === 1)
   )
 
   const maintenanceVehicles = computed(() => 
-    vehicles.value.filter(v => v.status === 'maintenance')
+    vehicleList.value.filter(v => v.status === 2)
   )
 
   const serviceDueVehicles = computed(() => 
-    vehicles.value.filter(v => v.currentMileage >= v.nextServiceMileage)
+    vehicleList.value.filter(v => v.currentMileage >= v.nextServiceMileage)
   )
 
   const getVehicleById = (id: string) => 
-    vehicles.value.find(v => v.id === id)
+    vehicleList.value.find(v => v.id === id)
 
   const getVehicleByLicensePlate = (licensePlate: string) => 
-    vehicles.value.find(v => v.licensePlate === licensePlate)
+    vehicleList.value.find(v => v.licensePlate === licensePlate)
 
   const getVehiclesByFuelCard = (fuelCardId: string) => 
-    vehicles.value.filter(v => v.fuelCardId === fuelCardId)
+    vehicleList.value.filter(v => v.fuelCardId === fuelCardId)
 
   const calculateServiceDue = (vehicle: Vehicle) => {
     const distanceToService = vehicle.nextServiceMileage - vehicle.currentMileage
@@ -74,11 +88,44 @@ export const useVehicles = () => {
     }
   }
 
+  const vehicleTypes = [
+      {
+        id: 1,
+        name : "Fuel-powered Car"
+      },
+      {
+        id: 2,
+        name: "Electric-powered Car"
+      }
+  ]
+
+  const statusMap = [
+    {
+      id: 1,
+      label: 'Active',
+      color: 'green'
+      
+    },
+    {
+      id: 2,
+      label: 'Maintenance',
+      color: 'orange'
+    },
+    {
+      id: 3,
+      label: 'Inactive',
+      color: 'red'
+    }
+  ]
+
   return {
-    vehicles,
+    statusMap,
+    vehicleList,
     loading,
     error,
+    vehicleTypes,
     getVehicles,
+    createVehicle,
     activeVehicles,
     maintenanceVehicles,
     serviceDueVehicles,

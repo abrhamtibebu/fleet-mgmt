@@ -1,15 +1,12 @@
 <template>
-  <v-chip :color="color" class="status-badge" size="small" label>
-    <v-icon v-if="icon" :icon="icon" size="16" class="mr-1 status-badge-icon" />
-    {{ label }}
+  <v-chip :color="props.status.color" class="status-badge" size="small" props.status.label>
+    {{ props.status.label }}
   </v-chip>
 </template>
 
 <script setup lang="ts">
-defineProps<{
-  label: string
-  color: string
-  icon?: string
+const props = defineProps<{
+  status: Object
 }>()
 </script>
 

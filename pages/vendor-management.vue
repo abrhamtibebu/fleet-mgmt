@@ -630,28 +630,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 
-// Composables
-const { 
-  brands, 
-  models, 
-  cards, 
-  activeCards, 
-  addBrand,
-  updateBrand,
-  deleteBrand,
-  addModel,
-  updateModel,
-  deleteModel,
-  addCard,
-  updateCard,
-  deleteCard,
-  maskCardNumber,
-  initializeData
-} = useVendorData()
 
-const {createVendor, getVendor} = useVendor()
-const {createModel, getModel} = useModel()
-const {createCard, getCard, getUsers} = useCard()
+
+const {createVendor, getVendor, vendorList} = useVendor()
+const {createModel, getModel, modelList} = useModel()
+const {createCard, getCard, getUsers, cardList, usersList} = useCard()
 
 // Reactive data
 const totalCardValue = ref(0)
@@ -695,10 +678,6 @@ const brandForm = ref({
   name: '',
   description: '',
 })
-const vendorList = ref([])
-const modelList = ref([])
-const cardList = ref([])
-const usersList = ref([])
 
 const modelForm = ref({
   vendorId: '',
@@ -970,23 +949,19 @@ const showErrorMessage = (message) => {
 }
 
 const getVendors = async () => {
-  const res = await getVendor()
-  vendorList.value = res
+  await getVendor()
 }
 
 const getModels = async () => {
-   const res = await getModel()
-   modelList.value = res
+   await getModel()
 }
 
 const getUsersHandler = async () => {
-  const res = await getUsers()
-  usersList.value = res
+  await getUsers()
 }
 
 const getCards = async () => {
-  const res = await getCard()
-  cardList.value = res
+  await getCard()
 
   cardList.value.forEach(aa => {
       totalCardValue.value += aa.balance

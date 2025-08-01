@@ -19,8 +19,8 @@ export function useVendor() {
         method: 'GET'
       })
       
-      // vendorList.value = Array.isArray(data.result) ? data.result : []
-      vendorList.value = Array.isArray(data) ? data : []
+
+      vendorList.value = Array.isArray(data.result) ? data.result : []
 
       return data.result;
     } catch (e) {
@@ -38,8 +38,8 @@ export function useVendor() {
         method: 'POST',
         body
       })
-      // vendorList.value = Array.isArray(data.result) ? data.result : []
-      vendorList.value = Array.isArray(data) ? data : []
+
+      vendorList.value.push(data.result)
 
     } catch (e) {
       error.value = 'Failed to create vendors'

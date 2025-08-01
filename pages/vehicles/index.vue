@@ -2,20 +2,22 @@
   <div class="vehicles-root">
     <div class="vehicles-header">
       <h1 class="vehicles-title">Vehicle Management</h1>
-      <p class="vehicles-subtitle">Manage your fleet vehicles, track maintenance, and monitor performance</p>
-      </div>
+      <p class="vehicles-subtitle">
+        Manage your fleet vehicles, track maintenance, and monitor performance
+      </p>
+    </div>
 
     <!-- Action Bar -->
     <div class="vehicles-actions mb-6">
       <v-row align="center">
         <v-col cols="12" md="6">
-        <v-text-field
+          <v-text-field
             v-model="searchQuery"
-          prepend-inner-icon="mdi-magnify"
+            prepend-inner-icon="mdi-magnify"
             placeholder="Search vehicles by license plate, model, or driver..."
             variant="outlined"
             density="compact"
-          hide-details
+            hide-details
             class="vehicles-search"
           ></v-text-field>
         </v-col>
@@ -34,12 +36,18 @@
 
     <!-- Vehicle Cards Grid -->
     <div v-if="loading" class="text-center py-8">
-      <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
+      <v-progress-circular
+        indeterminate
+        color="primary"
+        size="64"
+      ></v-progress-circular>
       <div class="mt-4 text-muted">Loading vehicles...</div>
     </div>
 
     <div v-else-if="filteredVehicles.length === 0" class="text-center py-8">
-      <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-truck-off</v-icon>
+      <v-icon size="64" color="grey-lighten-1" class="mb-4"
+        >mdi-truck-off</v-icon
+      >
       <h3 class="text-h6 text-muted mb-2">No vehicles found</h3>
       <p class="text-muted">Add your first vehicle to get started</p>
     </div>
@@ -50,90 +58,86 @@
           v-for="vehicle in filteredVehicles"
           :key="vehicle.id"
           cols="12"
+          md="12"
           sm="6"
           lg="4"
           xl="3"
         >
-          <v-card class="vehicle-card">
-            <v-card-title class="vehicle-card-header">
-              <div class="d-flex align-center justify-space-between w-100">
-                <div class="vehicle-license">{{ vehicle.licensePlate }}</div>
-                <StatusBadge :status="vehicle.status" />
-              </div>
-            </v-card-title>
+        <v-card class="vehicle-card">
+  <v-card-title class="vehicle-card-header">
+    <div class="d-flex align-center justify-space-between w-100">
+      <div class="vehicle-license">{{ vehicle.plateNo }}</div>
+      <StatusBadge :status="getStatusDetails(vehicle.status)" />
+    </div>
+  </v-card-title>
 
-            <v-card-text class="vehicle-card-content">
-              <div class="vehicle-info">
-                <div class="vehicle-model">
-                  <v-icon class="vehicle-main-icon me-2">mdi-truck</v-icon>
-                  {{ vehicle.brand }} {{ vehicle.model }} ({{ vehicle.year }})
-                </div>
-                
-                <div class="vehicle-details">
-                  <div class="vehicle-detail-item">
-                    <v-icon size="small" class="me-1">mdi-account</v-icon>
-                    <span>{{ vehicle.assignedDriver }}</span>
-                  </div>
-                  <div class="vehicle-detail-item">
-                    <v-icon size="small" class="me-1">mdi-map-marker</v-icon>
-                    <span>{{ vehicle.location }}</span>
-                  </div>
-                  <div class="vehicle-detail-item">
-                    <v-icon size="small" class="me-1">mdi-speedometer</v-icon>
-                    <span>{{ vehicle.currentMileage.toLocaleString() }} km</span>
-                  </div>
-                  <div class="vehicle-detail-item">
-                    <v-icon size="small" class="me-1">mdi-gas-station</v-icon>
-                    <span>{{ vehicle.fuelEfficiency.toFixed(1) }} km/l</span>
-                  </div>
-                </div>
+  <v-card-text class="vehicle-card-content">
+    <div class="vehicle-info">
+      <div class="vehicle-model">
+        <v-icon class="vehicle-main-icon me-2">mdi-truck</v-icon>
+        {{ vehicle.vendor.name }} {{ vehicle.model.name }} ({{ vehicle.year }})
+      </div>
 
-                <!-- Service Status -->
-                <div class="service-status mt-3">
-                  <div class="d-flex align-center justify-space-between mb-1">
-                    <span class="text-caption font-weight-medium">Service Status</span>
-                    <span class="text-caption">{{ formatDate(vehicle.lastServiceDate) }}</span>
-                  </div>
-                  <v-progress-linear
-                    :model-value="getServiceProgress(vehicle)"
-                    :color="getServiceColor(vehicle)"
-                    height="8"
-                    rounded
-                  ></v-progress-linear>
-                  <div class="text-caption text-muted mt-1">
-                    Next service at {{ vehicle.nextServiceMileage.toLocaleString() }} km
-                  </div>
-                </div>
-              </div>
-            </v-card-text>
+      <div class="vehicle-details">
+        <div class="vehicle-detail-item">
+          <v-icon size="small" class="me-1">mdi-account</v-icon>
+          <span>{{ vehicle.driver }}</span>
+        </div>
+        <div class="vehicle-detail-item">
+          <v-icon size="small" class="me-1">mdi-speedometer</v-icon>
+          <span>{{ vehicle.currentMileage.toLocaleString() }} km</span>
+        </div>
+      </div>
 
-            <v-card-actions class="vehicle-card-actions">
-              <v-btn
-                variant="outlined"
-                size="small"
-                class="vehicle-btn"
-                @click="viewVehicleDetails(vehicle)"
-              >
-                View Details
-              </v-btn>
-              <v-btn
-                variant="outlined"
-                size="small"
-                class="vehicle-btn"
-                @click="editVehicle(vehicle)"
-              >
-                Edit
-        </v-btn>
-              <v-btn
-                variant="outlined"
-                size="small"
-                class="vehicle-btn"
-                @click="addMileageEntry(vehicle)"
-              >
-                Add Mileage
-        </v-btn>
-            </v-card-actions>
-          </v-card>
+      <div class="service-status mt-3">
+        <div class="d-flex align-center justify-space-between mb-1">
+          <span class="text-caption font-weight-medium">Service Status</span>
+          <span class="text-caption">
+            {{ formatDate('2025-09-01') }}
+            <!-- {{ formatDate(vehicle.lastServiceDate) }} -->
+          </span>
+        </div>
+        <v-progress-linear
+          :model-value="getServiceProgress(vehicle)"
+          :color="getServiceColor(vehicle)"
+          height="8"
+          rounded
+        ></v-progress-linear>
+        <div class="text-caption text-muted mt-1">
+          Next service at 1000 KM
+        </div>
+      </div>
+    </div>
+  </v-card-text>
+
+  <v-card-actions class="vehicle-card-actions d-flex flex-wrap gap-2">
+    <v-btn
+      variant="outlined"
+      size="small"
+      class="vehicle-btn"
+      @click="viewVehicleDetails(vehicle)"
+    >
+      View Details
+    </v-btn>
+    <v-btn
+      variant="outlined"
+      size="small"
+      class="vehicle-btn"
+      @click="editVehicle(vehicle)"
+    >
+      Edit
+    </v-btn>
+    <v-btn
+      variant="outlined"
+      size="small"
+      class="vehicle-btn"
+      @click="addMileageEntry(vehicle)"
+    >
+      Add Mileage
+    </v-btn>
+  </v-card-actions>
+</v-card>
+
         </v-col>
       </v-row>
     </div>
@@ -144,198 +148,242 @@
     <v-dialog v-model="showAddDialog" max-width="600px">
       <v-card>
         <v-card-title class="text-h6 pa-4">
-          {{ editingVehicle ? 'Edit Vehicle' : 'Add New Vehicle' }}
+          {{ editingVehicle ? "Edit Vehicle" : "Add New Vehicle" }}
         </v-card-title>
         <v-card-text class="pa-4">
-          <v-form ref="vehicleForm" v-model="formValid">
-    <v-row>
+          <v-form ref="vehicleFormRef" v-model="formValid">
+            <v-row>
               <v-col cols="12" sm="6">
                 <v-text-field
-                  v-model="vehicleForm.licensePlate"
+                  density="compact"
+                  v-model="vehicleForm.plateNo"
                   label="License Plate"
                   variant="outlined"
-                  :rules="[v => !!v || 'License plate is required']"
+                  :rules="[(v) => !!v || 'License plate is required']"
                   required
                 ></v-text-field>
               </v-col>
               <v-col cols="12" sm="6">
-                <v-select
-                  v-model="vehicleForm.brandId"
+                <v-autocomplete
+                  density="compact"
+                  class="text--black"
+                  v-model="vehicleForm.vendorId"
                   :items="vendorList"
                   label="Vendor"
                   variant="outlined"
-                  :rules="[v => !!v || 'Vendor is required']"
+                  :rules="[(v) => !!v || 'Vendor is required']"
                   required
                   @update:model-value="onBrandChange"
-                ></v-select>
+                  item-title="name"
+                  item-value="id"
+                ></v-autocomplete>
               </v-col>
               <v-col cols="12" sm="6">
-                <v-select
+                <v-autocomplete
+                  density="compact"
                   v-model="vehicleForm.modelId"
-                  :items="modelOptions"
+                  :items="modelList"
                   label="Model"
                   variant="outlined"
-                  :rules="[v => !!v || 'Model is required']"
+                  :rules="[(v) => !!v || 'Model is required']"
                   required
-                  :disabled="!vehicleForm.brandId"
-                  @update:model-value="onModelChange"
-                ></v-select>
+                  :disabled="!vehicleForm.vendorId"
+                  item-title="name"
+                  item-value="id"
+                ></v-autocomplete>
               </v-col>
               <v-col cols="12" sm="6">
                 <v-text-field
+                  density="compact"
+                  hide-spin-buttons
                   v-model="vehicleForm.year"
                   label="Year"
                   type="number"
                   variant="outlined"
-                  :rules="[v => !!v || 'Year is required']"
+                  :rules="[(v) => !!v || 'Year is required']"
                   required
                 ></v-text-field>
               </v-col>
               <v-col cols="12" sm="6">
                 <v-text-field
-                  v-model="vehicleForm.assignedDriver"
+                  density="compact"
+                  v-model="vehicleForm.driver"
                   label="Assigned Driver"
                   variant="outlined"
-                  :rules="[v => !!v || 'Driver is required']"
+                  :rules="[(v) => !!v || 'Driver is required']"
                   required
                 ></v-text-field>
               </v-col>
-              <!-- <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model="vehicleForm.location"
-                  label="Location"
-                  variant="outlined"
-                  :rules="[v => !!v || 'Location is required']"
-                  required
-                ></v-text-field>
-              </v-col> -->
               <v-col cols="12" sm="6">
                 <v-text-field
+                  hide-spin-buttons
+                  density="compact"
                   v-model="vehicleForm.currentMileage"
                   label="Current Mileage (km)"
                   type="number"
                   variant="outlined"
-                  :rules="[v => !!v || 'Current mileage is required']"
+                  :rules="[(v) => !!v || 'Current mileage is required']"
                   required
                 ></v-text-field>
               </v-col>
               <v-col cols="12" sm="6">
                 <v-text-field
+                  hide-spin-buttons
+                  density="compact"
                   v-model="vehicleForm.serviceInterval"
                   label="Service Interval (km)"
                   type="number"
                   variant="outlined"
-                  :rules="[v => !!v || 'Service interval is required']"
+                  :rules="[(v) => !!v || 'Service interval is required']"
                   required
                 ></v-text-field>
-      </v-col>
-              <v-col cols="12">
-                <v-select
-                  v-model="vehicleForm.fuelCardId"
-                  :items="fuelCards"
-                  item-title="cardNumber"
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-autocomplete
+                  density="compact"
+                  v-model="vehicleForm.cardId"
+                  :items="cardList"
+                  item-title="number"
                   item-value="id"
                   label="Fuel Card"
                   variant="outlined"
-                  :rules="[v => !!v || 'Fuel card is required']"
+                  :rules="[(v) => !!v || 'Fuel card is required']"
                   required
-                ></v-select>
-      </v-col>
-              <v-col cols="12">
-                <v-select
-                  v-model="vehicleForm.vendorCardId"
-                  :items="vendorCardOptions"
-                  label="Select from Vendor Cards (Optional)"
-                  variant="outlined"
-                  placeholder="Choose an existing vendor card or leave empty"
-                  clearable
-                ></v-select>
+                ></v-autocomplete>
               </v-col>
-    </v-row>
+                  <v-col cols="12">
+                <v-autocomplete
+                  density="compact"
+                  v-model="vehicleForm.type"
+                  :items="vehicleTypes"
+                  item-title="name"
+                  item-value="id"
+                  label="Vehicle Type"
+                  variant="outlined"
+                  :rules="[(v) => !!v || 'Vehicle type is required']"
+                  required
+                ></v-autocomplete>
+              </v-col>
+            </v-row>
           </v-form>
         </v-card-text>
-        <v-card-actions class=" pa-4 justify-center">
-          <v-btn
-            variant="outlined"
-            @click="showAddDialog = false"
-          >
+        <v-card-actions class="pa-4 justify-center">
+          <v-btn variant="outlined" @click="showAddDialog = false">
             Cancel
           </v-btn>
           <!-- :disabled="!formValid" -->
 
-          <v-btn
-          variant="outlined"
-            :loading="saving"
-            @click="saveVehicle"
-          >
-            {{ editingVehicle ? 'Update' : 'Add' }} Vehicle
+          <v-btn variant="outlined" :loading="saving" @click="saveVehicle">
+            {{ editingVehicle ? "Update" : "Add" }} Vehicle
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
     <!-- </v-form> -->
+
+        <!-- Success Snackbar -->
+    <v-snackbar
+      v-model="showSuccessSnackbar"
+      color="success"
+      timeout="3000"
+    >
+      {{ successMessage }}
+      <template v-slot:actions>
+        <v-btn
+          color="white"
+          variant="text"
+          @click="showSuccessSnackbar = false"
+        >
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
+
+    <!-- Error Snackbar -->
+    <v-snackbar
+      v-model="showErrorSnackbar"
+      color="error"
+      timeout="5000"
+    >
+      {{ errorMessage }}
+      <template v-slot:actions>
+        <v-btn
+          color="white"
+          variant="text"
+          @click="showErrorSnackbar = false"
+        >
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
   </div>
 </template>
 
-<script setup>
-import { ref, computed, onMounted } from 'vue'
-const { $apiFetch } = useNuxtApp()
-const vehicleFormRef = ref()
+<script setup lang="ts">
+import { ref, computed, onMounted } from "vue";
+const { $apiFetch } = useNuxtApp();
+const vehicleFormRef = ref();
 
 // Composables
-const { vehicles, loading, getVehicles } = useVehicles()
-const { fuelCards, getFuelCards } = useFuel()
-const { brands, models, cards,vendorList ,getVendor,getModelsByBrand, maskCardNumber, initializeData } = useVendor()
+const { vehicleList, loading, getVehicles, createVehicle, vehicleTypes, statusMap } = useVehicles();
+const { getCard,cardList } = useCard();
+const { getByVendor, modelList } = useModel()
+const {
+  vendorList,
+  getVendor,
+} = useVendor();
 
 // Reactive data
-const searchQuery = ref('')
-const showAddDialog = ref(false)
-const editingVehicle = ref(null)
-const saving = ref(false)
-const formValid = ref(false)
+const searchQuery = ref("");
+const showAddDialog = ref(false);
+const editingVehicle = ref(null);
+const saving = ref(false);
+const formValid = ref(false);
 const vehicleForm = ref({
-  licensePlate: '',
-  brandId: '',
-  modelId: '',
-  brand: '',
-  model: '',
-  year: new Date().getFullYear(),
-  assignedDriver: '',
-  location: '',
+  plateNo: "",
+  vendorId: "",
+  modelId: "",
+  cardId: "",
+  year: "",
+  driver: "",
   currentMileage: 0,
-  serviceInterval: 10000,
-  fuelCardId: '',
-  vendorCardId: ''
-})
+  serviceInterval: 0,
+  type: 1
+});
+const showSuccessSnackbar = ref(false)
+const showErrorSnackbar = ref(false)
+const successMessage = ref('')
+const errorMessage = ref('')
 
 // Computed properties
 const filteredVehicles = computed(() => {
-  if (!searchQuery.value) return vehicles.value
-  
-  const query = searchQuery.value.toLowerCase()
-  return vehicles.value.filter(vehicle => 
-    vehicle.licensePlate.toLowerCase().includes(query) ||
-    vehicle.brand.toLowerCase().includes(query) ||
-    vehicle.model.toLowerCase().includes(query) ||
-    vehicle.assignedDriver.toLowerCase().includes(query)
-  )
-})
+  if (!searchQuery.value) return vehicleList.value;
+
+  const query = searchQuery.value.toLowerCase();
+  return vehicleList.value.filter(
+    (vehicle) =>
+      vehicle.licensePlate.toLowerCase().includes(query) ||
+      vehicle.brand.toLowerCase().includes(query) ||
+      vehicle.model.toLowerCase().includes(query) ||
+      vehicle.assignedDriver.toLowerCase().includes(query)
+  );
+});
 
 const brandOptions = computed(() => {
-  return brands.value.map(brand => ({
+  return brands.value.map((brand) => ({
     title: brand.name,
-    value: brand.id
-  }))
-})
+    value: brand.id,
+  }));
+});
 
 const modelOptions = computed(() => {
-  if (!vehicleForm.value.brandId) return []
-  const models = getModelsByBrand(vehicleForm.value.brandId) || []
-  return models.map(model => ({
+  if (!vehicleForm.value.brandId) return [];
+  const models = getModelsByBrand(vehicleForm.value.brandId) || [];
+  return models.map((model) => ({
     title: `${model.name} (${model.year})`,
-    value: model.id
-  }))
-})
+    value: model.id,
+  }));
+});
 
 // const vendorCardOptions = computed(() => {
 
@@ -347,127 +395,96 @@ const modelOptions = computed(() => {
 
 // Methods
 const getServiceProgress = (vehicle) => {
-  const progress = ((vehicle.currentMileage - vehicle.lastServiceMileage) / vehicle.serviceInterval) * 100
-  return Math.min(progress, 100)
-}
+  const progress =
+    ((vehicle.currentMileage - vehicle.lastServiceMileage) /
+      vehicle.serviceInterval) *
+    100;
+  return Math.min(progress, 100);
+};
 
 const getServiceColor = (vehicle) => {
-  const progress = getServiceProgress(vehicle)
-  if (progress >= 100) return 'error'
-  if (progress >= 80) return 'warning'
-  return 'success'
-}
+  const progress = getServiceProgress(vehicle);
+  if (progress >= 100) return "error";
+  if (progress >= 80) return "warning";
+  return "success";
+};
 
-const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleDateString()
-}
+const formatDate = (dateString: Date) => {
+  return new Date(dateString).toLocaleDateString();
+};
 
 const viewVehicleDetails = (vehicle) => {
   // Navigate to vehicle details page
-  console.log('View vehicle details:', vehicle)
-}
+  console.log("View vehicle details:", vehicle);
+};
 
 const editVehicle = (vehicle) => {
-  editingVehicle.value = vehicle
-  vehicleForm.value = { ...vehicle }
-  showAddDialog.value = true
-}
+  editingVehicle.value = vehicle;
+  vehicleForm.value = { ...vehicle };
+  showAddDialog.value = true;
+};
 
 const addMileageEntry = (vehicle) => {
   // Navigate to mileage entry page
-  console.log('Add mileage entry for:', vehicle)
-}
+  console.log("Add mileage entry for:", vehicle);
+};
 
-// const saveVehicle = async () => {
-//   saving.value = true
-//   try {
-//     // TODO: Implement save logic
-//     console.log('Saving vehicle:', vehicleForm.value)
-//     showAddDialog.value = false
-//     resetForm()
-//   } catch (error) {
-//     console.error('Error saving vehicle:', error)
-//   } finally {
-//     saving.value = false
-//   }
-// }
+
 const saveVehicle = async () => {
-  // const form = vehicleFormRef.value // defined below
-  // const isValid = await form.validate()
-
-  // if (!isValid.valid) return
-
-  // saving.value = true
-  try {
-    const response = await $apiFetch('/vehicle/add', {
-      method: 'POST',
-      body: vehicleForm.value,
-    });
-
-    console.log('Vehicle saved successfully:', response);
+  try {  
+    await createVehicle(vehicleForm.value)
+    showErrorMessage('Vehicle created Successfully')
     showAddDialog.value = false;
     resetForm();
-    // await getVehicles(); 
   } catch (error) {
-    console.error('Error saving vehicle:', error);
+    showErrorMessage('Failed to create Vehicle')
   } finally {
     saving.value = false;
   }
 };
 
-
-const onBrandChange = () => {
-  // Reset model when brand changes
-  vehicleForm.value.modelId = ''
-  vehicleForm.value.model = ''
-  
-  // Set brand name
-  const selectedBrand = brands.value.find(b => b.id === vehicleForm.value.brandId)
-  if (selectedBrand) {
-    vehicleForm.value.brand = selectedBrand.name
-  }
+const showSuccessMessage = (message: string) => {
+  successMessage.value = message
+  showSuccessSnackbar.value = true
 }
 
-const onModelChange = () => {
-  // Set model details
-  const selectedModel = models.value.find(m => m.id === vehicleForm.value.modelId)
-  if (selectedModel) {
-    vehicleForm.value.model = selectedModel.name
-    vehicleForm.value.year = selectedModel.year
-  }
+const showErrorMessage = (message: string) => {
+  errorMessage.value = message
+  showErrorSnackbar.value = true
 }
 
+const onBrandChange = async (item: Number) => {
+  await getByVendor(item)
+};
+
+const getStatusDetails = (status: Number) => {
+  return statusMap.find(v => v.id == status)
+}
 const resetForm = () => {
   vehicleForm.value = {
-    licensePlate: '',
-    brandId: '',
-    modelId: '',
-    brand: '',
-    model: '',
-    year: new Date().getFullYear(),
-    assignedDriver: '',
-    location: '',
+    plateNo: "",
+    vendorId: null,
+    modelId: null,
+    cardId: null,
+    year: "",
+    driver: "",
     currentMileage: 0,
-    serviceInterval: 10000,
-    fuelCardId: '',
-    vendorCardId: ''
-  }
-  editingVehicle.value = null
-}
+    serviceInterval: 0,
+    type: 1
+  };
+  editingVehicle.value = null;
+};
 
 // Lifecycle
 onMounted(async () => {
   await Promise.all([
     getVehicles(),
-    getFuelCards(),
+    getCard(),
     getVendor(),
     // initializeData()
-  ])
-  
-  
-
-})
-</script> 
+  ]);
+});
+</script>
 
 <style scoped>
 .vehicles-root {
@@ -590,4 +607,4 @@ onMounted(async () => {
   min-width: 120px;
   flex: 1;
 }
-</style> 
+</style>

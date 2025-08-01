@@ -23,8 +23,26 @@ export function useModel() {
         method: 'GET'
       })
       
-      // vendorList.value = Array.isArray(data.result) ? data.result : []
-      modelList.value = Array.isArray(data) ? data : []
+      modelList.value = Array.isArray(data.result) ? data.result : []
+
+      return data.result;
+    } catch (e) {
+      error.value = 'Failed to fetch models'
+      console.error(e)
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const getByVendor = async (id:Number) =>{
+        loading.value = true
+    error.value = null
+    try {
+      const data = await $apiFetch<{ result: Model[] }>(`/model/vendor/${id}`, {
+        method: 'GET'
+      })
+      
+      modelList.value = Array.isArray(data.result) ? data.result : []
 
       return data.result;
     } catch (e) {
@@ -42,8 +60,8 @@ export function useModel() {
         method: 'POST',
         body
       })
-      // vendorList.value = Array.isArray(data.result) ? data.result : []
-      modelList.value = Array.isArray(data) ? data : []
+
+      modelList.value.push(data.result)
 
     } catch (e) {
       error.value = 'Failed to create model'
@@ -56,6 +74,7 @@ export function useModel() {
   return {
     modelList,
     getModel,
+    getByVendor,
     createModel,
     loading,
     error

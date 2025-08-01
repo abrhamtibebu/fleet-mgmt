@@ -77,14 +77,10 @@ const onRefreshToken = async (): Promise<void> => {
 };
 
 const getCurrentUser = async (): Promise<void> => {
-  const { me } = useAuthRepository();
   const { currentUser, status } = useAuthState();
 
   try {
     status.value = AuthState.loading;
-    const auth_session = await me();
-    // appStore.setCurrentUser(auth_session);
-    currentUser.value = auth_session;
     // appStore.setAuthState(AuthState.authenticated);
     status.value = AuthState.authenticated;
     // console.log("AUTH SESSION: ", auth_session);
