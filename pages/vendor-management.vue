@@ -148,7 +148,7 @@
                 icon="mdi-plus"
                 variant="text"
                 size="small"
-                @click="showBrandDialog = true"
+                @click="resetBrandForm(), editingBrand = false, showBrandDialog = true"
               ></v-btn>
             </v-card-title>
             <v-card-text>
@@ -627,12 +627,12 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 
 
 
-const {createVendor, getVendor, vendorList} = useVendor()
+const {createVendor, getVendor, vendorList, editVendor} = useVendor()
 const {createModel, getModel, modelList} = useModel()
 const {createCard, getCard, getUsers, cardList, usersList} = useCard()
 
@@ -805,7 +805,7 @@ const saveBrand = async () => {
     
     if (editingBrand.value) {
       // Update existing brand
-      updateBrand(editingBrand.value.id, brandForm.value)
+      await editVendor(editingBrand.value.id, {'name' : brandForm.value.name, 'description' : brandForm.value.description})
     } else {
       console.log('brandForm.value', brandForm.value);
       

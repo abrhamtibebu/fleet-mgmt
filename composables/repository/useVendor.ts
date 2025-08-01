@@ -49,7 +49,30 @@ export function useVendor() {
     }
   }
 
+  const editVendor = async (id: number, body: Vendor) => {
+      try {
+      const data = await $apiFetch<{ result: Vendor[] }>(`/vendor/${id}`, {
+        method: 'PUT',
+        body
+      })
+
+      // vendorList.value.push(data.result)
+      let vd = vendorList.value.findIndex((v:Vendor) => v.id == id)
+      vendorList.value[vd] = data.result
+
+    } catch (e) {
+      error.value = 'Failed to create vendors'
+      console.error(e)
+    } finally {
+      loading.value = false
+    }
+  }
+
+  
+
+
   return {
+    editVendor,
     vendorList,
     getVendor,
     createVendor,
