@@ -369,7 +369,7 @@ import { ref, computed, onMounted } from 'vue'
 import * as echarts from 'echarts'
 
 // Composables
-const { vehicles, getVehicles, serviceDueVehicles, calculateServiceDue } = useVehicles()
+const { vehicleList, getVehicles, serviceDueVehicles, calculateServiceDue } = useVehicles()
 const { fuelRecords, fuelCards, getFuelRecords, getFuelCards } = useFuel()
 const { anomalies, getAnomalies } = useAnomalies()
 
@@ -402,13 +402,13 @@ const otherCosts = ref(50000) // 50K ETB
 
 // Computed properties
 const averageFuelEfficiency = computed(() => {
-  if (vehicles.value.length === 0) return 0
-  const totalEfficiency = vehicles.value.reduce((sum, vehicle) => sum + vehicle.fuelEfficiency, 0)
-  return totalEfficiency / vehicles.value.length
+  if (vehicleList.value.length === 0) return 0
+  const totalEfficiency = vehicleList.value.reduce((sum, vehicle) => sum + vehicle.fuelEfficiency, 0)
+  return totalEfficiency / vehicleList.value.length
 })
 
 const totalDistance = computed(() => 
-  vehicles.value.reduce((sum, vehicle) => sum + vehicle.currentMileage, 0)
+  vehicleList.value.reduce((sum, vehicle) => sum + vehicle.currentMileage, 0)
 )
 
 const totalFuelConsumption = computed(() => {
@@ -416,7 +416,7 @@ const totalFuelConsumption = computed(() => {
 })
 
 const topPerformingVehicles = computed(() => {
-  return [...vehicles.value]
+  return [...vehicleList.value]
     .sort((a, b) => b.fuelEfficiency - a.fuelEfficiency)
     .slice(0, 5)
 })
@@ -426,8 +426,8 @@ const totalFuelSpent = computed(() => {
 })
 
 const averageFuelCost = computed(() => {
-  if (vehicles.value.length === 0) return 0
-  return totalFuelSpent.value / vehicles.value.length
+  if (vehicleList.value.length === 0) return 0
+  return totalFuelSpent.value / vehicleList.value.length
 })
 
 const activeAlerts = computed(() => {
