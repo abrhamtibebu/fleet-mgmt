@@ -41,17 +41,17 @@ defineProps<{
   transform: translateY(-2px) scale(1.02);
 }
 .kpi-icon-bg {
-  background: linear-gradient(135deg, #ffc107 0%, #ffca2c 100%);
+  background: linear-gradient(135deg, #f3d70e 0%, #fbb339 100%);
   border-radius: 50%;
   width: 54px;
   height: 54px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
+  box-shadow: 0 2px 8px rgba(243, 215, 14, 0.2);
 }
 .kpi-icon {
-  color: #ffffff;
+  color: #040707;
 }
 .kpi-title {
   margin-bottom: 2px;
@@ -60,7 +60,7 @@ defineProps<{
 .kpi-value {
   margin-bottom: 2px;
   font-size: 1.7rem;
-  color: #000
+  color: #040707
 }
 .kpi-trend {
   margin-top: 2px;

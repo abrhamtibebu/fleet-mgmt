@@ -430,8 +430,8 @@ onMounted(async () => {
 
 .fuel-management-section-card {
   border-radius: 18px;
-  background: linear-gradient(135deg, #fffde7 0%, #f8fafb 100%);
-  box-shadow: 0 2px 12px rgba(16, 30, 54, 0.06);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafb 100%);
+  box-shadow: 0 2px 12px rgba(4, 7, 7, 0.06);
   overflow: hidden;
 }
 
@@ -446,8 +446,8 @@ onMounted(async () => {
 
 .overview-card {
   border-radius: 16px;
-  background: linear-gradient(135deg, #e3f2fd 0%, #f8fafb 100%);
-  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.08);
+  background: linear-gradient(135deg, #fffde7 0%, #f8fafb 100%);
+  box-shadow: 0 2px 8px rgba(243, 215, 14, 0.08);
   margin-bottom: 16px;
 }
 
@@ -462,14 +462,14 @@ onMounted(async () => {
 
 .fuel-card-detailed {
   border-radius: 16px;
-  background: linear-gradient(135deg, #e3f2fd 0%, #f8fafb 100%);
-  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.08);
+  background: linear-gradient(135deg, #fffde7 0%, #f8fafb 100%);
+  box-shadow: 0 2px 8px rgba(243, 215, 14, 0.08);
   margin-bottom: 16px;
   transition: box-shadow 0.2s, transform 0.2s;
 }
 
 .fuel-card-detailed:hover {
-  box-shadow: 0 4px 16px rgba(33, 150, 243, 0.12);
+  box-shadow: 0 4px 16px rgba(243, 215, 14, 0.12);
   transform: translateY(-1px);
 }
 

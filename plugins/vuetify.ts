@@ -20,24 +20,24 @@ export default defineNuxtPlugin((app) => {
       themes: {
         customTheme: {
           colors: {
-            primary: '#FFD600', // Brighter, modern yellow
-            secondary: '#212121', // Deep gray for contrast
-            accent: '#536DFE', // Indigo accent for modern touch
-            error: '#FF5252',
-            info: '#2196F3',
+            primary: '#f3d70e', // Safety Yellow
+            secondary: '#040707', // Rich Black
+            accent: '#f5e35e', // Minion Yellow
+            error: '#ff5252',
+            info: '#fbb339', // Honey Yellow
             success: '#43A047',
-            warning: '#FFC107',
-            background: '#F8FAFB', // Softer background
-            surface: '#FFFFFF',
-            'on-primary': '#212121',
-            'on-secondary': '#FFFFFF',
-            'on-accent': '#FFFFFF',
-            'text-primary': '#212121',
-            'text-secondary': '#757575',
-            'border-color': '#E0E0E0',
-            'sidebar-bg': '#FFFFFF',
-            'active-nav-bg': '#FFFDE7', // Softer yellow for active nav
-            'active-nav-text': '#212121',
+            warning: '#fbb339', // Honey Yellow
+            background: '#ffffff', // White
+            surface: '#ffffff', // White
+            'on-primary': '#040707', // Rich Black on Safety Yellow
+            'on-secondary': '#f3d70e', // Safety Yellow on Rich Black
+            'on-accent': '#040707', // Rich Black on Minion Yellow
+            'text-primary': '#040707', // Rich Black
+            'text-secondary': '#6c757d',
+            'border-color': '#e9ecef',
+            'sidebar-bg': '#ffffff', // White
+            'active-nav-bg': '#f3d70e', // Safety Yellow for active nav
+            'active-nav-text': '#040707', // Rich Black on Safety Yellow
           },
         },
       },

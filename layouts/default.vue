@@ -12,10 +12,12 @@
       :permanent="$vuetify.display.lgAndUp"
     >
       <div class="sidebar-header d-flex align-center px-4 py-3">
-        <v-icon icon="mdi-car" size="32" class="mr-2 text-primary" />
-        <div v-show="!collapsed">
-          <div class="text-h6 font-weight-bold">WebSprix</div>
-          <div class="text-caption text-medium-emphasis">Fleet Management</div>
+        <div class="brand-icon">
+          <v-icon icon="mdi-car" size="28" class="text-primary" />
+        </div>
+        <div v-show="!collapsed" class="brand-text">
+          <div class="text-h6 font-weight-bold text-primary">FleetPro</div>
+          <div class="text-caption text-medium-emphasis">Management System</div>
         </div>
       </div>
       <v-divider></v-divider>
@@ -60,46 +62,7 @@
     </v-navigation-drawer>
     </client-only>
 
-    <!-- Top Bar -->
-    <v-app-bar app color="#fff" elevation="0" class="topbar">
-      <div class="d-flex align-center w-100 justify-space-between">
-        <div class="d-flex align-center">
-          <v-btn 
-            icon="mdi-menu" 
-            variant="text"
-            @click="toggleDrawer"
-            class="mr-2"
-          ></v-btn>
-          <span class="text-h6 font-weight-bold text-primary">Fleet Management System</span>
-        </div>
-        <div class="d-flex align-center">
-          <!-- <v-btn 
-            v-show="$vuetify.display.lgAndUp"
-            icon="mdi-chevron-left" 
-            variant="text"
-            @click="toggleCollapse"
-            class="mr-2"
-            :class="{ 'rotated': collapsed }"
-          ></v-btn> -->
-          <v-btn icon variant="text"><v-icon>mdi-bell-outline</v-icon></v-btn>
-          <!-- <v-btn icon variant="text"><v-icon>mdi-account-circle-outline</v-icon></v-btn> -->
-          <v-menu offset-y>
-  <template >
-    <v-btn icon variant="text">
-      <v-icon>mdi-account-circle-outline</v-icon>
-    </v-btn>
-  </template>
-  <v-list>
-    <!-- Logout item -->
-    <v-list-item @click="handleLogout">
-      <v-list-item-title>Logout</v-list-item-title>
-    </v-list-item>
-  </v-list>
-</v-menu>
 
-        </div>
-      </div>
-    </v-app-bar>
 
     <!-- Main Content -->
     <v-main>
@@ -148,18 +111,32 @@ const toggleCollapse = () => {
 
 <style scoped>
 .sidebar {
-  border-right: 1px solid #dee2e6;
+  border-right: 1px solid #e9ecef;
   min-height: 100vh;
-  box-shadow: 2px 0 8px 0 rgba(0, 0, 0, 0.08);
-  background: var(--v-theme-sidebar-bg);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  background: white;
   transition: width 0.3s ease;
 }
 
 .sidebar-header {
-  background: var(--v-theme-sidebar-bg);
-  padding-top: 32px;
-  padding-bottom: 24px;
+  background: white;
+  padding: 24px 16px;
   transition: all 0.3s ease;
+}
+
+.brand-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f3d70e 0%, #fbb339 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+}
+
+.brand-text {
+  flex: 1;
 }
 
 .sidebar-footer {
@@ -192,19 +169,23 @@ const toggleCollapse = () => {
 }
 
 .active-nav {
-  background: var(--v-theme-active-nav-bg) !important;
-  color: var(--v-theme-active-nav-text) !important;
+  background: linear-gradient(135deg, #f3d70e 0%, #fbb339 100%) !important;
+  color: #040707 !important;
   font-weight: 600;
-  box-shadow: 0 2px 8px 0 rgba(255, 193, 7, 0.15);
+  box-shadow: 0 4px 12px rgba(243, 215, 14, 0.3);
+  border-radius: 12px;
+  margin: 4px 8px;
 }
 
 .v-list-item {
   transition: all 0.3s ease;
+  border-radius: 12px;
+  margin: 4px 8px;
 }
 
 .v-list-item:hover {
-  background: #e9ecef !important;
-  color: var(--v-theme-primary) !important;
+  background: rgba(243, 215, 14, 0.1) !important;
+  color: #f3d70e !important;
   transform: translateX(4px);
 }
 
@@ -212,11 +193,7 @@ const toggleCollapse = () => {
   transition: opacity 0.3s ease;
 }
 
-.topbar {
-  border-bottom: 1px solid #dee2e6;
-  background: #fff !important;
-  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.08);
-}
+
 
 .main-bg {
   background: var(--v-theme-background);
