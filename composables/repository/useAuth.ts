@@ -21,15 +21,13 @@ export const useAuthRepository = () => {
     getCurrentUser: async (): Promise<User> => {
       // For now, return a mock user since the endpoint doesn't exist
       // You can implement this when the backend provides the endpoint
-      return {
-        id: "1",
-        phone: "",
-        username: "admin",
-        first_name: "Admin",
-        last_name: "User",
-        role: "Fleet Manager",
-        parent_id: ""
-      };
+
+      const res =  await $authFetch<any>("/auth/user", {
+        method: "GET",
+      });
+
+      return res.data
+
     },
   };
 };

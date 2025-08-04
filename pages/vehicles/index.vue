@@ -115,9 +115,9 @@
       variant="outlined"
       size="small"
       class="vehicle-btn"
-      @click="viewVehicleDetails(vehicle)"
+      @click="addMainEntry(vehicle)"
     >
-      View Details
+      Mentainance
     </v-btn>
     <v-btn
       variant="outlined"
@@ -133,7 +133,7 @@
       class="vehicle-btn"
       @click="addMileageEntry(vehicle)"
     >
-      Add Mileage
+      Fuel
     </v-btn>
   </v-card-actions>
 </v-card>
@@ -316,6 +316,9 @@
         </v-btn>
       </template>
     </v-snackbar>
+
+    <LazyAddFuel v-if="addFuelModal" :vehicle="currItem" @close="addFuelModal = false" @showSuccess="showSuccess"/>
+    <LazyAddMaintenance v-if="addMainModal" :vehicle="currItem" @close="addMainModal = false" @showSuccess="showSuccess"/>
   </div>
 </template>
 
@@ -334,9 +337,12 @@ const {
 } = useVendor();
 
 // Reactive data
+const currItem = ref(null)
 const searchQuery = ref("");
 const showAddDialog = ref(false);
 const editingVehicle = ref(null);
+const addFuelModal = ref(false)
+const addMainModal = ref(false)
 const saving = ref(false);
 const formValid = ref(false);
 const vehicleForm = ref({
@@ -413,8 +419,10 @@ const formatDate = (dateString: Date) => {
   return new Date(dateString).toLocaleDateString();
 };
 
-const viewVehicleDetails = (vehicle) => {
+const addMainEntry = (vehicle) => {
   // Navigate to vehicle details page
+  currItem.value = vehicle 
+  addMainModal.value = true 
   console.log("View vehicle details:", vehicle);
 };
 
@@ -426,10 +434,18 @@ const editVehicle = (vehicle) => {
 
 const addMileageEntry = (vehicle) => {
   // Navigate to mileage entry page
+  currItem.value = vehicle
+  addFuelModal.value = true
   console.log("Add mileage entry for:", vehicle);
 };
 
-
+const showSuccess = async (message: string) => {
+  try {  
+    showSuccessMessage(message)
+  } catch (error) {
+    showErrorMessage(message)
+  }
+}
 const saveVehicle = async () => {
   try {  
     await createVehicle(vehicleForm.value)

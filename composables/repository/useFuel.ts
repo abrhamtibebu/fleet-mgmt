@@ -1,4 +1,5 @@
 import { ref, computed } from 'vue'
+import type { Vehicle } from '~/types/fleet'
 
 interface FuelRecord {
   id: string
@@ -39,14 +40,32 @@ export const useFuel = () => {
   const getFuelRecords = async (vehicleId?: string) => {
     loading.value = true
     try {
-      const url = vehicleId ? `/fuel-records?vehicleId=${vehicleId}` : '/fuel-records'
+      const url = vehicleId ? `/fuel-records?vehicleId=${vehicleId}` : '/fuel-records/all'
       const data = await $apiFetch<FuelRecord[]>(url, {
         method: "GET"
       });
-      fuelRecords.value = Array.isArray(data) ? data : []
+      fuelRecords.value = Array.isArray(data.result) ? data.result : []
     } catch (e) {
       fuelRecords.value = []
       error.value = 'Failed to fetch fuel records'
+      console.error(e)
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const createFuelRecords = async (body?: Vehicle) => {
+        loading.value = true
+    try {
+      const url = '/fuel-records/add'
+      const data = await $apiFetch<FuelRecord[]>(url, {
+        method: "POST",
+        body
+      });
+      fuelRecords.value.push(data?.result)
+    } catch (e) {
+      fuelRecords.value = []
+      error.value = 'Failed to create fuel records'
       console.error(e)
     } finally {
       loading.value = false
@@ -113,6 +132,7 @@ export const useFuel = () => {
   }
 
   return {
+    createFuelRecords,
     fuelRecords,
     fuelCards,
     loading,

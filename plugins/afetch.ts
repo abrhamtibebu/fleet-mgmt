@@ -5,6 +5,7 @@ export default defineNuxtPlugin(() => {
   const { public: config } = useRuntimeConfig();
   const { session } = useAuthState();
   const { onRefreshToken } = useAuth();
+
   const apiFetch = $fetch.create({
     baseURL: config.baseURL,
     retryStatusCodes: [401],
@@ -34,13 +35,15 @@ export default defineNuxtPlugin(() => {
     onRequest: ({ options }) => {
       options.headers = {
         ...options.headers,
+        Authorization: `Bearer ${session.value?.access_token}`,
         "Content-Type": "application/json",
       };
     },
     onResponseError: async ({ response }) => {
       if (response.status === 401) {
         try {
-          await onRefreshToken();
+          router.push('/login')
+          // await onRefreshToken();
         } catch (error) {
           console.error("Error refreshing token:", error);
         }

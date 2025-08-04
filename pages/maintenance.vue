@@ -7,7 +7,7 @@
           <h1 class="maintenance-title">Maintenance Management</h1>
           <p class="maintenance-subtitle">Comprehensive service scheduling, maintenance tracking, and vehicle upkeep management</p>
         </div>
-        <div class="header-actions">
+        <!-- <div class="header-actions">
           <v-btn
             color="primary"
             prepend-icon="mdi-plus"
@@ -24,7 +24,7 @@
           >
             Add Record
           </v-btn>
-        </div>
+        </div> -->
       </div>
     </div>
 
@@ -61,7 +61,7 @@
         <v-col cols="12" sm="6" md="3">
           <KpiCard
             title="Total Cost"
-            :value="`${totalMaintenanceCost.toLocaleString()} ETB`"
+            :value="`${totalMaintenanceCost.toLocaleString()}`"
             icon="mdi-currency-usd"
             color="error"
             @click="showCostBreakdown"
@@ -165,10 +165,12 @@
                   <template v-slot:item.licensePlate="{ item }">
                     <div class="vehicle-info">
                       <v-icon size="small" class="me-2">mdi-truck</v-icon>
-                      <span class="font-weight-medium">{{ item.licensePlate }}</span>
+                                          
+                        <span v-if="vehicleList.length">{{ vehicleList.find(vv => vv.id == item.vehicleId).plateNo }}</span>
+
                     </div>
                   </template>
-                  <template v-slot:item.serviceStatus="{ item }">
+                  <!-- <template v-slot:item.serviceStatus="{ item }">
                     <v-chip
                       :color="getServiceStatusColor(item)"
                       size="small"
@@ -176,7 +178,7 @@
                     >
                       {{ getServiceStatusText(item) }}
                     </v-chip>
-                  </template>
+                  </template> -->
                   <template v-slot:item.distanceToService="{ item }">
                     <span :class="getDistanceToServiceClass(item)">
                       {{ getDistanceToServiceText(item) }}
@@ -375,23 +377,33 @@
             <template v-slot:item.vehicleId="{ item }">
               <div class="vehicle-info">
                 <v-icon size="small" class="me-2">mdi-truck</v-icon>
-                <span class="font-weight-medium">{{ item.licensePlate }}</span>
+                <span v-if="vehicleList.length" class="font-weight-medium">{{ vehicleList.find(vv => vv.id == item.vehicleId).plateNo }}</span>
               </div>
             </template>
+            <template v-slot:item.createdAt="{ item }">
+              {{ moment(item.createdAt).format('lll')}}
+            </template>
+
+            <template v-slot:item.createdBy="{ item }">
+              <span v-if="usersList.length">
+              {{ usersList.find(uu => uu.id == item.createdBy).name}}
+              </span>
+            </template>
+            
             <template v-slot:item.serviceType="{ item }">
               <v-chip
                 :color="getServiceTypeColor(item.serviceType)"
                 size="small"
                 variant="flat"
               >
-                {{ item.serviceType }}
+                {{ serviceTypes.find(xx => xx.id == item.serviceType).name }}
               </v-chip>
             </template>
             <template v-slot:item.cost="{ item }">
-              <span class="font-weight-medium">{{ item.cost.toLocaleString() }} ETB</span>
+              <span class="font-weight-medium">{{ item.totalCost.toLocaleString() }} ETB</span>
             </template>
             <template v-slot:item.status="{ item }">
-              <StatusBadge :status="item.status" />
+              <!-- <StatusBadge :status="item.status" /> -->
             </template>
             <template v-slot:item.actions="{ item }">
               <div class="action-buttons">
@@ -651,9 +663,11 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-
+import moment from 'moment'
 // Composables
-const { vehicles, getVehicles, serviceDueVehicles, maintenanceVehicles, calculateServiceDue } = useVehicles()
+const { vehicleList, getVehicles, serviceDueVehicles, maintenanceVehicles, calculateServiceDue } = useVehicles()
+const {getMaintenanceList, maintenanceList} = useMaintenance()
+const {getUsers, usersList} = useCard()
 
 // Reactive data
 const searchQuery = ref('')
@@ -719,16 +733,16 @@ const serviceTypeOptions = [
 ]
 
 const serviceTypes = [
-  'Regular Service',
-  'Brake Service',
-  'Tire Rotation',
-  'Engine Repair',
-  'Electrical',
-  'Oil Change',
-  'Transmission Service',
-  'Suspension Service',
-  'Air Conditioning',
-  'Battery Replacement'
+  { id: 1, name: "Regular Service" },
+  { id: 2, name: "Brake Service" },
+  { id: 3, name: "Tire Rotation" },
+  { id: 4, name: "Engine Repair" },
+  { id: 5, name: "Electrical" },
+  { id: 6, name: "Oil Change" },
+  { id: 7, name: "Transmission Service" },
+  { id: 8, name: "Suspension Service" },
+  { id: 9, name: "Air Conditioning" },
+  { id: 10, name: "Battery Replacement" }
 ]
 
 // Table headers
@@ -744,9 +758,9 @@ const serviceDueHeaders = [
 const maintenanceHistoryHeaders = [
   { title: 'Vehicle', key: 'vehicleId', sortable: true },
   { title: 'Service Type', key: 'serviceType', sortable: true },
-  { title: 'Date', key: 'date', sortable: true },
+  { title: 'Date', key: 'createdAt', sortable: true },
   { title: 'Cost', key: 'cost', sortable: true },
-  { title: 'Status', key: 'status', sortable: true },
+  { title: 'Recorded By', key: 'createdBy', sortable: true },
   { title: 'Actions', key: 'actions', sortable: false }
 ]
 
@@ -789,7 +803,7 @@ const maintenanceHistory = ref([
 
 // Computed properties
 const filteredMaintenanceHistory = computed(() => {
-  let filtered = maintenanceHistory.value
+  let filtered = maintenanceList.value
 
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
@@ -824,7 +838,7 @@ const completedServicesThisMonth = computed(() => {
 })
 
 const totalMaintenanceCost = computed(() => {
-  return maintenanceHistory.value.reduce((sum, record) => sum + record.cost, 0)
+  return maintenanceList.value.reduce((sum, record) => sum + record.totalCost, 0)
 })
 
 // Methods
@@ -859,12 +873,12 @@ const getDistanceToServiceClass = (vehicle) => {
 
 const getServiceTypeColor = (serviceType) => {
   const colors = {
-    'Regular Service': 'primary',
-    'Brake Service': 'error',
-    'Tire Rotation': 'warning',
-    'Engine Repair': 'error',
-    'Electrical': 'info',
-    'Oil Change': 'success'
+    1: 'primary',
+    2: 'error',
+    3: 'warning',
+    4: 'error',
+    5: 'info',
+    6: 'success'
   }
   return colors[serviceType] || 'grey'
 }
@@ -1075,7 +1089,11 @@ const showErrorMessage = (message) => {
 
 // Lifecycle
 onMounted(async () => {
+  await getMaintenanceList()
   await getVehicles()
+  await getUsers()
+
+
 })
 </script>
 

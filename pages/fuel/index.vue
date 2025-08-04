@@ -8,7 +8,7 @@
           <p class="fuel-subtitle">Track fuel consumption, manage fuel cards, and monitor efficiency</p>
         </div>
         <div class="header-actions">
-          <v-btn
+          <!-- <v-btn
             color="primary"
             prepend-icon="mdi-gas-station"
             class="header-btn"
@@ -23,7 +23,7 @@
             @click="showCardDialog = true"
           >
             Add Fuel Card
-          </v-btn>
+          </v-btn> -->
           <v-btn
             icon="mdi-refresh"
             variant="text"
@@ -42,7 +42,7 @@
         <v-col cols="12" sm="6" md="3">
           <KpiCard
             title="Total Fuel Cards"
-            :value="loading ? '...' : totalFuelCards.toString()"
+            :value="loading ? '...' : cardList.length.toString()"
             icon="mdi-credit-card"
             color="primary"
             :loading="loading"
@@ -51,7 +51,7 @@
         <v-col cols="12" sm="6" md="3">
           <KpiCard
             title="Active Cards"
-            :value="loading ? '...' : totalActiveCards.toString()"
+            :value="loading ? '...' : cardList.filter(x => x.status == 1).length.toString()"
             icon="mdi-check-circle"
             color="success"
             :loading="loading"
@@ -60,7 +60,7 @@
         <v-col cols="12" sm="6" md="3">
           <KpiCard
             title="Low Balance Cards"
-            :value="loading ? '...' : totalLowBalanceCards.toString()"
+            :value="loading ? '...' : cardList.filter(x => x.balance <= 1000).length.toString()"
             icon="mdi-alert"
             color="warning"
             :loading="loading"
@@ -69,7 +69,7 @@
         <v-col cols="12" sm="6" md="3">
           <KpiCard
             title="Total Spent"
-            :value="loading ? '...' : `${totalFuelSpent.toLocaleString()} ETB`"
+            :value="loading ? '...' : `${getCardBalance()}`"
             icon="mdi-currency-usd"
             color="error"
             :loading="loading"
@@ -138,8 +138,8 @@
       <v-card class="content-card">
         <v-tabs v-model="activeTab" color="primary" class="fuel-tabs">
           <v-tab value="records">Fuel Records</v-tab>
-          <v-tab value="cards">Fuel Cards</v-tab>
-          <v-tab value="efficiency">Efficiency Analysis</v-tab>
+          <!-- <v-tab value="cards">Fuel Cards</v-tab>
+          <v-tab value="efficiency">Efficiency Analysis</v-tab> -->
         </v-tabs>
 
       <v-window v-model="activeTab">
@@ -160,7 +160,7 @@
                 <template v-slot:item.vehicleId="{ item }">
                   <div class="d-flex align-center">
                     <v-icon size="small" class="me-2">mdi-truck</v-icon>
-                    <span>{{ item.licensePlate }}</span>
+                    <span v-if="vehicleList.length">{{ vehicleList.find(vv => vv.id == item.vehicleId).plateNo }}</span>
                   </div>
                 </template>
                 <template v-slot:item.quantity="{ item }">
@@ -170,15 +170,15 @@
                   <span class="font-weight-medium">{{ item.amount.toLocaleString() }} ETB</span>
                 </template>
                 <template v-slot:item.fuelEfficiency="{ item }">
-                  <v-chip
+                  <!-- <v-chip
                     :color="getEfficiencyColor(item.fuelEfficiency)"
                     size="small"
                   >
                     {{ item.fuelEfficiency.toFixed(1) }} km/l
-                  </v-chip>
+                  </v-chip> -->
                 </template>
-                <template v-slot:item.date="{ item }">
-                  {{ formatDate(item.date) }}
+                <template v-slot:item.createdAt="{ item }">
+                  {{ formatDate(item.createdAt) }}
                 </template>
                 <template v-slot:item.actions="{ item }">
                   <v-btn
@@ -427,11 +427,11 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-
+import moment from 'moment'
 // Composables
-const { vehicles, getVehicles } = useVehicles()
+const { vehicleList, getVehicles } = useVehicles()
 const { fuelRecords, fuelCards, loading, getFuelRecords, getFuelCards, lowBalanceCards, activeCards } = useFuel()
-
+const {cardList, getCard} = useCard()
 // Reactive data
 const activeTab = ref('records')
 const searchQuery = ref('')
@@ -469,11 +469,11 @@ const cardOptions = [
 // Table headers
 const fuelRecordHeaders = [
   { title: 'Vehicle', key: 'vehicleId', sortable: true },
-  { title: 'Date', key: 'date', sortable: true },
+  { title: 'Date', key: 'createdAt', sortable: true },
   { title: 'Quantity', key: 'quantity', sortable: true },
   { title: 'Amount', key: 'amount', sortable: true },
-  { title: 'Station', key: 'station', sortable: true },
-  { title: 'Efficiency', key: 'fuelEfficiency', sortable: true },
+  { title: 'Station', key: 'fuelStation', sortable: true },
+  // { title: 'Efficiency', key: 'fuelEfficiency', sortable: true },
   { title: 'Actions', key: 'actions', sortable: false }
 ]
 
@@ -529,7 +529,7 @@ const getBalanceColor = (card) => {
 }
 
 const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleDateString()
+  return moment(dateString).format('lll')
 }
 
 const viewFuelRecord = (record) => {
@@ -585,14 +585,24 @@ const resetFuelForm = () => {
     fuelCardId: ''
   }
 }
+const getCardBalance = () => {
+  console.log('XX.AMOUNT', fuelRecords);
+  
+  let x = 0
+  fuelRecords.value.forEach(xx => {
+      x += xx.amount
+  });
 
+  return x.toLocaleString()
+}
 // Lifecycle
 onMounted(async () => {
   try {
     await Promise.all([
       getVehicles(),
       getFuelRecords(),
-      getFuelCards()
+      getCard()
+      
     ])
   } catch (error) {
     console.error('Error loading fuel data:', error)

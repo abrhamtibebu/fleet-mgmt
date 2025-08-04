@@ -1034,7 +1034,6 @@ onMounted(async () => {
   font-weight: 600;
   border-radius: 16px;
   text-transform: none;
-  padding: 16px 28px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-size: 0.95rem;

@@ -383,10 +383,10 @@
                     </v-avatar>
                     <div class="d-none d-sm-flex flex-column align-start me-2 user-info">
                       <span class="font-weight-medium user-name">
-                        {{ currentUser?.first_name || 'User' }}
+                        {{ currentUser?.first_name + ' ' + currentUser?.last_name|| 'User' }}
                       </span>
                       <span class="text-caption text-medium-emphasis user-role">
-                        {{ currentUser?.role || 'Fleet Manager' }}
+                        <!-- {{ currentUser?.role || 'Fleet Manager' }} -->
                       </span>
                     </div>
                     <v-icon size="20" class="text-medium-emphasis">mdi-chevron-down</v-icon>
@@ -403,7 +403,7 @@
                       {{ currentUser?.first_name }} {{ currentUser?.last_name }}
                     </div>
                     <div class="text-caption text-medium-emphasis mb-3 user-menu-role">
-                      {{ currentUser?.role || 'Fleet Manager' }}
+                      {{ currentUser?.role || 'Staff' }}
                     </div>
                     <v-chip
                       color="success"
@@ -416,7 +416,7 @@
                   </v-card-text>
                   <v-divider></v-divider>
                   <v-list density="compact" class="py-0">
-                    <v-list-item
+                    <!-- <v-list-item
                       @click="handleProfileClick"
                       prepend-icon="mdi-account"
                       title="Profile Settings"
@@ -436,7 +436,7 @@
                       title="Help & Support"
                       subtitle="Get assistance"
                       class="modern-menu-item"
-                    />
+                    /> -->
                     <v-divider class="my-2"></v-divider>
                     <v-list-item
                       @click="showLogoutPage = true"
@@ -698,7 +698,7 @@ const handleNotificationClick = (notification: any) => {
 // Initialize notifications on mount
 onMounted(() => {
   // You can fetch notifications from API here
-  console.log('Notifications initialized')
+  console.log('Notifications initialized', currentUser)
 })
 </script>
 
@@ -1227,6 +1227,7 @@ onMounted(() => {
   font-size: 0.875rem;
   color: #1a1a1a;
   line-height: 1.2;
+  font-weight: bolder;
 }
 
 .user-role {
