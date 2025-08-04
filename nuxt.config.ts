@@ -25,6 +25,12 @@ export default defineNuxtConfig({
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        { name: 'description', content: 'WebSprix Fleet Management System' },
+        { name: 'theme-color', content: '#FFD700' },
+      ],
+      link: [
+        { rel: 'icon', type: 'image/png', href: '/WS yellow logo-16.png' },
+        { rel: 'apple-touch-icon', href: '/WS yellow logo-16.png' },
       ],
     },
   },

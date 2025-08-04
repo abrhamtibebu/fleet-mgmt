@@ -6,7 +6,10 @@
       </div>
       <div>
         <div class="kpi-title text-caption text-medium-emphasis">{{ title }}</div>
-        <div class="kpi-value text-h5 font-weight-bold">{{ value }}</div>
+        <div v-if="loading" class="kpi-value text-h5 font-weight-bold">
+          <v-progress-circular indeterminate size="20" color="primary"></v-progress-circular>
+        </div>
+        <div v-else class="kpi-value text-h5 font-weight-bold">{{ value }}</div>
         <div v-if="trend" class="kpi-trend text-caption" :class="trendClass">{{ trend }}</div>
       </div>
     </div>
@@ -21,6 +24,7 @@ defineProps<{
   color?: string
   trend?: string
   trendClass?: string
+  loading?: boolean
 }>()
 </script>
 

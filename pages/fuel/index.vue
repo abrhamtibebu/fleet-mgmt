@@ -1,8 +1,39 @@
 <template>
-  <div class="fuel-root">
+  <div class="fuel-management-root">
+    <!-- Header Section -->
     <div class="fuel-header">
-      <h1 class="fuel-title">Fuel Management</h1>
-      <p class="fuel-subtitle">Track fuel consumption, manage fuel cards, and monitor efficiency</p>
+      <div class="header-content">
+        <div class="header-text">
+          <h1 class="fuel-title">Fuel Management</h1>
+          <p class="fuel-subtitle">Track fuel consumption, manage fuel cards, and monitor efficiency</p>
+        </div>
+        <div class="header-actions">
+          <v-btn
+            color="primary"
+            prepend-icon="mdi-gas-station"
+            class="header-btn"
+            @click="showFuelEntryDialog = true"
+          >
+            Add Fuel Entry
+          </v-btn>
+          <v-btn
+            color="success"
+            prepend-icon="mdi-credit-card-plus"
+            class="header-btn"
+            @click="showCardDialog = true"
+          >
+            Add Fuel Card
+          </v-btn>
+          <v-btn
+            icon="mdi-refresh"
+            variant="text"
+            size="small"
+            @click="refreshFuelData"
+            :loading="loading"
+            class="refresh-btn"
+          ></v-btn>
+        </div>
+      </div>
     </div>
 
     <!-- KPI Cards -->
@@ -11,80 +42,105 @@
         <v-col cols="12" sm="6" md="3">
           <KpiCard
             title="Total Fuel Cards"
-            :value="fuelCards.length.toString()"
+            :value="loading ? '...' : totalFuelCards.toString()"
             icon="mdi-credit-card"
             color="primary"
+            :loading="loading"
           />
         </v-col>
         <v-col cols="12" sm="6" md="3">
           <KpiCard
             title="Active Cards"
-            :value="activeCards.length.toString()"
+            :value="loading ? '...' : totalActiveCards.toString()"
             icon="mdi-check-circle"
             color="success"
+            :loading="loading"
           />
         </v-col>
         <v-col cols="12" sm="6" md="3">
           <KpiCard
             title="Low Balance Cards"
-            :value="lowBalanceCards.length.toString()"
+            :value="loading ? '...' : totalLowBalanceCards.toString()"
             icon="mdi-alert"
             color="warning"
+            :loading="loading"
           />
         </v-col>
         <v-col cols="12" sm="6" md="3">
           <KpiCard
             title="Total Spent"
-            :value="`${totalFuelSpent.toLocaleString()} ETB`"
+            :value="loading ? '...' : `${totalFuelSpent.toLocaleString()} ETB`"
             icon="mdi-currency-usd"
             color="error"
+            :loading="loading"
           />
         </v-col>
       </v-row>
     </div>
 
-    <!-- Action Bar -->
-    <div class="fuel-actions mb-6">
-      <v-row align="center">
-        <v-col cols="12" md="6">
-          <v-text-field
-            v-model="searchQuery"
-            prepend-inner-icon="mdi-magnify"
-            placeholder="Search fuel records by vehicle or station..."
-            variant="outlined"
-            density="compact"
-            hide-details
-            class="fuel-search"
-          ></v-text-field>
-        </v-col>
-        <v-col cols="12" md="6" class="text-md-right">
-          <v-btn
-            color="success"
-            prepend-icon="mdi-gas-station"
-            class="fuel-btn me-2"
-            @click="showFuelEntryDialog = true"
-          >
-            Add Fuel Entry
-          </v-btn>
-          <v-btn
-            color="primary"
-            prepend-icon="mdi-credit-card-plus"
-            class="fuel-btn"
-            @click="showCardDialog = true"
-          >
-            Add Fuel Card
-          </v-btn>
-        </v-col>
-      </v-row>
+    <!-- Search and Filter Bar -->
+    <div class="search-filter-section">
+      <v-card class="search-card">
+        <v-card-text>
+          <v-row align="center">
+            <v-col cols="12" md="4">
+              <v-text-field
+                v-model="searchQuery"
+                prepend-inner-icon="mdi-magnify"
+                placeholder="Search fuel records by vehicle or station..."
+                variant="outlined"
+                density="compact"
+                hide-details
+                class="search-field"
+                @input="filterFuelData"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="3">
+              <v-select
+                v-model="statusFilter"
+                :items="statusOptions"
+                label="Status Filter"
+                variant="outlined"
+                density="compact"
+                hide-details
+                @update:model-value="filterFuelData"
+              ></v-select>
+            </v-col>
+            <v-col cols="12" md="3">
+              <v-select
+                v-model="cardFilter"
+                :items="cardOptions"
+                label="Card Filter"
+                variant="outlined"
+                density="compact"
+                hide-details
+                @update:model-value="filterFuelData"
+              ></v-select>
+            </v-col>
+            <v-col cols="12" md="2" class="text-right">
+              <v-btn
+                color="primary"
+                variant="outlined"
+                prepend-icon="mdi-filter-variant"
+                @click="showAdvancedFilters = !showAdvancedFilters"
+                class="filter-btn"
+              >
+                Filters
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-card-text>
+      </v-card>
     </div>
 
-    <!-- Main Content Tabs -->
-    <v-card class="fuel-section-card">
-      <v-tabs v-model="activeTab" color="primary" class="fuel-tabs">
-        <v-tab value="records">Fuel Records</v-tab>
-        <v-tab value="cards">Fuel Cards</v-tab>
-        <v-tab value="efficiency">Efficiency Analysis</v-tab>
-      </v-tabs>
+    <!-- Main Content -->
+    <div class="main-content">
+      <v-card class="content-card">
+        <v-tabs v-model="activeTab" color="primary" class="fuel-tabs">
+          <v-tab value="records">Fuel Records</v-tab>
+          <v-tab value="cards">Fuel Cards</v-tab>
+          <v-tab value="efficiency">Efficiency Analysis</v-tab>
+        </v-tabs>
 
       <v-window v-model="activeTab">
         <!-- Fuel Records Tab -->
@@ -141,14 +197,24 @@
         <!-- Fuel Cards Tab -->
         <v-window-item value="cards">
           <v-card-text class="pa-6">
-            <v-row>
-              <v-col
-                v-for="card in fuelCards"
-                :key="card.id"
-                cols="12"
-                sm="6"
-                lg="4"
-              >
+            <div v-if="loading" class="text-center py-8">
+              <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
+              <div class="mt-4 text-muted">Loading fuel cards...</div>
+            </div>
+            <div v-else-if="fuelCards.length === 0" class="text-center py-8">
+              <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-credit-card-off</v-icon>
+              <h3 class="text-h6 text-muted mb-2">No fuel cards found</h3>
+              <p class="text-muted">Add your first fuel card to get started</p>
+            </div>
+            <div v-else>
+              <v-row>
+                <v-col
+                  v-for="card in fuelCards"
+                  :key="card.id"
+                  cols="12"
+                  sm="6"
+                  lg="4"
+                >
                 <v-card class="fuel-card">
                   <v-card-title class="fuel-card-header">
                     <div class="d-flex align-center justify-space-between w-100">
@@ -167,16 +233,16 @@
                       <div class="fuel-card-balance">
                         <div class="balance-item">
                           <span class="balance-label">Total Issued:</span>
-                          <span class="balance-value">{{ card.totalValueIssued.toLocaleString() }} ETB</span>
+                          <span class="balance-value">{{ (card.totalValueIssued || 0).toLocaleString() }} ETB</span>
                         </div>
                         <div class="balance-item">
                           <span class="balance-label">Amount Spent:</span>
-                          <span class="balance-value">{{ card.amountSpent.toLocaleString() }} ETB</span>
+                          <span class="balance-value">{{ (card.amountSpent || 0).toLocaleString() }} ETB</span>
                         </div>
                         <div class="balance-item">
                           <span class="balance-label">Remaining:</span>
                           <span class="balance-value" :class="{ 'text-error': card.isLowBalance }">
-                            {{ card.remainingBalance.toLocaleString() }} ETB
+                            {{ (card.remainingBalance || 0).toLocaleString() }} ETB
                           </span>
                         </div>
                       </div>
@@ -218,6 +284,7 @@
                 </v-card>
               </v-col>
             </v-row>
+            </div>
           </v-card-text>
         </v-window-item>
 
@@ -266,6 +333,7 @@
         </v-window-item>
       </v-window>
     </v-card>
+    </div>
 
     <!-- Add Fuel Entry Dialog -->
     <v-dialog v-model="showFuelEntryDialog" max-width="600px">
@@ -367,6 +435,9 @@ const { fuelRecords, fuelCards, loading, getFuelRecords, getFuelCards, lowBalanc
 // Reactive data
 const activeTab = ref('records')
 const searchQuery = ref('')
+const statusFilter = ref('all')
+const cardFilter = ref('all')
+const showAdvancedFilters = ref(false)
 const showFuelEntryDialog = ref(false)
 const showCardDialog = ref(false)
 const saving = ref(false)
@@ -379,6 +450,21 @@ const fuelEntryForm = ref({
   station: '',
   fuelCardId: ''
 })
+
+// Filter options
+const statusOptions = [
+  { title: 'All Records', value: 'all' },
+  { title: 'Recent', value: 'recent' },
+  { title: 'This Month', value: 'month' },
+  { title: 'This Year', value: 'year' }
+]
+
+const cardOptions = [
+  { title: 'All Cards', value: 'all' },
+  { title: 'Active', value: 'active' },
+  { title: 'Low Balance', value: 'low_balance' },
+  { title: 'Inactive', value: 'inactive' }
+]
 
 // Table headers
 const fuelRecordHeaders = [
@@ -397,17 +483,29 @@ const filteredFuelRecords = computed(() => {
   
   const query = searchQuery.value.toLowerCase()
   return fuelRecords.value.filter(record => 
-    record.licensePlate.toLowerCase().includes(query) ||
-    record.station.toLowerCase().includes(query)
+    (record.licensePlate && record.licensePlate.toLowerCase().includes(query)) ||
+    (record.station && record.station.toLowerCase().includes(query))
   )
 })
 
 const totalFuelSpent = computed(() => {
-  return fuelCards.value.reduce((sum, card) => sum + card.amountSpent, 0)
+  return fuelCards.value.reduce((sum, card) => sum + (card.amountSpent || 0), 0)
+})
+
+const totalFuelCards = computed(() => {
+  return fuelCards.value.length
+})
+
+const totalActiveCards = computed(() => {
+  return activeCards.value.length
+})
+
+const totalLowBalanceCards = computed(() => {
+  return lowBalanceCards.value.length
 })
 
 const vehiclesByEfficiency = computed(() => {
-  return [...vehicles.value].sort((a, b) => b.fuelEfficiency - a.fuelEfficiency)
+  return [...vehicles.value].sort((a, b) => (b.fuelEfficiency || 0) - (a.fuelEfficiency || 0))
 })
 
 // Methods
@@ -418,7 +516,9 @@ const getEfficiencyColor = (efficiency) => {
 }
 
 const getBalancePercentage = (card) => {
-  return ((card.amountSpent / card.totalValueIssued) * 100)
+  const amountSpent = card.amountSpent || 0
+  const totalValue = card.totalValueIssued || 1 // Avoid division by zero
+  return Math.round((amountSpent / totalValue) * 100)
 }
 
 const getBalanceColor = (card) => {
@@ -458,6 +558,23 @@ const saveFuelEntry = async () => {
   }
 }
 
+const refreshFuelData = async () => {
+  try {
+    await Promise.all([
+      getFuelRecords(),
+      getFuelCards()
+    ])
+  } catch (error) {
+    console.error('Error refreshing fuel data:', error)
+  }
+}
+
+const filterFuelData = () => {
+  // This method will be called when filters change
+  // The filtering logic is handled in the computed properties
+  console.log('Filtering fuel data:', { searchQuery: searchQuery.value, statusFilter: statusFilter.value, cardFilter: cardFilter.value })
+}
+
 const resetFuelForm = () => {
   fuelEntryForm.value = {
     vehicleId: '',
@@ -471,63 +588,133 @@ const resetFuelForm = () => {
 
 // Lifecycle
 onMounted(async () => {
-  await Promise.all([
-    getVehicles(),
-    getFuelRecords(),
-    getFuelCards()
-  ])
+  try {
+    await Promise.all([
+      getVehicles(),
+      getFuelRecords(),
+      getFuelCards()
+    ])
+  } catch (error) {
+    console.error('Error loading fuel data:', error)
+  }
 })
 </script>
 
 <style scoped>
-.fuel-root {
-  padding-bottom: 32px;
+.fuel-management-root {
+  padding: 32px;
+  min-height: 100vh;
+  background: #fafafa;
 }
 
 .fuel-header {
-  margin-bottom: 32px;
+  margin-bottom: 40px;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.header-text {
+  flex: 1;
 }
 
 .fuel-title {
-  letter-spacing: -0.5px;
-  margin-top: 8px;
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--v-theme-text-primary);
+  font-size: 2.75rem;
+  font-weight: 900;
+  color: #040707;
+  margin-bottom: 12px;
+  letter-spacing: -1px;
+  line-height: 1.1;
 }
 
 .fuel-subtitle {
-  margin-bottom: 32px;
-  color: var(--v-theme-text-secondary);
-  font-size: 1.1rem;
+  font-size: 1.125rem;
+  color: #6b7280;
+  margin: 0;
+  font-weight: 400;
+  line-height: 1.5;
 }
 
-.kpi-row {
-  margin-bottom: 32px;
+.header-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
-.fuel-actions {
-  background: linear-gradient(135deg, #fffde7 0%, #f8fafb 100%);
-  border-radius: 18px;
-  padding: 24px;
-  box-shadow: 0 2px 12px rgba(16, 30, 54, 0.06);
-}
-
-.fuel-search {
-  max-width: 400px;
-}
-
-.fuel-btn {
+.header-btn {
   font-weight: 600;
-  border-radius: 10px;
-  min-width: 140px;
+  border-radius: 16px;
+  text-transform: none;
+  padding: 16px 28px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 0.95rem;
+  letter-spacing: 0.025em;
 }
 
-.fuel-section-card {
-  border-radius: 18px;
-  background: linear-gradient(135deg, #fffde7 0%, #f8fafb 100%);
-  box-shadow: 0 2px 12px rgba(16, 30, 54, 0.06);
+.header-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.refresh-btn {
+  color: #6b7280;
+  transition: all 0.3s ease;
+}
+
+.refresh-btn:hover {
+  color: #1976d2;
+  transform: rotate(180deg);
+}
+
+.kpi-section {
+  margin-bottom: 40px;
+}
+
+.search-filter-section {
+  margin-bottom: 40px;
+}
+
+.search-card {
+  border-radius: 20px;
+  background: white;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   overflow: hidden;
+}
+
+.search-field {
+  border-radius: 16px;
+}
+
+.filter-btn {
+  border-radius: 16px;
+  font-weight: 500;
+}
+
+.main-content {
+  margin-bottom: 40px;
+}
+
+.content-card {
+  border-radius: 24px;
+  background: white;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.content-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+  border-color: rgba(0, 0, 0, 0.1);
 }
 
 .fuel-tabs {
@@ -540,31 +727,35 @@ onMounted(async () => {
 }
 
 .fuel-card {
-  border-radius: 16px;
-  background: linear-gradient(135deg, #e3f2fd 0%, #f8fafb 100%);
-  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.08);
+  border-radius: 20px;
+  background: white;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   margin-bottom: 16px;
-  transition: box-shadow 0.2s, transform 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
 }
 
 .fuel-card:hover {
-  box-shadow: 0 4px 16px rgba(33, 150, 243, 0.12);
-  transform: translateY(-1px);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  border-color: rgba(0, 0, 0, 0.1);
 }
 
 .fuel-card-header {
-  padding: 16px 20px 12px 20px;
-  border-bottom: 1px solid #f0f1f3;
+  padding: 20px 24px 16px 24px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #fafafa;
 }
 
 .fuel-card-number {
   font-size: 1.1rem;
   font-weight: 600;
-  color: var(--v-theme-primary);
+  color: #1976d2;
 }
 
 .fuel-card-content {
-  padding: 16px 20px;
+  padding: 20px 24px;
 }
 
 .fuel-card-info {
@@ -575,11 +766,11 @@ onMounted(async () => {
   font-size: 1rem;
   font-weight: 500;
   margin-bottom: 16px;
-  color: var(--v-theme-text-primary);
+  color: #1a1a1a;
 }
 
 .fuel-card-icon {
-  color: var(--v-theme-primary);
+  color: #1976d2;
 }
 
 .fuel-card-balance {
@@ -594,12 +785,12 @@ onMounted(async () => {
 }
 
 .balance-label {
-  color: var(--v-theme-text-secondary);
+  color: #666;
 }
 
 .balance-value {
   font-weight: 500;
-  color: var(--v-theme-text-primary);
+  color: #1a1a1a;
 }
 
 .balance-progress {
@@ -607,24 +798,65 @@ onMounted(async () => {
 }
 
 .fuel-card-actions {
-  padding: 12px 20px 16px 20px;
-  border-top: 1px solid #f0f1f3;
+  padding: 16px 24px 20px 24px;
+  border-top: 1px solid #e0e0e0;
   gap: 8px;
+  background: #fafafa;
 }
 
 .efficiency-card {
-  border-radius: 16px;
-  background: linear-gradient(135deg, #f3e5f5 0%, #f8fafb 100%);
-  box-shadow: 0 2px 8px rgba(156, 39, 176, 0.08);
+  border-radius: 20px;
+  background: white;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   margin-bottom: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.efficiency-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  border-color: rgba(0, 0, 0, 0.1);
 }
 
 .efficiency-item {
-  padding: 12px 0;
-  border-bottom: 1px solid #f0f1f3;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .efficiency-item:last-child {
   border-bottom: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .fuel-management-root {
+    padding: 16px;
+  }
+  
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .header-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+  
+  .header-btn {
+    flex: 1;
+  }
+  
+  .fuel-title {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .fuel-title {
+    font-size: 1.75rem;
+  }
 }
 </style> 

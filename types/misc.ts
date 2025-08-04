@@ -6,6 +6,7 @@ interface LoginResult {
   refresh_token: string;
   token_type: string;
   expires_in: Number;
+  user?: User; // Optional user data from login response
 }
 interface AuthSession {
   access_token: string;

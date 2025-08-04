@@ -11,7 +11,7 @@
           <v-btn
             color="primary"
             prepend-icon="mdi-plus"
-            class="header-btn"
+            class="header-btn primary-btn"
             @click="showServiceDialog = true"
           >
             Schedule Service
@@ -19,7 +19,7 @@
           <v-btn
             color="success"
             prepend-icon="mdi-wrench"
-            class="header-btn"
+            class="header-btn success-btn"
             @click="showMaintenanceDialog = true"
           >
             Add Record
@@ -72,19 +72,20 @@
 
     <!-- Search and Filter Bar -->
     <div class="search-filter-section">
-      <v-card class="search-card">
-        <v-card-text>
-          <v-row align="center">
+      <v-card class="search-card" elevation="0">
+        <v-card-text class="pa-6">
+          <v-row align="center" class="g-4">
             <v-col cols="12" md="4">
               <v-text-field
                 v-model="searchQuery"
                 prepend-inner-icon="mdi-magnify"
                 placeholder="Search vehicles, service types..."
                 variant="outlined"
-                density="compact"
+                density="comfortable"
                 hide-details
                 class="search-field"
                 @input="filterMaintenanceData"
+                bg-color="surface"
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="3">
@@ -93,9 +94,10 @@
                 :items="statusOptions"
                 label="Status Filter"
                 variant="outlined"
-                density="compact"
+                density="comfortable"
                 hide-details
                 @update:model-value="filterMaintenanceData"
+                bg-color="surface"
               ></v-select>
             </v-col>
             <v-col cols="12" md="3">
@@ -104,9 +106,10 @@
                 :items="serviceTypeOptions"
                 label="Service Type"
                 variant="outlined"
-                density="compact"
+                density="comfortable"
                 hide-details
                 @update:model-value="filterMaintenanceData"
+                bg-color="surface"
               ></v-select>
             </v-col>
             <v-col cols="12" md="2" class="text-right">
@@ -115,6 +118,7 @@
                 variant="outlined"
                 prepend-icon="mdi-filter-variant"
                 @click="showAdvancedFilters = !showAdvancedFilters"
+                class="filter-btn"
               >
                 Filters
               </v-btn>
@@ -129,18 +133,19 @@
       <v-row>
         <!-- Service Due Vehicles -->
         <v-col cols="12" lg="8">
-          <v-card class="content-card service-due-card">
+          <v-card class="content-card" elevation="0">
             <v-card-title class="card-title">
               <div class="title-content">
                 <v-icon class="title-icon" color="warning">mdi-alert</v-icon>
-                <span>Service Due Vehicles</span>
-                <v-chip color="warning" size="small" class="ms-2">{{ serviceDueVehicles.length }}</v-chip>
+                <span class="title-text">Service Due Vehicles</span>
+                <v-chip color="warning" size="small" class="ms-2" variant="flat">{{ serviceDueVehicles.length }}</v-chip>
               </div>
               <v-btn
                 icon="mdi-refresh"
                 variant="text"
                 size="small"
                 @click="refreshServiceDue"
+                class="refresh-btn"
               ></v-btn>
             </v-card-title>
             <v-card-text>
@@ -214,10 +219,10 @@
         <!-- Quick Actions & Stats -->
         <v-col cols="12" lg="4">
           <!-- Maintenance Statistics -->
-          <v-card class="content-card stats-card">
+          <v-card class="content-card" elevation="0">
             <v-card-title class="card-title">
               <v-icon class="title-icon" color="info">mdi-chart-pie</v-icon>
-              <span>Maintenance Statistics</span>
+              <span class="title-text">Maintenance Statistics</span>
             </v-card-title>
             <v-card-text>
               <div class="stats-grid">
@@ -262,10 +267,10 @@
           </v-card>
 
           <!-- Quick Actions -->
-          <v-card class="content-card actions-card">
+          <v-card class="content-card" elevation="0">
             <v-card-title class="card-title">
               <v-icon class="title-icon" color="success">mdi-lightning-bolt</v-icon>
-              <span>Quick Actions</span>
+              <span class="title-text">Quick Actions</span>
             </v-card-title>
             <v-card-text>
               <div class="actions-grid">
@@ -338,11 +343,11 @@
 
     <!-- Maintenance History -->
     <div class="history-section">
-      <v-card class="content-card history-card">
+      <v-card class="content-card" elevation="0">
         <v-card-title class="card-title">
           <div class="title-content">
             <v-icon class="title-icon" color="primary">mdi-history</v-icon>
-            <span>Recent Maintenance History</span>
+            <span class="title-text">Recent Maintenance History</span>
           </div>
           <div class="title-actions">
             <v-btn
@@ -423,7 +428,7 @@
 
     <!-- Service Scheduling Dialog -->
     <v-dialog v-model="showServiceDialog" max-width="600px" persistent>
-      <v-card class="dialog-card">
+      <v-card class="dialog-card" elevation="0">
         <v-card-title class="dialog-title">
           <v-icon class="me-2" color="primary">mdi-wrench</v-icon>
           Schedule Service
@@ -1076,12 +1081,13 @@ onMounted(async () => {
 
 <style scoped>
 .maintenance-root {
-  padding: 24px;
+  padding: 32px;
   min-height: 100vh;
+  background: #fafafa;
 }
 
 .maintenance-header {
-  margin-bottom: 32px;
+  margin-bottom: 40px;
 }
 
 .header-content {
@@ -1098,24 +1104,22 @@ onMounted(async () => {
 
 .maintenance-title {
   font-size: 2.5rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, #f3d70e 0%, #fbb339 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+  color: #1a1a1a;
   margin-bottom: 8px;
   letter-spacing: -0.5px;
 }
 
 .maintenance-subtitle {
   font-size: 1.1rem;
-  color: #040707;
+  color: #666;
   margin: 0;
-  opacity: 0.8;
+  line-height: 1.5;
 }
 
 .header-actions {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   flex-wrap: wrap;
 }
 
@@ -1124,13 +1128,23 @@ onMounted(async () => {
   border-radius: 12px;
   text-transform: none;
   padding: 12px 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .header-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.primary-btn {
+  background: #1976d2;
+  color: white;
+}
+
+.success-btn {
+  background: #2e7d32;
+  color: white;
 }
 
 .kpi-section {
@@ -1143,14 +1157,18 @@ onMounted(async () => {
 
 .search-card {
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 20px rgba(243, 215, 14, 0.15);
-  border: 1px solid rgba(243, 215, 14, 0.2);
+  background: white;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e0e0e0;
 }
 
 .search-field {
-  border-radius: 12px;
+  border-radius: 8px;
+}
+
+.filter-btn {
+  border-radius: 8px;
+  font-weight: 500;
 }
 
 .main-content {
@@ -1158,36 +1176,18 @@ onMounted(async () => {
 }
 
 .content-card {
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(15px);
-  box-shadow: 0 8px 32px rgba(243, 215, 14, 0.12);
-  border: 1px solid rgba(243, 215, 14, 0.15);
+  border-radius: 16px;
+  background: white;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e0e0e0;
   transition: all 0.3s ease;
   overflow: hidden;
 }
 
 .content-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(243, 215, 14, 0.2);
-  border-color: rgba(243, 215, 14, 0.3);
-}
-
-.service-due-card {
-  background: linear-gradient(135deg, #ffffff 0%, #f5e35e 30%, #f3d70e 100%);
-}
-
-.stats-card {
-  background: linear-gradient(135deg, #ffffff 0%, #f5e35e 40%, #fbb339 100%);
-  margin-bottom: 24px;
-}
-
-.actions-card {
-  background: linear-gradient(135deg, #ffffff 0%, #f5e35e 50%, #f3d70e 100%);
-}
-
-.history-card {
-  background: linear-gradient(135deg, #ffffff 0%, #f5e35e 20%, #fbb339 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  border-color: #d0d0d0;
 }
 
 .card-title {
@@ -1195,20 +1195,36 @@ onMounted(async () => {
   justify-content: space-between;
   align-items: center;
   padding: 24px 24px 16px 24px;
-  border-bottom: 2px solid rgba(243, 215, 14, 0.3);
+  border-bottom: 1px solid #e0e0e0;
   font-size: 1.25rem;
-  font-weight: 700;
-  color: #040707;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(245, 227, 94, 0.1) 100%);
+  font-weight: 600;
+  color: #1a1a1a;
+  background: #fafafa;
 }
 
 .title-content {
   display: flex;
   align-items: center;
+  gap: 12px;
+}
+
+.title-text {
+  font-weight: 600;
+  color: #1a1a1a;
 }
 
 .title-icon {
-  margin-right: 12px;
+  font-size: 1.5rem;
+}
+
+.refresh-btn {
+  color: #666;
+  transition: all 0.3s ease;
+}
+
+.refresh-btn:hover {
+  color: #1976d2;
+  transform: rotate(180deg);
 }
 
 .title-actions {
@@ -1250,18 +1266,18 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   padding: 16px;
-  background: rgba(255, 255, 255, 0.8);
+  background: #f8f9fa;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
-  border: 1px solid rgba(243, 215, 14, 0.2);
+  border: 1px solid #e0e0e0;
 }
 
 .stat-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(243, 215, 14, 0.2);
-  background: rgba(255, 255, 255, 0.95);
-  border-color: rgba(243, 215, 14, 0.4);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  background: white;
+  border-color: #d0d0d0;
 }
 
 .stat-icon {
@@ -1292,16 +1308,16 @@ onMounted(async () => {
 
 .stat-value {
   font-size: 1.5rem;
-  font-weight: 800;
-  color: #040707;
+  font-weight: 700;
+  color: #1a1a1a;
   line-height: 1;
 }
 
 .stat-label {
   font-size: 0.875rem;
-  color: #040707;
+  color: #666;
   margin-top: 4px;
-  opacity: 0.7;
+  font-weight: 500;
 }
 
 .actions-grid {
@@ -1317,31 +1333,31 @@ onMounted(async () => {
   padding: 12px 16px;
   transition: all 0.3s ease;
   border-width: 2px;
-  border-color: rgba(243, 215, 14, 0.3);
+  border-color: #e0e0e0;
 }
 
 .action-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(243, 215, 14, 0.3);
-  border-color: rgba(243, 215, 14, 0.6);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #d0d0d0;
 }
 
 .dialog-card {
-  border-radius: 20px;
+  border-radius: 16px;
   overflow: hidden;
 }
 
 .dialog-title {
-  background: linear-gradient(135deg, #f3d70e 0%, #fbb339 100%);
-  color: #040707;
+  background: #1976d2;
+  color: white;
   font-size: 1.25rem;
-  font-weight: 700;
+  font-weight: 600;
   padding: 24px;
 }
 
 .dialog-actions {
   padding: 24px;
-  background: linear-gradient(135deg, #ffffff 0%, #f5e35e 20%);
+  background: #fafafa;
 }
 
 /* Responsive Design */

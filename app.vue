@@ -2,6 +2,16 @@
   <NuxtLayout />
 </template>
 
+<script setup>
+import { onMounted } from 'vue'
+
+const { initializeAuth } = useAuth()
+
+onMounted(async () => {
+  await initializeAuth()
+})
+</script>
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
 
