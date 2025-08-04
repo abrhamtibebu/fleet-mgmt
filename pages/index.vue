@@ -1,112 +1,5 @@
 <template>
   <div class="modern-dashboard">
-    <!-- Header Section -->
-    <div class="dashboard-header">
-      <div class="header-content">
-        <div class="header-left">
-          <h1 class="dashboard-title">WS Fleet Management Dashboard</h1>
-          <p class="dashboard-subtitle">Comprehensive, real-time fleet insights and analytics</p>
-        </div>
-        <div class="header-right">
-          <v-btn icon variant="text" class="header-icon">
-            <v-icon>mdi-magnify</v-icon>
-          </v-btn>
-
-          <v-btn icon variant="text" class="header-icon">
-            <v-icon>mdi-bell-outline</v-icon>
-          </v-btn>
-          <v-divider vertical class="mx-2"></v-divider>
-          <v-menu offset-y>
-            <template #activator="{ props }">
-              <v-btn
-                v-bind="props"
-                class="user-detail-btn"
-                variant="text"
-                style="padding: 0 12px; border-radius: 24px; min-width: 0;"
-              >
-                <v-avatar size="32" color="primary" class="me-2">
-                  <span class="white--text text-h6" style="text-transform: uppercase;">
-                    {{ (currentUser?.first_name?.[0] || 'U').toUpperCase() }}
-                  </span>
-                </v-avatar>
-                <div class="d-none d-sm-flex flex-column align-start me-2">
-                  <span class="font-weight-medium" style="font-size: 15px;">
-                    {{ currentUser?.first_name || 'User' }}
-                  </span>
-                  <span class="text-caption text-medium-emphasis" style="font-size: 12px;">
-                    {{ currentUser?.role || 'Fleet Manager' }}
-                  </span>
-                </div>
-                <v-icon size="20" class="text-medium-emphasis">mdi-chevron-down</v-icon>
-              </v-btn>
-            </template>
-            <v-card class="elevation-8" style="min-width: 240px; border-radius: 18px;">
-              <v-card-text class="pb-2 pt-4 d-flex flex-column align-center">
-                <v-avatar size="56" color="primary" class="mb-2">
-                  <span class="white--text text-h4" style="text-transform: uppercase;">
-                    {{ (currentUser?.first_name?.[0] || 'U').toUpperCase() }}
-                  </span>
-                </v-avatar>
-                <div class="font-weight-bold text-h6 mb-1">
-                  {{ currentUser?.first_name }} {{ currentUser?.last_name }}
-                </div>
-                <div class="text-caption text-medium-emphasis mb-2">
-                  {{ currentUser?.role || 'Fleet Manager' }}
-                </div>
-              </v-card-text>
-              <v-divider></v-divider>
-              <v-list density="compact" class="py-0">
-                                 <v-list-item
-                   @click="handleProfileClick"
-                   prepend-icon="mdi-account"
-                   title="Profile"
-                   class="rounded-lg"
-                 />
-                <v-list-item
-                  @click="showLogoutPage = true"
-                  prepend-icon="mdi-logout"
-                  title="Logout"
-                  class="rounded-lg"
-                />
-              </v-list>
-            </v-card>
-          </v-menu>
-
-          <!-- Logout Page Dialog -->
-          <v-dialog v-model="showLogoutPage" max-width="400" persistent>
-            <v-card class="logout-dialog-modern pa-6" style="border-radius: 20px;">
-              <v-card-title class="d-flex align-center justify-center mb-2">
-                <v-icon color="error" size="36" class="me-2">mdi-logout</v-icon>
-                <span class="text-h5 font-weight-bold">Sign Out</span>
-              </v-card-title>
-              <v-card-text class="text-center mb-4">
-                Are you sure you want to log out of your account?
-              </v-card-text>
-              <v-card-actions class="justify-center">
-                <v-btn
-                  variant="text"
-                  color="primary"
-                  @click="showLogoutPage = false"
-                  class="px-6"
-                >
-                  Cancel
-                </v-btn>
-                <v-btn
-                  color="error"
-                  variant="elevated"
-                  prepend-icon="mdi-logout"
-                  @click="handleLogout"
-                  class="px-6"
-                  :loading="logoutLoading"
-                >
-                  Logout
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
-        </div>
-      </div>
-    </div>
 
     <!-- Loading State -->
     <div v-if="status === AuthState.loading" class="text-center py-8">
@@ -898,27 +791,7 @@ const { logout } = useAuth()
 const { currentUser, status } = useAuthState()
 const { AuthState } = await import('~/types/auth')
 
-// Logout dialog state
-const showLogoutPage = ref(false)
-const logoutLoading = ref(false)
 
-const handleLogout = async () => {
-  logoutLoading.value = true
-  try {
-    await logout()
-    showLogoutPage.value = false
-  } catch (error) {
-    console.error('Logout failed:', error)
-  } finally {
-    logoutLoading.value = false
-  }
-}
-
-const handleProfileClick = () => {
-  // For now, show a simple message since profile page doesn't exist
-  // You can implement a proper profile page later
-  alert('Profile page coming soon!')
-}
 
 // Watch for authentication state changes
 watch(() => status.value, async (newStatus) => {
@@ -977,67 +850,12 @@ onMounted(async () => {
   min-height: 100vh;
 }
 
-.dashboard-header {
-  margin-bottom: 32px;
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: white;
-  padding: 24px 32px;
-  border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-}
-
 .dashboard-title {
-  font-size: 28px;
-  font-weight: 700;
   color: #2c3e50;
   margin: 0 0 8px 0;
 }
 
-.dashboard-subtitle {
-  font-size: 16px;
-  color: #6c757d;
-  margin: 0;
-}
 
-.header-right {
-  display: flex;
-  gap: 12px;
-}
-
-.header-icon {
-  color: #6c757d;
-}
-
-.logout-btn {
-  font-weight: 500;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.logout-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
-}
-
-.user-detail-btn {
-  transition: all 0.3s ease;
-  border-radius: 24px;
-}
-
-.user-detail-btn:hover {
-  background: rgba(243, 215, 14, 0.1) !important;
-  transform: translateY(-1px);
-}
-
-.logout-dialog-modern {
-  border-radius: 20px;
-  overflow: hidden;
-}
 
 .kpi-section {
   margin-bottom: 32px;
@@ -1317,11 +1135,7 @@ onMounted(async () => {
     padding: 16px;
   }
   
-  .header-content {
-    flex-direction: column;
-    gap: 16px;
-    text-align: center;
-  }
+
   
   .chart-header {
     flex-direction: column;
