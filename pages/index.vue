@@ -377,6 +377,16 @@
                        ></v-text-field>
                      </v-col>
                      <v-col cols="12">
+                       <v-text-field 
+                         v-model="cardForm.expiryDate" 
+                         label="Expiry Date" 
+                         type="date" 
+                         variant="outlined" 
+                         :rules="[v => !!v || 'Expiry date is required']" 
+                         required
+                       ></v-text-field>
+                     </v-col>
+                     <v-col cols="12">
                        <v-select 
                          v-model="cardForm.status" 
                          :items="cardStatusOptions" 
@@ -589,7 +599,7 @@ const showSuccessSnackbar = ref(false)
 const successMessage = ref('')
 const cardFormRef = ref(null)
 const cardFormValid = ref(false)
-const cardForm = ref({ cardNumber: '', cardHolder: '', totalValue: '', status: 'Active', vendorCardId: '' })
+const cardForm = ref({ cardNumber: '', cardHolder: '', totalValue: '', expiryDate: '', status: 'Active', vendorCardId: '' })
 const cardStatusOptions = [
   { title: 'Active', value: 'Active' },
   { title: 'Inactive', value: 'Inactive' },
@@ -613,6 +623,7 @@ const saveCard = async () => {
           amountSpent: 0,
           remainingBalance: parseFloat(cardForm.value.totalValue),
           status: cardForm.value.status,
+          expiryDate: cardForm.value.expiryDate,
           lowBalanceThreshold: parseFloat(cardForm.value.totalValue) * 0.2,
           isLowBalance: false,
           lastTransactionDate: new Date().toISOString().split('T')[0],
@@ -629,6 +640,7 @@ const saveCard = async () => {
         amountSpent: 0,
         remainingBalance: parseFloat(cardForm.value.totalValue),
         status: cardForm.value.status,
+        expiryDate: cardForm.value.expiryDate,
         lowBalanceThreshold: parseFloat(cardForm.value.totalValue) * 0.2,
         isLowBalance: false,
         lastTransactionDate: new Date().toISOString().split('T')[0],
@@ -648,7 +660,7 @@ const saveCard = async () => {
   }
 }
 const resetCardForm = () => {
-  cardForm.value = { cardNumber: '', cardHolder: '', totalValue: '', status: 'Active', vendorCardId: '' }
+  cardForm.value = { cardNumber: '', cardHolder: '', totalValue: '', expiryDate: '', status: 'Active', vendorCardId: '' }
 }
 const maskCardNumber = (cardNumber) => `****-****-****-${cardNumber.slice(-4)}`
 

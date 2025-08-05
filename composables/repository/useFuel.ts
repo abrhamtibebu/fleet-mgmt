@@ -23,6 +23,10 @@ interface FuelCard {
   amountSpent: number
   remainingBalance: number
   status: 'Active' | 'Inactive' | 'Suspended'
+  expiryDate: string
+  assignedToVehicleId?: string
+  issuedBy: string
+  notes?: string
   lowBalanceThreshold: number
   isLowBalance: boolean
   lastTransactionDate: string
@@ -88,6 +92,22 @@ export const useFuel = () => {
     }
   }
 
+  const addFuelCard = async (fuelCard: FuelCard) => {
+    loading.value = true
+    try {
+      const data = await $apiFetch<FuelCard>('/card/add', {
+        method: "POST",
+        body: fuelCard
+      });
+      fuelCards.value.push(data)
+    } catch (e) {
+      error.value = 'Failed to add fuel card'
+      console.error(e)
+    } finally {
+      loading.value = false
+    }
+  }
+
   const getFuelRecordsByVehicle = (vehicleId: string) => 
     fuelRecords.value.filter(record => record.vehicleId === vehicleId)
 
@@ -133,6 +153,7 @@ export const useFuel = () => {
 
   return {
     createFuelRecords,
+    addFuelCard,
     fuelRecords,
     fuelCards,
     loading,

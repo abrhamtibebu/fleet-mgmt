@@ -81,7 +81,7 @@
       <div class="vehicle-details">
         <div class="vehicle-detail-item">
           <v-icon size="small" class="me-1">mdi-account</v-icon>
-          <span>{{ vehicle.driver }}</span>
+          <span>{{ usersList.find(x => x.id == vehicle.driver)?.name || 'Unassigned' }}</span>
         </div>
         <div class="vehicle-detail-item">
           <v-icon size="small" class="me-1">mdi-speedometer</v-icon>
@@ -148,7 +148,8 @@
     <v-dialog v-model="showAddDialog" max-width="600px">
       <v-card>
         <v-card-title class="text-h6 pa-4">
-          {{ editingVehicle ? "Edit Vehicle" : "Add New Vehicle" }}
+          <v-icon class="me-2" color="primary">mdi-truck</v-icon>
+          {{ editingVehicle ? `Edit Vehicle - ${editingVehicle.plateNo}` : "Add New Vehicle" }}
         </v-card-title>
         <v-card-text class="pa-4">
           <v-form ref="vehicleFormRef" v-model="formValid">
@@ -205,14 +206,17 @@
                 ></v-text-field>
               </v-col>
               <v-col cols="12" sm="6">
-                <v-text-field
+                <v-autocomplete
                   density="compact"
                   v-model="vehicleForm.driver"
+                  :items="usersList"
+                  item-title="name"
+                  item-value="id"
                   label="Assigned Driver"
                   variant="outlined"
                   :rules="[(v) => !!v || 'Driver is required']"
                   required
-                ></v-text-field>
+                ></v-autocomplete>
               </v-col>
               <v-col cols="12" sm="6">
                 <v-text-field
@@ -249,9 +253,12 @@
                   variant="outlined"
                   :rules="[(v) => !!v || 'Fuel card is required']"
                   required
+                  :item-props="(item) => ({
+                    title: `${item.number} - ${usersList.value.find(x => x.id == item.holder)?.name || 'Unknown'} (${item.balance} ETB)`
+                  })"
                 ></v-autocomplete>
               </v-col>
-                  <v-col cols="12">
+                  <v-col cols="12" md="6">
                 <v-autocomplete
                   density="compact"
                   v-model="vehicleForm.type"
@@ -264,6 +271,19 @@
                   required
                 ></v-autocomplete>
               </v-col>
+                             <v-col cols="12" md="6" v-if="editingVehicle">
+                 <v-select
+                   density="compact"
+                   v-model="vehicleForm.status"
+                   :items="vehicleStatusOptions"
+                   item-title="name"
+                   item-value="id"
+                   label="Vehicle Status"
+                   variant="outlined"
+                   :rules="[(v) => !!v || 'Vehicle status is required']"
+                   required
+                 ></v-select>
+               </v-col>
             </v-row>
           </v-form>
         </v-card-text>
@@ -271,9 +291,12 @@
           <v-btn variant="outlined" @click="showAddDialog = false">
             Cancel
           </v-btn>
-          <!-- :disabled="!formValid" -->
-
-          <v-btn variant="outlined" :loading="saving" @click="saveVehicle">
+          <v-btn 
+            color="primary" 
+            :loading="saving" 
+            :disabled="!formValid"
+            @click="saveVehicle"
+          >
             {{ editingVehicle ? "Update" : "Add" }} Vehicle
           </v-btn>
         </v-card-actions>
@@ -328,8 +351,16 @@ const { $apiFetch } = useNuxtApp();
 const vehicleFormRef = ref();
 
 // Composables
-const { vehicleList, loading, getVehicles, createVehicle, vehicleTypes, statusMap } = useVehicles();
-const { getCard,cardList } = useCard();
+const { vehicleList, loading, getVehicles, createVehicle, updateVehicle, vehicleTypes, statusMap } = useVehicles();
+
+// Vehicle status options for the form
+const vehicleStatusOptions = computed(() => {
+  return statusMap.map(status => ({
+    id: status.id,
+    name: status.label
+  }));
+});
+const { getCard, getUsers, cardList, usersList } = useCard();
 const { getByVendor, modelList } = useModel()
 const {
   vendorList,
@@ -368,27 +399,9 @@ const filteredVehicles = computed(() => {
   const query = searchQuery.value.toLowerCase();
   return vehicleList.value.filter(
     (vehicle) =>
-      vehicle.licensePlate.toLowerCase().includes(query) ||
-      vehicle.brand.toLowerCase().includes(query) ||
-      vehicle.model.toLowerCase().includes(query) ||
-      vehicle.assignedDriver.toLowerCase().includes(query)
+      vehicle.plateNo.toLowerCase().includes(query) ||
+      (usersList.value.find(x => x.id == vehicle.driver)?.name || '').toLowerCase().includes(query)
   );
-});
-
-const brandOptions = computed(() => {
-  return brands.value.map((brand) => ({
-    title: brand.name,
-    value: brand.id,
-  }));
-});
-
-const modelOptions = computed(() => {
-  if (!vehicleForm.value.brandId) return [];
-  const models = getModelsByBrand(vehicleForm.value.brandId) || [];
-  return models.map((model) => ({
-    title: `${model.name} (${model.year})`,
-    value: model.id,
-  }));
 });
 
 // const vendorCardOptions = computed(() => {
@@ -430,6 +443,7 @@ const editVehicle = (vehicle) => {
   editingVehicle.value = vehicle;
   vehicleForm.value = { ...vehicle };
   showAddDialog.value = true;
+  console.log("Editing vehicle:", vehicle);
 };
 
 const addMileageEntry = (vehicle) => {
@@ -448,12 +462,23 @@ const showSuccess = async (message: string) => {
 }
 const saveVehicle = async () => {
   try {  
-    await createVehicle(vehicleForm.value)
-    showErrorMessage('Vehicle created Successfully')
+    if (editingVehicle.value) {
+      // Update existing vehicle
+      await updateVehicle(editingVehicle.value.id, vehicleForm.value)
+      showSuccessMessage('Vehicle updated successfully')
+    } else {
+      // Create new vehicle with default status (Active = 1)
+      const newVehicleData = {
+        ...vehicleForm.value,
+        status: 1 // Default to Active status for new vehicles
+      }
+      await createVehicle(newVehicleData)
+      showSuccessMessage('Vehicle created successfully')
+    }
     showAddDialog.value = false;
     resetForm();
   } catch (error) {
-    showErrorMessage('Failed to create Vehicle')
+    showErrorMessage(editingVehicle.value ? 'Failed to update vehicle' : 'Failed to create vehicle')
   } finally {
     saving.value = false;
   }
@@ -496,6 +521,7 @@ onMounted(async () => {
   await Promise.all([
     getVehicles(),
     getCard(),
+    getUsers(),
     getVendor(),
     // initializeData()
   ]);

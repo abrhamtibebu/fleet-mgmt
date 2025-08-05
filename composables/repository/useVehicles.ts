@@ -57,6 +57,29 @@ export const useVehicles = () => {
     }
   }
 
+  const updateVehicle = async (id: string, body: any) => {
+    loading.value = true
+    error.value = null
+    try {
+      const data = await $apiFetch<{ result: Vehicle }>('/vehicle/update', {
+        method: 'PUT',
+        body: { id, ...body }
+      })
+
+      // Update the vehicle in the list
+      const index = vehicleList.value.findIndex(v => v.id === id)
+      if (index !== -1) {
+        vehicleList.value[index] = data.result
+      }
+
+    } catch (e) {
+      error.value = 'Failed to update vehicle'
+      console.error(e)
+    } finally {
+      loading.value = false
+    }
+  }
+
   const activeVehicles = computed(() => 
     vehicleList.value.filter(v => v.status === 1)
   )
@@ -126,6 +149,7 @@ export const useVehicles = () => {
     vehicleTypes,
     getVehicles,
     createVehicle,
+    updateVehicle,
     activeVehicles,
     maintenanceVehicles,
     serviceDueVehicles,

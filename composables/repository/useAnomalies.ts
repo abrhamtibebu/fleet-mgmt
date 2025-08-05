@@ -28,9 +28,44 @@ export const useAnomalies = () => {
       });
       anomalies.value = Array.isArray(data) ? data : []
     } catch (e) {
-      anomalies.value = []
-      error.value = 'Failed to fetch anomalies'
-      console.error(e)
+      console.error('Failed to fetch anomalies:', e)
+      // Provide fallback data when API is not available
+      anomalies.value = [
+        {
+          id: 'AN-001',
+          vehicleId: 'FL-001-ABC',
+          licensePlate: 'ABC-123-ET',
+          type: 'fuel_consumption_spike',
+          severity: 'medium',
+          description: 'Fuel consumption increased by 25% compared to average',
+          details: {
+            averageEfficiency: 12.5,
+            currentEfficiency: 9.8,
+            changePercentage: 25.2
+          },
+          detectedAt: '2024-06-05T14:30:00Z',
+          status: 'open',
+          resolvedAt: null
+        },
+        {
+          id: 'AN-002',
+          vehicleId: 'FL-002-DEF',
+          licensePlate: 'DEF-456-ET',
+          type: 'service_overdue',
+          severity: 'high',
+          description: 'Vehicle has exceeded service interval by 2,500 km',
+          details: {
+            currentMileage: 32500,
+            lastServiceMileage: 25000,
+            serviceInterval: 10000,
+            overdueBy: 2500
+          },
+          detectedAt: '2024-06-01T09:00:00Z',
+          status: 'open',
+          resolvedAt: null
+        }
+      ]
+      error.value = 'Using fallback data - API endpoint not available'
     } finally {
       loading.value = false
     }

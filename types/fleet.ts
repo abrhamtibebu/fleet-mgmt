@@ -34,7 +34,12 @@ export interface FuelCard {
   totalValue: number
   amountSpent: number
   remainingBalance: number
+  expiryDate: string
+  assignedToVehicleId?: string
+  issuedBy: string
+  notes?: string
   lastUpdated: string
+  createdAt: string
 }
 
 export interface ServiceAlert {

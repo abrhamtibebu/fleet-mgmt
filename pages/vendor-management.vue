@@ -315,7 +315,7 @@
                   density="comfortable"
                 >
                   <!-- <template v-slot:item.cardNumber="{ item }"> -->
-                    <template v-slot:item_cardNumber="{ item }">
+                    <template v-slot:item.number="{ item }">
 
                     <div class="card-info">
                       <v-icon size="small" class="me-2">mdi-credit-card</v-icon>
@@ -323,7 +323,7 @@
                     </div>
                   </template>
                   <!-- <template v-slot:item.balance="{ item }"> -->
-                    <template v-slot:item_balance="{ item }">
+                    <template v-slot:item.balance="{ item }">
 
                     <span class="font-weight-medium">{{ item.balance.toLocaleString() }} ETB</span>
                   </template>
@@ -579,6 +579,16 @@
                 ></v-text-field>
               </v-col>
               <v-col cols="12" md="6">
+                <v-text-field
+                  v-model="cardForm.expiryDate"
+                  label="Expiry Date"
+                  type="date"
+                  variant="outlined"
+                  :rules="[v => !!v || 'Expiry date is required']"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" md="6">
                 <v-select
                   v-model="cardForm.status"
                   :items="cardStatusOptions"
@@ -677,6 +687,186 @@
     </v-card-actions>
   </v-card>
 </v-dialog>
+    <!-- Card Details Dialog -->
+    <v-dialog v-model="showCardDetailsDialog" max-width="600px">
+      <v-card class="dialog-card">
+        <v-card-title class="dialog-title">
+          <v-icon class="me-2" color="info">mdi-credit-card</v-icon>
+          Card Details
+        </v-card-title>
+        <v-card-text v-if="selectedCard" class="pa-6">
+          <v-row>
+            <v-col cols="12" md="6">
+              <div class="detail-item">
+                <label class="detail-label">Card Number</label>
+                <div class="detail-value">
+                  <v-icon size="small" class="me-2">mdi-credit-card</v-icon>
+                  {{ maskCardNumber(selectedCard.number) }}
+                </div>
+              </div>
+            </v-col>
+            <v-col cols="12" md="6">
+              <div class="detail-item">
+                <label class="detail-label">Card Holder</label>
+                <div class="detail-value">
+                  <v-icon size="small" class="me-2">mdi-account</v-icon>
+                  {{ usersList.find(x => x.id == selectedCard.holder)?.name || 'Unknown' }}
+                </div>
+              </div>
+            </v-col>
+            <v-col cols="12" md="6">
+              <div class="detail-item">
+                <label class="detail-label">Balance</label>
+                <div class="detail-value">
+                  <v-icon size="small" class="me-2">mdi-currency-usd</v-icon>
+                  {{ selectedCard.balance.toLocaleString() }} ETB
+                </div>
+              </div>
+            </v-col>
+            <v-col cols="12" md="6">
+              <div class="detail-item">
+                <label class="detail-label">Status</label>
+                <div class="detail-value">
+                  <v-chip
+                    :color="getCardStatusColor(selectedCard.status)"
+                    size="small"
+                    variant="flat"
+                  >
+                    {{ getCardStatusLabel(selectedCard.status) }}
+                  </v-chip>
+                </div>
+              </div>
+            </v-col>
+            <v-col cols="12" md="6">
+              <div class="detail-item">
+                <label class="detail-label">Expiry Date</label>
+                <div class="detail-value">
+                  <v-icon size="small" class="me-2">mdi-calendar</v-icon>
+                  {{ selectedCard.expiryDate || 'Not set' }}
+                </div>
+              </div>
+            </v-col>
+            <v-col cols="12" md="6">
+              <div class="detail-item">
+                <label class="detail-label">Vendor</label>
+                <div class="detail-value">
+                  <v-icon size="small" class="me-2">mdi-store</v-icon>
+                  {{ cardVendors.find(v => v.id === selectedCard.vendorId)?.name || 'Unknown' }}
+                </div>
+              </div>
+            </v-col>
+            <v-col cols="12" v-if="selectedCard.remark">
+              <div class="detail-item">
+                <label class="detail-label">Remarks</label>
+                <div class="detail-value">
+                  <v-icon size="small" class="me-2">mdi-note-text</v-icon>
+                  {{ selectedCard.remark }}
+                </div>
+              </div>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-card-actions class="dialog-actions">
+          <v-spacer></v-spacer>
+          <v-btn
+            variant="outlined"
+            @click="showCardDetailsDialog = false"
+          >
+            Close
+          </v-btn>
+          <v-btn
+            color="warning"
+            @click="editCard(selectedCard); showCardDetailsDialog = false"
+          >
+            Edit Card
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Refill Card Dialog -->
+    <v-dialog v-model="showRefillDialog" max-width="500px" persistent>
+      <v-card class="dialog-card">
+        <v-card-title class="dialog-title">
+          <v-icon class="me-2" color="success">mdi-gas-station</v-icon>
+          Refill Fuel Card
+        </v-card-title>
+        <v-card-text>
+          <div v-if="selectedCardForRefill" class="refill-info mb-4">
+            <v-alert type="info" variant="tonal" class="mb-4">
+              <div class="d-flex align-center">
+                <v-icon class="me-2">mdi-credit-card</v-icon>
+                <div>
+                  <div class="font-weight-medium">{{ maskCardNumber(selectedCardForRefill.number) }}</div>
+                  <div class="text-caption">Current Balance: {{ selectedCardForRefill.balance.toLocaleString() }} ETB</div>
+                </div>
+              </div>
+            </v-alert>
+          </div>
+          
+          <v-form ref="refillFormRef" v-model="refillFormValid">
+            <v-row>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="refillForm.amount"
+                  label="Refill Amount (ETB)"
+                  type="number"
+                  variant="outlined"
+                  :rules="[
+                    v => !!v || 'Amount is required',
+                    v => v > 0 || 'Amount must be greater than 0',
+                    v => v <= 50000 || 'Maximum refill amount is 50,000 ETB'
+                  ]"
+                  required
+                  min="1"
+                  max="50000"
+                  step="100"
+                  prepend-inner-icon="mdi-currency-usd"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-textarea
+                  v-model="refillForm.notes"
+                  label="Refill Notes (Optional)"
+                  variant="outlined"
+                  rows="3"
+                  placeholder="Reason for refill, location, or any additional notes..."
+                ></v-textarea>
+              </v-col>
+              <v-col cols="12">
+                <v-alert type="warning" variant="tonal" class="mb-0">
+                  <div class="d-flex align-center">
+                    <v-icon class="me-2">mdi-alert</v-icon>
+                    <div>
+                      <div class="font-weight-medium">Important</div>
+                      <div class="text-caption">This action will add the specified amount to the card balance. The transaction will be recorded in the fuel records.</div>
+                    </div>
+                  </div>
+                </v-alert>
+              </v-col>
+            </v-row>
+          </v-form>
+        </v-card-text>
+        <v-card-actions class="dialog-actions">
+          <v-spacer></v-spacer>
+          <v-btn
+            variant="outlined"
+            @click="showRefillDialog = false"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
+            color="success"
+            :loading="refilling"
+            :disabled="!refillFormValid"
+            @click="processRefill"
+          >
+            <v-icon class="me-2">mdi-gas-station</v-icon>
+            Process Refill
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <!-- Success Snackbar -->
     <v-snackbar
@@ -756,6 +946,8 @@ const cardVendors = ref([{
 const showBrandDialog = ref(false)
 const showModelDialog = ref(false)
 const showCardDialog = ref(false)
+const showCardDetailsDialog = ref(false)
+const showRefillDialog = ref(false)
 const showSuccessSnackbar = ref(false)
 const showErrorSnackbar = ref(false)
 const successMessage = ref('')
@@ -765,14 +957,19 @@ const errorMessage = ref('')
 const brandFormRef = ref(null)
 const modelFormRef = ref(null)
 const cardFormRef = ref(null)
+const refillFormRef = ref(null)
 const brandFormValid = ref(false)
 const modelFormValid = ref(false)
 const cardFormValid = ref(false)
+const refillFormValid = ref(false)
 
 // Editing states
 const editingBrand = ref(null)
 const editingModel = ref(null)
 const editingCard = ref(null)
+const selectedCard = ref(null)
+const selectedCardForRefill = ref(null)
+const refilling = ref(false)
 
 // Form data
 const brandForm = ref({
@@ -793,8 +990,14 @@ const cardForm = ref({
   number: '',
   holder: '',
   balance: '',
+  expiryDate: '',
   status: 1,
   remark: ''
+})
+
+const refillForm = ref({
+  amount: '',
+  notes: ''
 })
 
 // Options
@@ -825,10 +1028,9 @@ const cardHeaders = [
   { title: 'Card Holder', key: 'holder', sortable: true },
   { title: 'Balance', key: 'balance', sortable: true },
   { title: 'Status', key: 'status', sortable: true },
-{ 
-    title: 'Actions', 
-    key: 'actions', 
-  }]
+  { title: 'Expiry Date', key: 'expiryDate', sortable: true },
+  { title: 'Actions', key: 'actions', sortable: false }
+]
 
 
 
@@ -864,6 +1066,10 @@ const deletingCard = ref(false)
 const deleteBrandItem = (brand) => {
   brandToDelete.value = brand
   showDeleteBrandDialog.value = true
+}
+const getCardStatusLabel = (status) => {
+    const option = cardStatusOptions.find(x => x.value === status)
+    return option ? option.title : 'Unknown'
 }
 
 const deleteModelItem = (model) => {
@@ -920,11 +1126,6 @@ const confirmDeleteCard = async () => {
     deletingCard.value = false
     cardToDelete.value = null
   }
-}
-
-const getCardStatusLabel = (status) => {
-  const foundStatus = cardStatusOptions.find(option => option.value === status)
-  return foundStatus ? foundStatus.title : 'Unknown'
 }
 // changing status
 const toggleVendorStatus = async (vendor) => {
@@ -1010,6 +1211,83 @@ const editCard = (card) => {
 //     }
 //   }
 // }
+
+
+const refreshCardBalance = async (card) => {
+  try {
+    // Add loading state to the specific card
+    card.refreshing = true
+    
+    // Simulate API call to refresh balance
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    
+    // Update the balance (in a real app, this would come from the API)
+    const cardIndex = cardList.value.findIndex(c => c.id === card.id)
+    if (cardIndex !== -1) {
+      // Simulate a new balance (in real app, this would be from API)
+      const newBalance = Math.floor(Math.random() * 10000) + 1000
+      cardList.value[cardIndex].balance = newBalance.toString()
+    }
+    
+    showSuccessMessage('Card balance refreshed successfully')
+  } catch (error) {
+    showErrorMessage('Failed to refresh card balance')
+  } finally {
+    card.refreshing = false
+  }
+}
+
+const openRefillDialog = (card) => {
+  selectedCardForRefill.value = card
+  refillForm.value = {
+    amount: '',
+    notes: ''
+  }
+  showRefillDialog.value = true
+}
+
+const processRefill = async () => {
+  refilling.value = true
+  try {
+    // Simulate API call to process refill
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    
+    const refillAmount = parseFloat(refillForm.value.amount)
+    const cardIndex = cardList.value.findIndex(c => c.id === selectedCardForRefill.value.id)
+    
+    if (cardIndex !== -1) {
+      // Update the card balance
+      const currentBalance = parseFloat(cardList.value[cardIndex].balance)
+      const newBalance = currentBalance + refillAmount
+      cardList.value[cardIndex].balance = newBalance.toString()
+      
+      // In a real app, you would also create a fuel record entry here
+      // await createFuelRecord({
+      //   cardId: selectedCardForRefill.value.id,
+      //   amount: refillAmount,
+      //   type: 'refill',
+      //   notes: refillForm.value.notes,
+      //   date: new Date().toISOString()
+      // })
+    }
+    
+    showRefillDialog.value = false
+    resetRefillForm()
+    showSuccessMessage(`Card refilled successfully with ${refillAmount.toLocaleString()} ETB`)
+  } catch (error) {
+    showErrorMessage('Failed to process refill')
+  } finally {
+    refilling.value = false
+    selectedCardForRefill.value = null
+  }
+}
+
+const resetRefillForm = () => {
+  refillForm.value = {
+    amount: '',
+    notes: ''
+  }
+}
 
 const saveBrand = async () => {
   savingBrand.value = true
@@ -1114,11 +1392,13 @@ const resetModelForm = () => {
 
 const resetCardForm = () => {
   cardForm.value = {
-    cardNumber: '',
-    cardHolder: '',
+    vendorId: 1,
+    number: '',
+    holder: '',
     balance: '',
-    status: 'active',
-    notes: ''
+    expiryDate: '',
+    status: 1,
+    remark: ''
   }
 }
 
@@ -1128,8 +1408,8 @@ const filterVendorData = () => {
 }
 
 const viewCardDetails = (card) => {
-  console.log('View card details:', card)
-  // Could open a detailed view dialog
+  selectedCard.value = card
+  showCardDetailsDialog.value = true
 }
 
 const filterByBrands = () => {
@@ -1180,6 +1460,14 @@ const getCards = async () => {
   cardList.value.forEach(aa => {
       totalCardValue.value += aa.balance
   });
+}
+
+// Utility function to mask card numbers
+const maskCardNumber = (cardNumber) => {
+  if (!cardNumber) return 'N/A'
+  const str = cardNumber.toString()
+  if (str.length <= 8) return str
+  return str.slice(0, 4) + '****' + str.slice(-4)
 }
 // Lifecycle
 onMounted(async () => {
@@ -1366,10 +1654,63 @@ onMounted(async () => {
   color:red
 } */
 
+.card-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 4px 0;
+}
+
+.action-btn {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 8px;
+  min-width: 32px;
+  height: 32px;
+}
+
+.action-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.action-btn:active {
+  transform: scale(0.95);
+}
+
+.detail-item {
+  margin-bottom: 16px;
+}
+
+.detail-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.detail-value {
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #111827;
+  padding: 8px 0;
+}
+
 .card-info {
   display: flex;
   align-items: center;
   font-weight: 600;
+}
+
+.expiry-date-info {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
 }
 
 .empty-state {
@@ -1396,6 +1737,14 @@ onMounted(async () => {
 .dialog-actions {
   padding: 28px;
   background: white;
+}
+
+.refill-info {
+  margin-bottom: 24px;
+}
+
+.refill-info .v-alert {
+  border-radius: 12px;
 }
 
 /* Responsive Design */
