@@ -1,74 +1,109 @@
 <template>
   <v-app>
-    <!-- Sidebar Navigation -->
+    <!-- Modern Sidebar Navigation -->
     <client-only>
     <v-navigation-drawer 
       v-model="drawer" 
       app 
       :width="drawerWidth" 
-      class="sidebar" 
-      color="#fff"
+      class="modern-sidebar" 
       :temporary="$vuetify.display.mdAndDown"
       :permanent="$vuetify.display.lgAndUp"
     >
-      <div class="sidebar-header d-flex align-center px-4 py-3">
-        <div class="brand-icon">
-          <img 
-            src="/WS yellow logo-16.png" 
-            alt="WebSprix Logo" 
-            class="brand-logo"
-            width="55" 
-            height="55"
-          />
-        </div>
-        <div v-show="!collapsed" class="brand-text">
-          <div class="text-h6 font-weight-bold text-primary">WebSprix</div>
-          <div class="text-caption text-medium-emphasis">Fleet Management System</div>
+      <!-- Elegant Header -->
+      <div class="sidebar-header">
+        <div class="brand-section" :class="{ 'brand-section-collapsed': collapsed }">
+          <div class="brand-icon-wrapper">
+            <img 
+              src="/WS yellow logo-16.png" 
+              alt="WebSprix Logo" 
+              class="brand-logo"
+              width="48" 
+              height="48"
+            />
+          </div>
+          <div v-show="!collapsed" class="brand-text-section">
+            <div class="brand-title">WebSprix</div>
+            <div class="brand-subtitle">Fleet Management</div>
+          </div>
         </div>
       </div>
-      <v-divider></v-divider>
-      <v-list nav density="compact" class="mt-2">
-        <v-list-subheader v-show="!collapsed" class="text-overline">Main Navigation</v-list-subheader>
-        <v-list-item 
-          v-for="item in mainNav" 
-          :key="item.title" 
-          :to="item.to" 
-          :prepend-icon="item.icon" 
-          :title="collapsed ? '' : item.title" 
-          active-class="active-nav" 
-          class="rounded-r-xl my-1 ml-2 font-weight-medium"
-          :class="{ 'collapsed-item': collapsed }"
-        />
-        <v-list-subheader v-show="!collapsed" class="text-overline mt-4">Management</v-list-subheader>
-        <v-list-item 
-          v-for="item in managementNav" 
-          :key="item.title" 
-          :to="item.to" 
-          :prepend-icon="item.icon" 
-          :title="collapsed ? '' : item.title" 
-          active-class="active-nav" 
-          class="rounded-r-xl my-1 ml-2 font-weight-medium"
-          :class="{ 'collapsed-item': collapsed }"
-        />
-      </v-list>
-      <template v-slot:append>
-        <div class="d-flex align-center justify-space-between pa-4 sidebar-footer-row">
-          <div v-show="!collapsed" class="text-caption text-medium-emphasis sidebar-footer">
-            <div>Fleet Management v1.0</div>
+
+      <!-- Navigation Menu -->
+      <div class="nav-menu">
+        <div class="nav-section">
+          <div v-show="!collapsed" class="nav-section-title">
+            <span class="section-label">Main Navigation</span>
           </div>
+          <div class="nav-items">
+            <div 
+              v-for="item in mainNav" 
+              :key="item.title"
+              class="nav-item"
+              :class="{ 
+                'nav-item-active': $route.path === item.to,
+                'nav-item-collapsed': collapsed 
+              }"
+              @click="navigateTo(item.to)"
+            >
+              <div class="nav-item-icon">
+                <v-icon :icon="item.icon" size="20"></v-icon>
+              </div>
+              <div v-show="!collapsed" class="nav-item-text">
+                {{ item.title }}
+              </div>
+              <div v-show="!collapsed && $route.path === item.to" class="nav-item-indicator"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div v-show="!collapsed" class="nav-section-title">
+            <span class="section-label">Management</span>
+          </div>
+          <div class="nav-items">
+            <div 
+              v-for="item in managementNav" 
+              :key="item.title"
+              class="nav-item"
+              :class="{ 
+                'nav-item-active': $route.path === item.to,
+                'nav-item-collapsed': collapsed 
+              }"
+              @click="navigateTo(item.to)"
+            >
+              <div class="nav-item-icon">
+                <v-icon :icon="item.icon" size="20"></v-icon>
+              </div>
+              <div v-show="!collapsed" class="nav-item-text">
+                {{ item.title }}
+              </div>
+              <div v-show="!collapsed && $route.path === item.to" class="nav-item-indicator"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="sidebar-footer">
+        <div v-show="!collapsed" class="footer-info">
+          <div class="version-text">v1.0.0</div>
+          <div class="status-indicator">
+            <div class="status-dot"></div>
+            <span class="status-text">Online</span>
+          </div>
+        </div>
+        <div class="collapse-control">
           <v-btn
             :icon="collapsed ? 'mdi-chevron-right' : 'mdi-chevron-left'" 
-            variant="elevated"
-            color="primary"
+            variant="text"
             size="small"
             @click="toggleCollapse"
-            class="collapse-btn fancy-collapse-btn ml-2"
+            class="collapse-btn"
             :class="{ 'rotated': !collapsed }"
-            elevation="8"
-            style="border-radius: 50%; box-shadow: 0 2px 8px rgba(243, 215, 14, 0.25); transition: background 0.3s, box-shadow 0.3s;"
           ></v-btn>
         </div>
-      </template>
+      </div>
     </v-navigation-drawer>
     </client-only>
 
@@ -264,104 +299,57 @@
                   v-model="showNotifications"
                   :close-on-content-click="false"
                   offset-y
-                  location="bottom end"
+                  location="bottom center"
                   class="notification-menu"
-                  :max-width="450"
-                  :min-width="400"
+                  :max-width="400"
+                  :min-width="350"
                 >
                   <v-card class="notification-card">
-                    <v-card-title class="d-flex align-center justify-space-between pa-4">
-                      <div class="d-flex align-center">
-                        <v-icon color="primary" class="me-2">mdi-bell</v-icon>
-                        <span class="text-h6 font-weight-bold">Notifications</span>
-                        <v-chip
-                          v-if="unreadNotifications > 0"
-                          color="error"
-                          size="small"
-                          class="ml-2"
-                        >
-                          {{ unreadNotifications }}
-                        </v-chip>
+                    <!-- Pointer/Caret -->
+                    <div class="notification-pointer"></div>
+                    
+                    <!-- Header -->
+                    <div class="notification-header">
+                      <div class="header-content">
+                        <v-icon color="primary" class="header-icon">mdi-bell</v-icon>
+                        <span class="header-title">Notifications</span>
+                        <v-icon color="grey" class="header-icon-right">mdi-chat</v-icon>
                       </div>
-                      <v-btn
-                        v-if="unreadNotifications > 0"
-                        variant="text"
-                        size="small"
-                        @click="markAllAsRead"
-                        class="text-caption"
-                        prepend-icon="mdi-check-all"
-                      >
-                        Mark all as read
-                      </v-btn>
-                    </v-card-title>
-                    <v-divider></v-divider>
-                    <v-list class="notification-list">
-                      <v-list-item
+                    </div>
+                    
+                    <!-- Notifications List -->
+                    <div class="notifications-list">
+                      <div
                         v-for="notification in displayNotifications"
                         :key="notification.id"
-                        :class="{ 'unread': !notification.read }"
+                        :class="{ 'notification-item': true, 'notification-item-selected': notification.selected }"
                         @click="handleNotificationClick(notification)"
-                        class="notification-item"
                       >
-                        <template #prepend>
-                          <v-avatar
-                            :color="notification.type === 'alert' ? 'error' : notification.type === 'info' ? 'info' : notification.type === 'success' ? 'success' : 'warning'"
-                            size="40"
-                            class="notification-avatar"
-                          >
-                            <v-icon size="18" color="white">
-                              {{ notification.icon }}
-                            </v-icon>
-                          </v-avatar>
-                        </template>
-                        <v-list-item-title class="notification-title">
-                          {{ notification.title }}
-                        </v-list-item-title>
-                        <v-list-item-subtitle class="notification-subtitle">
-                          {{ notification.message }}
-                        </v-list-item-subtitle>
-                        <template #append>
-                          <div class="d-flex flex-column align-end">
-                            <span class="notification-time">{{ notification.time }}</span>
-                            <v-chip
-                              v-if="!notification.read"
-                              color="primary"
-                              size="x-small"
-                              variant="tonal"
-                              class="mt-1"
-                            >
-                              New
-                            </v-chip>
-                          </div>
-                        </template>
-                      </v-list-item>
-                      <v-list-item v-if="displayNotifications.length === 0" class="text-center py-8">
+                        <div class="notification-avatar">
+                          <img 
+                            :src="notification.avatar || '/default-avatar.png'" 
+                            :alt="notification.name"
+                            class="avatar-image"
+                          />
+                        </div>
+                        <div class="notification-content">
+                          <div class="notification-name">{{ notification.name }}</div>
+                          <div class="notification-message">{{ notification.message }}</div>
+                        </div>
+                        <div class="notification-time">{{ notification.time }}</div>
+                      </div>
+                      
+                      <!-- Empty State -->
+                      <div v-if="displayNotifications.length === 0" class="empty-notifications">
                         <v-icon size="48" color="grey-lighten-1">mdi-bell-off</v-icon>
-                        <div class="text-grey mt-2">No notifications</div>
-                        <div class="text-caption text-medium-emphasis">You're all caught up!</div>
-                      </v-list-item>
-                    </v-list>
-                    <v-divider v-if="displayNotifications.length > 0"></v-divider>
-                    <v-card-actions v-if="displayNotifications.length > 0" class="pa-3">
-                      <v-btn
-                        variant="text"
-                        size="small"
-                        @click="showNotifications = false"
-                        class="text-caption"
-                      >
-                        Close
-                      </v-btn>
-                      <v-spacer></v-spacer>
-                      <v-btn
-                        variant="text"
-                        size="small"
-                        @click="clearAllNotifications"
-                        class="text-caption text-error"
-                        prepend-icon="mdi-delete"
-                      >
-                        Clear all
-                      </v-btn>
-                    </v-card-actions>
+                        <div class="empty-text">No notifications</div>
+                      </div>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div class="notification-footer">
+                      <a href="/alerts" class="footer-link">See all incoming activity</a>
+                    </div>
                   </v-card>
                 </v-menu>
               </div>
@@ -541,14 +529,43 @@ console.log('Unread notifications:', unreadNotifications.value)
 const fallbackNotifications = ref([
   {
     id: 1,
-    title: 'Test Notification',
-    message: 'This is a test notification to ensure the dropdown works',
-    type: 'info',
-    icon: 'mdi-bell',
-    time: 'Just now',
-    read: false,
-    actionUrl: '/alerts',
-    actionType: 'alerts'
+    name: 'Kate Youn',
+    message: 'Lorem Ipsum / Contrary to popular belief, Lorem Ipsum is not simply random text.',
+    avatar: '/default-avatar.png',
+    time: '5 mins ago',
+    selected: false
+  },
+  {
+    id: 2,
+    name: 'Brandon Newman',
+    message: 'Lorem Ipsum',
+    avatar: '/default-avatar.png',
+    time: '12 mins ago',
+    selected: false
+  },
+  {
+    id: 3,
+    name: 'Dave Wood',
+    message: 'Lorem Ipsum',
+    avatar: '/default-avatar.png',
+    time: '1 hr ago',
+    selected: true
+  },
+  {
+    id: 4,
+    name: 'Anne Lao',
+    message: 'Lorem Ipsum / Contrary to popular belief, Lorem Ipsum is not simply random text.',
+    avatar: '/default-avatar.png',
+    time: '2 hr ago',
+    selected: false
+  },
+  {
+    id: 5,
+    name: 'John Smith',
+    message: 'Lorem Ipsum',
+    avatar: '/default-avatar.png',
+    time: '1 day ago',
+    selected: false
   }
 ])
 
@@ -703,107 +720,352 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.sidebar {
-  border-right: 1px solid #e9ecef;
+/* Modern Sidebar Styles */
+.modern-sidebar {
+  background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
   min-height: 100vh;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  background: white;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
 
+.modern-sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(243, 215, 14, 0.3) 50%, transparent 100%);
+}
+
+/* Header Styles */
 .sidebar-header {
-  background: white;
-  padding: 24px 16px;
-  transition: all 0.3s ease;
+  padding: 32px 24px 24px;
+  background: linear-gradient(135deg, rgba(243, 215, 14, 0.05) 0%, rgba(251, 179, 57, 0.02) 100%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  position: relative;
 }
 
-.brand-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 12px;
+.brand-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.brand-section-collapsed {
+  justify-content: center;
+  gap: 0;
+}
+
+.brand-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 12px;
+  /* box-shadow: 0 4px 16px rgba(255, 255, 255, 0.1); */
+  transition: all 0.3s ease;
+  flex-shrink: 0;
 }
 
-.brand-text {
+.brand-icon-wrapper:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(243, 215, 14, 0.4);
+}
+
+.brand-logo {
+  border-radius: 8px;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+}
+
+.brand-text-section {
   flex: 1;
 }
 
-.sidebar-footer {
-  border-top: 1px solid #dee2e6;
-  margin-top: 24px;
-  transition: all 0.3s ease;
+.brand-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.2;
+  margin-bottom: 2px;
 }
 
-.collapsed-item {
+.brand-subtitle {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* Navigation Menu Styles */
+.nav-menu {
+  padding: 24px 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.nav-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.nav-section-title {
+  padding: 0 8px;
+  margin-bottom: 8px;
+}
+
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
+}
+
+.section-label::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  width: 3px;
+  height: 3px;
+  background: #f3d70e;
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+
+.nav-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  gap: 12px;
+  color: #6b7280;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.nav-item:hover {
+  background: rgba(243, 215, 14, 0.08);
+  color: #1a1a1a;
+  transform: translateX(4px);
+}
+
+.nav-item-active {
+  background: linear-gradient(135deg, #f3d70e 0%, #fbb339 100%);
+  color: #1a1a1a !important;
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(243, 215, 14, 0.25);
+  transform: translateX(4px);
+}
+
+.nav-item-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 4px;
+  height: 24px;
+  background: #1a1a1a;
+  border-radius: 0 2px 2px 0;
+  transform: translateY(-50%);
+}
+
+.nav-item-collapsed {
   justify-content: center;
+  padding: 12px;
   min-width: 48px;
-  margin: 4px 8px;
-  border-radius: 8px;
 }
 
-.collapsed-item .v-list-item__prepend {
-  margin-right: 0;
+.nav-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.nav-item-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-item-indicator {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  background: #1a1a1a;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Footer Styles */
+.sidebar-footer {
+  padding: 20px 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  background: rgba(248, 250, 252, 0.8);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.footer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.version-text {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  background: #10b981;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.status-text {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.collapse-control {
+  display: flex;
+  align-items: center;
 }
 
 .collapse-btn {
-  transition: all 0.3s ease;
   color: #6b7280;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  padding: 8px;
 }
 
 .collapse-btn:hover {
+  color: #f3d70e;
+  background: rgba(243, 215, 14, 0.1);
   transform: scale(1.1);
-  color: #1976d2;
 }
 
 .rotated {
   transform: rotate(180deg);
 }
 
-.active-nav {
-  background: linear-gradient(135deg, #f3d70e 0%, #fbb339 100%) !important;
-  color: #040707 !important;
-  font-weight: 600;
-  box-shadow: 0 4px 12px rgba(243, 215, 14, 0.3);
-  border-radius: 12px;
-  margin: 4px 8px;
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .modern-sidebar {
+    position: fixed;
+    z-index: 1000;
+  }
 }
 
-.v-list-item {
-  transition: all 0.3s ease;
-  border-radius: 12px;
-  margin: 4px 8px;
-}
-
-.v-list-item:hover {
-  background: rgba(243, 215, 14, 0.1) !important;
-  color: #f3d70e !important;
-  transform: translateX(4px);
-}
-
-.v-list-subheader {
-  transition: opacity 0.3s ease;
+@media (max-width: 768px) {
+  .sidebar-header {
+    padding: 24px 16px 20px;
+  }
+  
+  .nav-menu {
+    padding: 20px 12px;
+  }
+  
+  .nav-item {
+    padding: 10px 12px;
+  }
+  
+  .sidebar-footer {
+    padding: 16px 12px;
+  }
 }
 
 .main-bg {
-  background: var(--v-theme-background);
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   min-height: 100vh;
   border-radius: 18px;
   box-shadow: 0 2px 16px 0 rgba(0, 0, 0, 0.08);
   transition: margin-left 0.3s ease;
+  position: relative;
+}
+
+.main-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 20% 80%, rgba(243, 215, 14, 0.03) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(251, 179, 57, 0.03) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 /* Modern Top App Bar Styles */
 .modern-top-app-bar {
-  border-bottom: 1px solid #e9ecef;
-  background: white !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(20px);
   transition: margin-left 0.3s ease;
   height: auto !important;
   min-height: 80px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  position: relative;
+}
+
+.modern-top-app-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(243, 215, 14, 0.2) 50%, transparent 100%);
 }
 
 .app-bar-collapsed {
@@ -1031,75 +1293,169 @@ onMounted(() => {
   top: 100%;
 }
 
+/* Notification Card Styles */
 .notification-card {
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   overflow: hidden;
   max-height: 500px;
   position: relative;
+  background: white;
 }
 
-.notification-list {
+/* Notification Pointer/Caret */
+.notification-pointer {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid white;
+  z-index: 1;
+}
+
+.notification-pointer::before {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: -8px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid rgba(0, 0, 0, 0.1);
+  z-index: -1;
+}
+
+/* Notification Header */
+.notification-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  background: white;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-icon {
+  margin-right: 8px;
+  font-size: 18px;
+}
+
+.header-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  flex: 1;
+  text-align: center;
+}
+
+.header-icon-right {
+  font-size: 16px;
+  color: #9ca3af;
+}
+
+/* Notifications List */
+.notifications-list {
   max-height: 400px;
   overflow-y: auto;
 }
 
 .notification-item {
-  padding: 16px;
-  transition: all 0.2s ease;
-  border-radius: 8px;
-  margin: 4px 8px;
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f3f4f6;
   cursor: pointer;
-  position: relative;
+  transition: background-color 0.2s ease;
 }
 
 .notification-item:hover {
-  background: rgba(243, 215, 14, 0.08);
-  transform: translateX(4px);
+  background-color: #f9fafb;
 }
 
-.notification-item.unread {
-  background: rgba(25, 118, 210, 0.05);
-  border-left: 3px solid #1976d2;
-  position: relative;
-}
-
-.notification-item.unread::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: -2px;
-  width: 6px;
-  height: 6px;
-  background: #1976d2;
-  border-radius: 50%;
-  transform: translateY(-50%);
+.notification-item-selected {
+  background-color: #f3f4f6;
 }
 
 .notification-avatar {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 12px;
+  flex-shrink: 0;
+  overflow: hidden;
 }
 
-.notification-title {
-  font-weight: 600;
-  font-size: 0.875rem;
-  color: #1a1a1a;
+.avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.notification-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #3b82f6;
   margin-bottom: 4px;
-  line-height: 1.3;
+  line-height: 1.2;
 }
 
-.notification-subtitle {
-  font-size: 0.75rem;
+.notification-message {
+  font-size: 12px;
   color: #6b7280;
   line-height: 1.4;
-  margin-bottom: 4px;
 }
 
 .notification-time {
-  font-size: 0.75rem;
+  font-size: 12px;
   color: #9ca3af;
   white-space: nowrap;
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+
+/* Empty State */
+.empty-notifications {
+  padding: 32px 20px;
+  text-align: center;
+  color: #9ca3af;
+}
+
+.empty-text {
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+/* Notification Footer */
+.notification-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #e5e7eb;
+  text-align: center;
+  background: white;
+}
+
+.footer-link {
+  color: #3b82f6;
+  text-decoration: underline;
+  font-size: 14px;
   font-weight: 500;
+  cursor: pointer;
+}
+
+.footer-link:hover {
+  color: #2563eb;
 }
 
 /* Enhanced Notification Styles */
@@ -1126,75 +1482,12 @@ onMounted(() => {
   z-index: 1000;
 }
 
-.notification-card {
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-  overflow: hidden;
-  max-height: 500px;
-}
-
-.notification-list {
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.notification-item {
-  padding: 16px;
-  transition: all 0.2s ease;
-  border-radius: 8px;
-  margin: 4px 8px;
-  cursor: pointer;
+/* Ensure the menu appears directly below the bell icon */
+.notification-container {
   position: relative;
 }
 
-.notification-item:hover {
-  background: rgba(243, 215, 14, 0.08);
-  transform: translateX(4px);
-}
 
-.notification-item.unread {
-  background: rgba(25, 118, 210, 0.05);
-  border-left: 3px solid #1976d2;
-  position: relative;
-}
-
-.notification-item.unread::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: -2px;
-  width: 6px;
-  height: 6px;
-  background: #1976d2;
-  border-radius: 50%;
-  transform: translateY(-50%);
-}
-
-.notification-avatar {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.notification-title {
-  font-weight: 600;
-  font-size: 0.875rem;
-  color: #1a1a1a;
-  margin-bottom: 4px;
-  line-height: 1.3;
-}
-
-.notification-subtitle {
-  font-size: 0.75rem;
-  color: #6b7280;
-  line-height: 1.4;
-  margin-bottom: 4px;
-}
-
-.notification-time {
-  font-size: 0.75rem;
-  color: #9ca3af;
-  white-space: nowrap;
-  font-weight: 500;
-}
 
 /* Enhanced User Menu Styles */
 .modern-user-btn {

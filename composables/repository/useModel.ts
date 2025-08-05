@@ -71,11 +71,34 @@ export function useModel() {
     }
   }
 
+  const deleteModel = async (id: number) => {
+    loading.value = true
+    error.value = null
+    try {
+      await $apiFetch(`/model/${id}`, {
+        method: 'DELETE'
+      })
+
+      // Remove the model from the list
+      const index = modelList.value.findIndex(m => m.id === id)
+      if (index !== -1) {
+        modelList.value.splice(index, 1)
+      }
+
+    } catch (e) {
+      error.value = 'Failed to delete model'
+      console.error(e)
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     modelList,
     getModel,
     getByVendor,
     createModel,
+    deleteModel,
     loading,
     error
   }

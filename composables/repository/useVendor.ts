@@ -68,14 +68,34 @@ export function useVendor() {
     }
   }
 
-  
+  const deleteBrand = async (id: number) => {
+    loading.value = true
+    error.value = null
+    try {
+      await $apiFetch(`/vendor/${id}`, {
+        method: 'DELETE'
+      })
 
+      // Remove the brand from the list
+      const index = vendorList.value.findIndex(v => v.id === id)
+      if (index !== -1) {
+        vendorList.value.splice(index, 1)
+      }
+
+    } catch (e) {
+      error.value = 'Failed to delete brand'
+      console.error(e)
+    } finally {
+      loading.value = false
+    }
+  }
 
   return {
     editVendor,
     vendorList,
     getVendor,
     createVendor,
+    deleteBrand,
     loading,
     error
   }

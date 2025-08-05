@@ -386,7 +386,7 @@
 
             <template v-slot:item.createdBy="{ item }">
               <span v-if="usersList.length">
-              {{ usersList.find(uu => uu.id == item.createdBy).name}}
+              {{ usersList.find(uu => uu.id == item.createdBy)?.name || 'Unknown'}}
               </span>
             </template>
             
@@ -396,7 +396,7 @@
                 size="small"
                 variant="flat"
               >
-                {{ serviceTypes.find(xx => xx.id == item.serviceType).name }}
+                {{ serviceTypes.find(xx => xx.id == item.serviceType)?.name || 'Unknown' }}
               </v-chip>
             </template>
             <template v-slot:item.cost="{ item }">
