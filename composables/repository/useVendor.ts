@@ -67,8 +67,37 @@ export function useVendor() {
       loading.value = false
     }
   }
-
-  
+  const deleteVendor = async (id: number) => {
+  loading.value = true
+  error.value = null
+  try {
+    await $apiFetch(`/vendor/${id}`, {
+      method: 'DELETE'
+    })
+    // Remove the deleted vendor from the list
+    vendorList.value = vendorList.value.filter(vendor => vendor.id !== id)
+  } catch (e) {
+    error.value = 'Failed to delete vendor'
+    console.error(e)
+    throw e // Re-throw the error so the calling component can handle it
+  } finally {
+    loading.value = false
+  }
+}
+const changeVendorStatus = async (id: number, status: string) => {
+  loading.value = true
+  try {
+    const response = await $apiFetch(`/vendor/status/${id}/${status}`, {
+      method: 'PATCH'
+    })
+    return response
+  } catch (e) {
+    console.error('Status change error:', e)
+    throw e
+  } finally {
+    loading.value = false
+  }
+}
 
 
   return {
@@ -76,6 +105,8 @@ export function useVendor() {
     vendorList,
     getVendor,
     createVendor,
+    deleteVendor,
+    changeVendorStatus,
     loading,
     error
   }

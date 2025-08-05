@@ -159,40 +159,51 @@
               </div>
               <div v-else>
                 <v-list class="brand-list">
-                  <v-list-item
-                    v-for="brand in vendorList"
-                    :key="brand.id"
-                    class="brand-item"
-                    @click="editBrand(brand)"
-                  >
-                    <template v-slot:prepend>
-                      <v-avatar color="primary" size="40">
-                        <v-icon color="white">{{ brand.icon || 'mdi-tag' }}</v-icon>
-                      </v-avatar>
-                    </template>
-                    <v-list-item-title class="font-weight-medium">{{ brand.name }}</v-list-item-title>
-                    <!-- <v-list-item-subtitle>{{ brand.models.length }} models</v-list-item-subtitle> -->
-                    <v-list-item-subtitle>{{modelList.filter(x => x.vendorId == brand.id).length}} {{modelList.filter(x => x.vendorId == brand.id).length <= 1 ? 'model' : 'models'}}</v-list-item-subtitle>
-                    <template v-slot:append>
-                      <div class="brand-actions">
-                        <v-btn
-                          icon="mdi-pencil"
-                          size="small"
-                          variant="text"
-                          color="primary"
-                          @click.stop="editBrand(brand)"
-                        ></v-btn>
-                        <v-btn
-                          icon="mdi-delete"
-                          size="small"
-                          variant="text"
-                          color="error"
-                          @click.stop="deleteBrandItem(brand)"
-                        ></v-btn>
-                      </div>
-                    </template>
-                  </v-list-item>
-                </v-list>
+  <v-list-item
+    v-for="brand in vendorList"
+    :key="brand.id"
+    class="brand-item"
+    @click="editBrand(brand)"
+  >
+    <template v-slot:prepend>
+      <v-avatar color="primary" size="40">
+        <v-icon color="white">{{ brand.icon || 'mdi-tag' }}</v-icon>
+      </v-avatar>
+    </template>
+    <v-list-item-title class="font-weight-medium">{{ brand.name }}</v-list-item-title>
+    <v-list-item-subtitle>{{ modelList.filter(x => x.vendorId == brand.id).length }} {{ modelList.filter(x => x.vendorId == brand.id).length <= 1 ? 'model' : 'models' }}</v-list-item-subtitle>
+    <template v-slot:append>
+      <div class="brand-actions">
+        
+        <v-btn
+          icon="mdi-pencil"
+          size="small"
+          variant="text"
+          color="primary"
+          @click.stop="editBrand(brand)"
+        ></v-btn>
+        <v-btn
+      icon
+      size="small"
+      variant="text"
+      :color="brand.status === 1 ? 'success' : 'error'"
+      @click.stop="toggleVendorStatus(brand)"
+      :title="brand.status === 1 ? 'Active (click to deactivate)' : 'Inactive (click to activate)'"
+    >
+      <v-icon>{{ brand.status === 1 ? 'mdi-check' : 'mdi-close' }}</v-icon>
+    </v-btn>
+        <!-- DELETE BUTTON GOES HERE -->
+        <v-btn
+  icon="mdi-delete"
+  size="small"
+  variant="text"
+  color="error"
+  @click.stop="deleteBrandItem(brand)"
+></v-btn>
+      </div>
+    </template>
+  </v-list-item>
+</v-list>
               </div>
             </v-card-text>
           </v-card>
@@ -245,12 +256,23 @@
                           @click.stop="editModel(model)"
                         ></v-btn>
                         <v-btn
-                          icon="mdi-delete"
-                          size="small"
-                          variant="text"
-                          color="error"
-                          @click.stop="deleteModelItem(model)"
-                        ></v-btn>
+      icon
+      size="small"
+      variant="text"
+      :color="model.status === 1 ? 'success' : 'error'"
+      @click.stop="toggleModelStatus(model)"
+      :title="model.status === 1 ? 'Active (click to deactivate)' : 'Inactive (click to activate)'"
+    >
+      <v-icon>{{ model.status === 1 ? 'mdi-check' : 'mdi-close' }}</v-icon>
+    </v-btn>
+                        
+                        <v-btn
+  icon="mdi-delete"
+  size="small"
+  variant="text"
+  color="error"
+  @click.stop="deleteModelItem(model)"
+></v-btn>
                       </div>
                     </template>
                   </v-list-item>
@@ -297,7 +319,7 @@
 
                     <div class="card-info">
                       <v-icon size="small" class="me-2">mdi-credit-card</v-icon>
-                      <span class="font-weight-medium">{{ maskCardNumber(item.cardNumber) }}</span>
+                      <span class="font-weight-medium">{{(item.cardNumber) }}</span>
                     </div>
                   </template>
                   <!-- <template v-slot:item.balance="{ item }"> -->
@@ -312,45 +334,54 @@
                       :color="getCardStatusColor(item.status)"
                       size="small"
                       variant="flat"
+                          class="status-chip"
+
                     >
-                      {{ getCardStatusLabel(item.status) }}
+                      {{ getCardStatusLabel(item.status)}}
                     </v-chip>
                   </template>
 
                     <template v-slot:item.holder="{ item }">
                       {{usersList.find(x => x.id == item.holder).name}}
-                    </template>
-
-                  <!-- <template v-slot:item.actions="{ item }"> -->
-                    <template v-slot:item_actions="{ item }">
-
-                    <div class="action-buttons">
-                      <v-btn
-                        icon="mdi-eye"
-                        size="small"
-                        variant="text"
-                        color="primary"
-                        @click="viewCardDetails(item)"
-                        :title="'View details for ' + maskCardNumber(item.cardNumber)"
-                      ></v-btn>
-                      <v-btn
-                        icon="mdi-pencil"
-                        size="small"
-                        variant="text"
-                        color="warning"
-                        @click="editCard(item)"
-                        :title="'Edit ' + maskCardNumber(item.cardNumber)"
-                      ></v-btn>
-                                              <v-btn
-                          icon="mdi-delete"
-                          size="small"
-                          variant="text"
-                          color="error"
-                          @click="deleteCardItem(item)"
-                          :title="'Delete ' + maskCardNumber(item.cardNumber)"
-                        ></v-btn>
-                    </div>
-                  </template>
+                    </template>                    
+                  <template v-slot:item.actions="{ item }">
+  <div class="action-buttons">
+    <!-- <v-btn
+      icon="mdi-eye"
+      size="small"
+      variant="text"
+      color="primary"
+      @click.stop="viewCardDetails(item)"
+      :title="'View details for ' + (item.number)"
+    ></v-btn> -->
+    <v-btn
+      icon
+      size="small"
+      variant="text"
+      :color="item.status === 1 ? 'success' : 'error'"
+      @click.stop="toggleCardStatus(item)"
+      :title="item.status === 1 ? 'Active (click to deactivate)' : 'Inactive (click to activate)'"
+>
+      <v-icon>{{ item.status === 1 ? 'mdi-check' : 'mdi-close' }}</v-icon>
+    </v-btn>
+    <v-btn
+      icon="mdi-pencil"
+      size="small"
+      variant="text"
+      color="warning"
+      @click.stop="editCard(item)"
+      :title="'Edit ' + (item.number)"
+    ></v-btn>
+    <!-- <v-btn
+  icon="mdi-delete"
+  size="small"
+  variant="text"
+  color="error"
+  @click.stop="deleteCardItem(item)"
+  :title="'Delete ' +(item.number)"
+></v-btn> -->
+  </div>
+</template>
                 </v-data-table>
               </div>
             </v-card-text>
@@ -589,11 +620,73 @@
       </v-card>
     </v-dialog>
 
+    <!-- neww Delete Confirmation Dialog -->
+<!-- Brand Delete Dialog -->
+<v-dialog v-model="showDeleteBrandDialog" max-width="500px" persistent>
+  <v-card class="dialog-card">
+    <v-card-title class="dialog-title">
+      <v-icon class="me-2" color="error">mdi-alert-circle</v-icon>
+      Confirm Brand Deletion
+    </v-card-title>
+    <v-card-text>
+      Are you sure you want to delete brand "{{ brandToDelete?.name }}"?
+      <!-- <span v-if="modelList.filter(x => x.vendorId === brandToDelete?.id).length" class="text-error d-block mt-2">
+        Warning: This will also delete {{ modelList.filter(x => x.vendorId === brandToDelete?.id).length }} associated models!
+      </span> -->
+    </v-card-text>
+    <v-card-actions class="dialog-actions">
+      <v-spacer></v-spacer>
+      <v-btn variant="outlined" @click="showDeleteBrandDialog = false">Cancel</v-btn>
+      <v-btn color="error" :loading="deletingBrand" @click="confirmDeleteBrand">Delete</v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
+
+<!-- Model Delete Dialog -->
+<v-dialog v-model="showDeleteModelDialog" max-width="500px" persistent>
+  <v-card class="dialog-card">
+    <v-card-title class="dialog-title">
+      <v-icon class="me-2" color="error">mdi-alert-circle</v-icon>
+      Confirm Model Deletion
+    </v-card-title>
+    <v-card-text>
+      Are you sure you want to delete model "{{ modelToDelete?.name }}"?
+    </v-card-text>
+    <v-card-actions class="dialog-actions">
+      <v-spacer></v-spacer>
+      <v-btn variant="outlined" @click="showDeleteModelDialog = false">Cancel</v-btn>
+      <v-btn color="error" :loading="deletingModel" @click="confirmDeleteModel">Delete</v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
+
+<!-- Card Delete Dialog -->
+<v-dialog v-model="showDeleteCardDialog" max-width="500px" persistent>
+  <v-card class="dialog-card">
+    <v-card-title class="dialog-title">
+      <v-icon class="me-2" color="error">mdi-alert-circle</v-icon>
+      Confirm Card Deletion
+    </v-card-title>
+    <v-card-text>
+      Are you sure you want to delete Card Number  "{{(cardToDelete?.number) }}"?
+    </v-card-text>
+    <v-card-actions class="dialog-actions">
+      <v-spacer></v-spacer>
+      <v-btn variant="outlined" @click="showDeleteCardDialog = false">Cancel</v-btn>
+      <v-btn color="error" :loading="deletingCard" @click="confirmDeleteCard">Delete</v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
+
     <!-- Success Snackbar -->
     <v-snackbar
       v-model="showSuccessSnackbar"
       color="success"
       timeout="3000"
+      location="top"
+      size="5000px"
+
+
     >
       {{ successMessage }}
       <template v-slot:actions>
@@ -601,6 +694,9 @@
           color="white"
           variant="text"
           @click="showSuccessSnackbar = false"
+          location="top"
+
+
         >
           Close
         </v-btn>
@@ -612,6 +708,7 @@
       v-model="showErrorSnackbar"
       color="error"
       timeout="5000"
+
     >
       {{ errorMessage }}
       <template v-slot:actions>
@@ -632,11 +729,15 @@ import { ref, computed, onMounted } from 'vue'
 
 
 
-const {createVendor, getVendor, vendorList, editVendor} = useVendor()
-const {createModel, getModel, modelList} = useModel()
-const {createCard, getCard, getUsers, cardList, usersList} = useCard()
+const {createVendor, getVendor, vendorList, editVendor, deleteVendor, changeVendorStatus} = useVendor()
+const {createModel, getModel, modelList, deleteModel, changeModelStatus} = useModel()
+const {createCard, getCard, getUsers, cardList, usersList , deleteCard, changeCardStatus} = useCard()
 
 // Reactive data
+// neww
+
+
+
 const totalCardValue = ref(0)
 const searchQuery = ref('')
 const categoryFilter = ref('all')
@@ -713,9 +814,9 @@ const statusOptions = [
 
 const cardStatusOptions = [
   { title: 'Active', value: 1 },
-  { title: 'Inactive', value: 2 },
-  { title: 'Suspended', value: 3 },
-  { title: 'Expired', value: 4 }
+  { title: 'Inactive', value: 0 },
+  { title: 'Suspended', value: 2 },
+  { title: 'Expired', value: 3 }
 ]
 
 // Table headers
@@ -724,8 +825,10 @@ const cardHeaders = [
   { title: 'Card Holder', key: 'holder', sortable: true },
   { title: 'Balance', key: 'balance', sortable: true },
   { title: 'Status', key: 'status', sortable: true },
-  { title: 'Actions', key: 'actions', sortable: false }
-]
+{ 
+    title: 'Actions', 
+    key: 'actions', 
+  }]
 
 
 
@@ -734,17 +837,128 @@ const cardHeaders = [
 const getCardStatusColor = (status) => {
   const colors = {
     1: 'success',
-    2: 'grey',
-    3: 'warning',
-    4: 'error'
+    0: 'red',
+    2: 'warning',
+    3: 'error'
   }
   return colors[status] || 'grey'
 }
 
-const getCardStatusLabel = (status) => {
-    return cardStatusOptions.find(x => x.value = status).title
+// newwwwww Add these methods
+// Delete dialog states
+const showDeleteBrandDialog = ref(false)
+const showDeleteModelDialog = ref(false)
+const showDeleteCardDialog = ref(false)
+
+// Items to delete
+const brandToDelete = ref(null)
+const modelToDelete = ref(null)
+const cardToDelete = ref(null)
+
+// Loading states
+const deletingBrand = ref(false)
+const deletingModel = ref(false)
+const deletingCard = ref(false)
+
+// Delete methods
+const deleteBrandItem = (brand) => {
+  brandToDelete.value = brand
+  showDeleteBrandDialog.value = true
 }
 
+const deleteModelItem = (model) => {
+  modelToDelete.value = model
+  showDeleteModelDialog.value = true
+}
+
+const deleteCardItem = (card) => {
+  cardToDelete.value = card
+  showDeleteCardDialog.value = true
+}
+
+// Confirmation methods
+const confirmDeleteBrand = async () => {
+  deletingBrand.value = true
+  try {
+    await deleteVendor(brandToDelete.value.id)
+    vendorList.value = vendorList.value.filter(v => v.id !== brandToDelete.value.id)
+    showSuccessMessage('Brand deleted successfully')
+    showDeleteBrandDialog.value = false
+  } catch (error) {
+    showErrorMessage('Failed to delete brand: ' + (error.value || error.message))
+  } finally {
+    deletingBrand.value = false
+    brandToDelete.value = null
+  }
+}
+
+const confirmDeleteModel = async () => {
+  deletingModel.value = true
+  try {
+    await deleteModel(modelToDelete.value.id)
+    modelList.value = modelList.value.filter(m => m.id !== modelToDelete.value.id)
+    showSuccessMessage('Model deleted successfully')
+    showDeleteModelDialog.value = false
+  } catch (error) {
+    showErrorMessage('Failed to delete model: ' + (error.value || error.message))
+  } finally {
+    deletingModel.value = false
+    modelToDelete.value = null
+  }
+}
+
+const confirmDeleteCard = async () => {
+  deletingCard.value = true
+  try {
+    await deleteCard(cardToDelete.value.id)
+    cardList.value = cardList.value.filter(c => c.id !== cardToDelete.value.id)
+    showSuccessMessage('Card deleted successfully')
+    showDeleteCardDialog.value = false
+  } catch (error) {
+    showErrorMessage('Failed to delete card: ' + (error.value || error.message))
+  } finally {
+    deletingCard.value = false
+    cardToDelete.value = null
+  }
+}
+
+const getCardStatusLabel = (status) => {
+  const foundStatus = cardStatusOptions.find(option => option.value === status)
+  return foundStatus ? foundStatus.title : 'Unknown'
+}
+// changing status
+const toggleVendorStatus = async (vendor) => {
+  try {
+    const newStatus = vendor.status === 1 ? 0 : 1 // Assuming 1=active, 0=inactive
+    await changeVendorStatus(vendor.id, newStatus)
+    await getVendors() // Refresh the list
+    showSuccessMessage(`Brand ${newStatus === 1 ? 'activated' : 'deactivated'} successfully`)
+  } catch (error) {
+    showErrorMessage(`Failed to change status: ${error.message}`)
+  }
+}
+
+const toggleModelStatus = async (model) => {
+  try {
+    const newStatus = model.status === 1 ? 0 : 1
+    await changeModelStatus(model.id, newStatus)
+    await getModels()
+    showSuccessMessage(`Model ${newStatus === 1 ? 'activated' : 'deactivated'} successfully`)
+  } catch (error) {
+    showErrorMessage(`Failed to change status: ${error.message}`)
+  }
+}
+
+const toggleCardStatus = async (card) => {
+  try {
+    const newStatus = card.status === 1 ? 0 : 1
+    await changeCardStatus(card.id, newStatus)
+    await getCards()
+    showSuccessMessage(`Card ${newStatus === 1 ? 'activated' : 'deactivated'} successfully`)
+  } catch (error) {
+    showErrorMessage(`Failed to change status: ${error.message}`)
+  }
+}
 // Action methods
 const editBrand = (brand) => {
   editingBrand.value = brand
@@ -764,38 +978,38 @@ const editCard = (card) => {
   showCardDialog.value = true
 }
 
-const deleteBrandItem = async (brand) => {
-  if (confirm(`Are you sure you want to delete the brand "${brand.name}"?`)) {
-    try {
-      deleteBrand(brand.id)
-      showSuccessMessage('Brand deleted successfully')
-    } catch (error) {
-      showErrorMessage('Failed to delete brand')
-    }
-  }
-}
+// const deleteBrandItem = async (brand) => {
+//   if (confirm(`Are you sure you want to delete the brand "${brand.name}"?`)) {
+//     try {
+//       deleteBrand(brand.id)
+//       showSuccessMessage('Brand deleted successfully')
+//     } catch (error) {
+//       showErrorMessage('Failed to delete brand')
+//     }
+//   }
+// }
 
-const deleteModelItem = async (model) => {
-  if (confirm(`Are you sure you want to delete the model "${model.name}"?`)) {
-    try {
-      deleteModel(model.id)
-      showSuccessMessage('Model deleted successfully')
-    } catch (error) {
-      showErrorMessage('Failed to delete model')
-    }
-  }
-}
+// const deleteModelItem = async (model) => {
+//   if (confirm(`Are you sure you want to delete the model "${model.name}"?`)) {
+//     try {
+//       deleteModel(model.id)
+//       showSuccessMessage('Model deleted successfully')
+//     } catch (error) {
+//       showErrorMessage('Failed to delete model')
+//     }
+//   }
+// }
 
-const deleteCardItem = async (card) => {
-  if (confirm(`Are you sure you want to delete the card "${maskCardNumber(card.cardNumber)}"?`)) {
-    try {
-      deleteCard(card.id)
-      showSuccessMessage('Card deleted successfully')
-    } catch (error) {
-      showErrorMessage('Failed to delete card')
-    }
-  }
-}
+// const deleteCardItem = async (card) => {
+//   if (confirm(`Are you sure you want to delete the card "${(card.cardNumber)}"?`)) {
+//     try {
+//       deleteCard(card.id)
+//       showSuccessMessage('Card deleted successfully')
+//     } catch (error) {
+//       showErrorMessage('Failed to delete card')
+//     }
+//   }
+// }
 
 const saveBrand = async () => {
   savingBrand.value = true
@@ -1146,10 +1360,11 @@ onMounted(async () => {
   gap: 4px;
 }
 
-.action-buttons {
+/* .action-buttons {
   display: flex;
   gap: 4px;
-}
+  color:red
+} */
 
 .card-info {
   display: flex;
@@ -1215,4 +1430,5 @@ onMounted(async () => {
     gap: 12px;
   }
 }
+
 </style> 

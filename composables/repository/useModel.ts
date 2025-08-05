@@ -70,12 +70,41 @@ export function useModel() {
       loading.value = false
     }
   }
-
+const deleteModel = async (id: number) => {
+  loading.value = true
+  try {
+    const response = await $apiFetch(`/model/${id}`, {
+      method: 'DELETE'
+    })
+    return response
+  } catch (e) {
+    console.error('Delete model error:', e)
+    throw e
+  } finally {
+    loading.value = false
+  }
+}
+const changeModelStatus = async (id: number, status: string) => {
+  loading.value = true
+  try {
+    const response = await $apiFetch(`/model/status/${id}/${status}`, {
+      method: 'PATCH'
+    })
+    return response
+  } catch (e) {
+    console.error('Status change error:', e)
+    throw e
+  } finally {
+    loading.value = false
+  }
+}
   return {
     modelList,
     getModel,
     getByVendor,
     createModel,
+    deleteModel,
+    changeModelStatus,
     loading,
     error
   }

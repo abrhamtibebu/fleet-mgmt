@@ -72,13 +72,42 @@ export function useCard() {
     } finally {
     }
   }
-
+  const deleteCard = async (id: number) => {
+  loading.value = true
+  try {
+    const response = await $apiFetch(`/card/${id}`, {
+      method: 'DELETE'
+    })
+    return response
+  } catch (e) {
+    console.error('Delete card error:', e)
+    throw e
+  } finally {
+    loading.value = false
+  }
+}
+const changeCardStatus = async (id: number, status: string) => {
+  loading.value = true
+  try {
+    const response = await $apiFetch(`/card/status/${id}/${status}`, {
+      method: 'PATCH'
+    })
+    return response
+  } catch (e) {
+    console.error('Status change error:', e)
+    throw e
+  } finally {
+    loading.value = false
+  }
+}
   return {
     cardList,
     usersList,
     getCard,
     createCard,
     getUsers,
+    deleteCard,
+    changeCardStatus,
     loading,
     error
   }
