@@ -35,7 +35,7 @@ export function useModel() {
   }
 
   const getByVendor = async (id:Number) =>{
-        loading.value = true
+    loading.value = true
     error.value = null
     try {
       const data = await $apiFetch<{ result: Model[] }>(`/model/vendor/${id}`, {
