@@ -83,29 +83,6 @@ export function useCard() {
     }
   }
 
-  const deleteCard = async (id: string) => {
-    loading.value = true
-    error.value = null
-    try {
-      await $apiFetch(`/card/delete`, {
-        method: 'DELETE',
-        body: { id }
-      })
-
-      // Remove the card from the list
-      const index = cardList.value.findIndex(c => c.id === id)
-      if (index !== -1) {
-        cardList.value.splice(index, 1)
-      }
-
-    } catch (e) {
-      error.value = 'Failed to delete card'
-      console.error(e)
-    } finally {
-      loading.value = false
-    }
-  }
-
    const getUsers = async () => {
     try {
       const data = await $apiFetch<{ result: any[] }>('/user/all', {
@@ -155,7 +132,6 @@ const changeCardStatus = async (id: number, status: string) => {
     updateCard,
     deleteCard,
     getUsers,
-    deleteCard,
     changeCardStatus,
     loading,
     error
