@@ -280,6 +280,16 @@
                     >
                       Edit
                     </v-btn>
+                    <v-btn
+                      color="success"
+                      size="small"
+                      prepend-icon="mdi-gas-station"
+                      @click="openRefillDialog(card)"
+                      :disabled="card.remainingBalance <= 0"
+                      :title="card.remainingBalance <= 0 ? 'Card is depleted' : 'Refill card'"
+                    >
+                      Refill
+                    </v-btn>
                   </v-card-actions>
                 </v-card>
               </v-col>
@@ -422,6 +432,51 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <!-- Refill Card Dialog -->
+    <RefillCard
+      v-model="showRefillDialog"
+      :card="selectedCardForRefill"
+      @refill-processed="handleRefillProcessed"
+    />
+
+    <!-- Success Snackbar -->
+    <v-snackbar
+      v-model="showSuccessSnackbar"
+      color="success"
+      timeout="3000"
+      location="top"
+    >
+      {{ successMessage }}
+      <template v-slot:actions>
+        <v-btn
+          color="white"
+          variant="text"
+          @click="showSuccessSnackbar = false"
+        >
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
+
+    <!-- Error Snackbar -->
+    <v-snackbar
+      v-model="showErrorSnackbar"
+      color="error"
+      timeout="5000"
+      location="top"
+    >
+      {{ errorMessage }}
+      <template v-slot:actions>
+        <v-btn
+          color="white"
+          variant="text"
+          @click="showErrorSnackbar = false"
+        >
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
   </div>
 </template>
 
@@ -430,7 +485,7 @@ import { ref, computed, onMounted } from 'vue'
 import moment from 'moment'
 // Composables
 const { vehicleList, getVehicles } = useVehicles()
-const { fuelRecords, fuelCards, loading, getFuelRecords, getFuelCards, lowBalanceCards, activeCards } = useFuel()
+const { fuelRecords, fuelCards, loading, getFuelRecords, getFuelCards, lowBalanceCards, activeCards, refillFuelCard } = useFuel()
 const {cardList, getCard} = useCard()
 // Reactive data
 const activeTab = ref('records')
@@ -442,6 +497,15 @@ const showFuelEntryDialog = ref(false)
 const showCardDialog = ref(false)
 const saving = ref(false)
 const fuelFormValid = ref(false)
+
+// Refill functionality
+const showRefillDialog = ref(false)
+const selectedCardForRefill = ref(null)
+const showSuccessSnackbar = ref(false)
+const showErrorSnackbar = ref(false)
+const successMessage = ref('')
+const errorMessage = ref('')
+
 const fuelEntryForm = ref({
   vehicleId: '',
   quantity: 0,
@@ -594,6 +658,25 @@ const getCardBalance = () => {
   });
 
   return x.toLocaleString()
+}
+
+const openRefillDialog = (card) => {
+  selectedCardForRefill.value = card
+  showRefillDialog.value = true
+}
+
+const handleRefillProcessed = async (cardId, amount, notes) => {
+  try {
+    const result = await refillFuelCard(cardId, amount, notes)
+    
+    successMessage.value = result.message
+    showSuccessSnackbar.value = true
+    
+  } catch (error) {
+    errorMessage.value = 'Failed to process refill'
+    showErrorSnackbar.value = true
+    console.error('Error processing refill:', error)
+  }
 }
 // Lifecycle
 onMounted(async () => {

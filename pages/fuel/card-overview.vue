@@ -89,24 +89,87 @@
               <span>Last Transaction: {{ new Date(card.lastUpdated).toLocaleDateString() }}</span>
             </div>
           </v-card-text>
-          <v-card-actions class="mt-auto d-flex justify-end">
-            <v-btn variant="text" size="small" color="primary">View Details</v-btn>
-            <v-btn variant="text" size="small" color="secondary">Manage</v-btn>
+          <v-card-actions class="mt-auto d-flex justify-space-between">
+            <div>
+              <v-btn variant="text" size="small" color="primary">View Details</v-btn>
+              <v-btn variant="text" size="small" color="secondary">Manage</v-btn>
+            </div>
+            <v-btn
+              color="success"
+              size="small"
+              prepend-icon="mdi-gas-station"
+              @click="openRefillDialog(card)"
+              :disabled="card.remainingBalance <= 0"
+            >
+              Refill
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-col>
     </v-row>
+
+    <!-- Refill Card Dialog -->
+    <RefillCard
+      v-model="showRefillDialog"
+      :card="selectedCardForRefill"
+      @refill-processed="handleRefillProcessed"
+    />
+
+    <!-- Success Snackbar -->
+    <v-snackbar
+      v-model="showSuccessSnackbar"
+      color="success"
+      timeout="3000"
+      location="top"
+    >
+      {{ successMessage }}
+      <template v-slot:actions>
+        <v-btn
+          color="white"
+          variant="text"
+          @click="showSuccessSnackbar = false"
+        >
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
+
+    <!-- Error Snackbar -->
+    <v-snackbar
+      v-model="showErrorSnackbar"
+      color="error"
+      timeout="5000"
+      location="top"
+    >
+      {{ errorMessage }}
+      <template v-slot:actions>
+        <v-btn
+          color="white"
+          variant="text"
+          @click="showErrorSnackbar = false"
+        >
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useFuel } from '~/composables/repository/useFuel'
 import { useVehicles } from '~/composables/repository/useVehicles'
-import type { FuelCard } from '~/types/fleet'
 
-const { fuelCards, lowBalanceCards, getFuelCards } = useFuel()
-const { vehicles, getVehicles } = useVehicles() // To get vehicle plate for display
+const { fuelCards, getFuelCards, lowBalanceCards, refillFuelCard } = useFuel()
+const { vehicleList, getVehicles } = useVehicles()
+
+// Refill functionality
+const showRefillDialog = ref(false)
+const selectedCardForRefill = ref(null)
+const showSuccessSnackbar = ref(false)
+const showErrorSnackbar = ref(false)
+const successMessage = ref('')
+const errorMessage = ref('')
 
 const totalCardValue = computed(() => {
   return fuelCards.value.reduce((sum, card) => sum + card.totalValue, 0)
@@ -116,29 +179,46 @@ const totalRemainingBalance = computed(() => {
   return fuelCards.value.reduce((sum, card) => sum + card.remainingBalance, 0)
 })
 
-const getVehiclePlate = (fuelCardId: string) => {
-  // This is a placeholder, as the current FuelCard interface doesn't directly link to VehicleId
-  // In a real scenario, you'd link the fuel card to a vehicle or vice-versa.
-  // For now, let's mock a vehicle based on the fuelCardId for demonstration
-  const mockVehicles = [
-    { id: 'FC-001', licensePlate: 'AA-1234' },
-    { id: 'FC-002', licensePlate: 'BB-5678' },
-    { id: 'FC-003', licensePlate: 'CC-9012' },
-    { id: 'FC-004', licensePlate: 'DD-3456' },
-    { id: 'FC-005', licensePlate: 'EE-7890' },
-  ]
-  const vehicle = mockVehicles.find(v => v.id === fuelCardId)
-  return vehicle?.licensePlate || 'N/A'
+const getVehiclePlate = (cardId: string) => {
+  // This would typically come from a relationship between cards and vehicles
+  // For now, returning a placeholder
+  return 'ABC-123-ET'
 }
 
-const getCardProgressColor = (card: FuelCard) => {
-  const percentage = (card.amountSpent / card.totalValue) * 100
-  if (percentage >= 80) return 'error'
-  if (percentage >= 50) return 'warning'
-  return 'primary'
+const getCardProgressColor = (card: any) => {
+  const usagePercentage = (card.amountSpent / card.totalValue) * 100
+  if (usagePercentage >= 80) return 'error'
+  if (usagePercentage >= 60) return 'warning'
+  return 'success'
+}
+
+const openRefillDialog = (card: any) => {
+  selectedCardForRefill.value = card
+  showRefillDialog.value = true
+}
+
+const handleRefillProcessed = async (cardId: string, amount: number, notes: string) => {
+  try {
+    const result = await refillFuelCard(cardId, amount, notes)
+    
+    successMessage.value = result.message
+    showSuccessSnackbar.value = true
+    
+  } catch (error) {
+    errorMessage.value = 'Failed to process refill'
+    showErrorSnackbar.value = true
+    console.error('Error processing refill:', error)
+  }
 }
 
 onMounted(async () => {
-  await Promise.all([getFuelCards(), getVehicles()])
+  try {
+    await Promise.all([
+      getFuelCards(),
+      getVehicles()
+    ])
+  } catch (error) {
+    console.error('Error loading fuel card data:', error)
+  }
 })
 </script> 

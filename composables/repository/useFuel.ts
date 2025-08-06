@@ -135,6 +135,34 @@ export const useFuel = () => {
     return totalDistance / totalFuel
   }
 
+  const refillFuelCard = async (cardId: string, amount: number, notes?: string) => {
+    loading.value = true
+    try {
+      const data = await $apiFetch<{ success: boolean; message: string; data: { card: FuelCard; fuelRecord: any } }>('/fuel-cards/refill', {
+        method: "POST",
+        body: {
+          cardId,
+          amount,
+          notes
+        }
+      })
+      
+      // Update the card in the local state
+      const cardIndex = fuelCards.value.findIndex(card => card.id === cardId)
+      if (cardIndex !== -1) {
+        fuelCards.value[cardIndex] = data.data.card
+      }
+      
+      return data
+    } catch (e) {
+      error.value = 'Failed to refill fuel card'
+      console.error(e)
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
+
   const getMonthlyFuelConsumption = (vehicleId: string, year: number, month: number) => {
     const records = getFuelRecordsByVehicle(vehicleId)
     const monthlyRecords = records.filter(record => {
@@ -166,6 +194,7 @@ export const useFuel = () => {
     lowBalanceCards,
     activeCards,
     calculateFuelEfficiency,
+    refillFuelCard,
     getMonthlyFuelConsumption
   }
 } 
