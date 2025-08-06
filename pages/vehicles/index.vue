@@ -253,9 +253,6 @@
                   variant="outlined"
                   :rules="[(v) => !!v || 'Fuel card is required']"
                   required
-                  :item-props="(item) => ({
-                    title: `${item.number} - ${usersList.value.find(x => x.id == item.holder)?.name || 'Unknown'} (${item.balance} ETB)`
-                  })"
                 ></v-autocomplete>
               </v-col>
                   <v-col cols="12" md="6">
