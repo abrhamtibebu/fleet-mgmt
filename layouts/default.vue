@@ -88,10 +88,10 @@
       <div class="sidebar-footer">
         <div v-show="!collapsed" class="footer-info">
           <div class="version-text">v1.0.0</div>
-          <div class="status-indicator">
+          <!-- <div class="status-indicator">
             <div class="status-dot"></div>
             <span class="status-text">Online</span>
-          </div>
+          </div> -->
         </div>
         <div class="collapse-control">
           <v-btn
@@ -140,138 +140,7 @@
             
             <div class="header-center">
               <!-- Search Bar -->
-              <div class="search-container">
-                <v-text-field
-                  v-model="searchQuery"
-                  placeholder="Search vehicles, fuel cards, reports..."
-                  prepend-inner-icon="mdi-magnify"
-                  variant="outlined"
-                  density="compact"
-                  hide-details
-                  class="modern-search-field"
-                  @keyup.enter="handleSearch"
-                  @click:prepend-inner="handleSearch"
-                  @input="handleSearchInput"
-                  @focus="showSearchResults = true"
-                  @blur="handleSearchBlur"
-                >
-                  <template #append-inner>
-                    <v-btn
-                      v-if="searchQuery"
-                      icon="mdi-close"
-                      variant="text"
-                      size="small"
-                      @click="clearSearch"
-                      class="search-clear-btn"
-                    ></v-btn>
-                  </template>
-                </v-text-field>
-                
-                <!-- Search Results Dropdown -->
-                <v-menu
-                  v-model="showSearchResults"
-                  :close-on-content-click="false"
-                  offset-y
-                  location="bottom start"
-                  class="search-results-menu"
-                  :max-width="500"
-                >
-                  <v-card class="search-results-card">
-                    <!-- Search Suggestions -->
-                    <div v-if="searchQuery && !isSearching && searchResults.length === 0" class="pa-4">
-                      <div class="text-subtitle-2 font-weight-bold mb-3">Suggestions</div>
-                      <v-list density="compact" class="suggestions-list">
-                        <v-list-item
-                          v-for="suggestion in getSearchSuggestions"
-                          :key="suggestion.text"
-                          @click="selectSuggestion(suggestion.text)"
-                          class="suggestion-item"
-                        >
-                          <template #prepend>
-                            <v-icon :icon="suggestion.icon" size="16" color="grey"></v-icon>
-                          </template>
-                          <v-list-item-title class="suggestion-text">
-                            {{ suggestion.text }}
-                          </v-list-item-title>
-                        </v-list-item>
-                      </v-list>
-                    </div>
-                    
-                    <!-- Search Results -->
-                    <div v-if="searchResults.length > 0" class="pa-4">
-                      <div class="d-flex align-center justify-space-between mb-3">
-                        <div class="text-subtitle-2 font-weight-bold">
-                          Search Results ({{ searchResults.length }})
-                        </div>
-                        <v-btn
-                          variant="text"
-                          size="small"
-                          @click="clearSearchResults"
-                          class="text-caption"
-                        >
-                          Clear
-                        </v-btn>
-                      </div>
-                      <v-list density="compact" class="search-results-list">
-                        <v-list-item
-                          v-for="result in searchResults"
-                          :key="`${result.type}-${result.id}`"
-                          @click="handleSearchResultClick(result)"
-                          class="search-result-item"
-                        >
-                          <template #prepend>
-                            <v-avatar
-                              :color="result.color"
-                              size="32"
-                              class="result-avatar"
-                            >
-                              <v-icon size="16" color="white">
-                                {{ result.icon }}
-                              </v-icon>
-                            </v-avatar>
-                          </template>
-                          <v-list-item-title class="result-title">
-                            {{ result.name }}
-                          </v-list-item-title>
-                          <v-list-item-subtitle class="result-subtitle">
-                            <span class="result-type">{{ result.type }}</span>
-                            <span v-if="result.category" class="result-category"> • {{ result.category }}</span>
-                            <span v-if="result.vin" class="result-vin"> • {{ result.vin }}</span>
-                            <span v-if="result.number" class="result-number"> • {{ result.number }}</span>
-                          </v-list-item-subtitle>
-                          <template #append>
-                            <v-chip
-                              :color="result.color"
-                              size="small"
-                              variant="tonal"
-                              class="result-status"
-                            >
-                              {{ result.status }}
-                            </v-chip>
-                          </template>
-                        </v-list-item>
-                      </v-list>
-                    </div>
-                    
-                    <!-- Loading State -->
-                    <div v-if="isSearching" class="pa-8 text-center">
-                      <v-progress-circular
-                        indeterminate
-                        color="primary"
-                        size="32"
-                      ></v-progress-circular>
-                      <div class="mt-3 text-caption text-medium-emphasis">Searching...</div>
-                    </div>
-                    
-                    <!-- No Results -->
-                    <div v-if="searchQuery && !isSearching && searchResults.length === 0 && getSearchSuggestions.length === 0" class="pa-8 text-center">
-                      <v-icon size="48" color="grey-lighten-1">mdi-magnify</v-icon>
-                      <div class="mt-3 text-grey">No results found for "{{ searchQuery }}"</div>
-                      <div class="text-caption text-medium-emphasis">Try different keywords</div>
-                    </div>
-                  </v-card>
-                </v-menu>
-              </div>
+          
             </div>
 
             <div class="header-right">

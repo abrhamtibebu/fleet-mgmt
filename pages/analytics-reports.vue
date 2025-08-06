@@ -31,7 +31,7 @@
     <!-- KPI Cards -->
     <div class="kpi-section">
       <v-row>
-        <v-col cols="12" sm="6" md="3">
+        <v-col cols="12" sm="6" md="4">
           <KpiCard
             title="Total Fleet Value"
             :value="`${totalFleetValue.toLocaleString()} ETB`"
@@ -40,7 +40,7 @@
             @click="showFleetValueBreakdown"
           />
         </v-col>
-        <v-col cols="12" sm="6" md="3">
+        <v-col cols="12" sm="6" md="4">
           <KpiCard
             title="Avg Fuel Efficiency"
             :value="`${averageFuelEfficiency.toFixed(1)} km/l`"
@@ -49,7 +49,7 @@
             @click="showEfficiencyAnalysis"
           />
         </v-col>
-        <v-col cols="12" sm="6" md="3">
+        <v-col cols="12" sm="6" md="4">
           <KpiCard
             title="Monthly Fuel Cost"
             :value="`${monthlyFuelCost.toLocaleString()} ETB`"
@@ -58,7 +58,7 @@
             @click="showFuelCostAnalysis"
           />
         </v-col>
-        <v-col cols="12" sm="6" md="3">
+        <!-- <v-col cols="12" sm="6" md="3">
           <KpiCard
             title="Fleet Utilization"
             :value="`${fleetUtilization.toFixed(1)}%`"
@@ -66,7 +66,7 @@
             color="info"
             @click="showUtilizationAnalysis"
           />
-        </v-col>
+        </v-col> -->
       </v-row>
     </div>
 
@@ -139,192 +139,12 @@
     </v-row>
 
     <!-- Report Types Grid -->
-    <div class="reports-section">
-      <v-card class="section-card glass-card">
-        <v-card-title class="section-title">
-          <v-icon class="me-2" color="primary">mdi-file-chart</v-icon>
-          Quick Reports
-        </v-card-title>
-        <v-card-text>
-          <v-row>
-            <v-col cols="12" sm="6" md="3">
-              <v-card class="report-card" @click="generateReport('monthly-vehicle')">
-                <v-card-text class="text-center pa-6">
-                  <v-icon size="48" color="primary" class="mb-3">mdi-file-chart</v-icon>
-                  <h3 class="text-h6 mb-2">Monthly Vehicle Report</h3>
-                  <p class="text-muted">Total km, fuel consumption, and efficiency per vehicle</p>
-                </v-card-text>
-              </v-card>
-            </v-col>
-            
-            <v-col cols="12" sm="6" md="3">
-              <v-card class="report-card" @click="generateReport('fuel-card-balance')">
-                <v-card-text class="text-center pa-6">
-                  <v-icon size="48" color="success" class="mb-3">mdi-credit-card</v-icon>
-                  <h3 class="text-h6 mb-2">Fuel Card Balance</h3>
-                  <p class="text-muted">Current balances, spending patterns, and low balance alerts</p>
-                </v-card-text>
-              </v-card>
-            </v-col>
-            
-            <v-col cols="12" sm="6" md="3">
-              <v-card class="report-card" @click="generateReport('refill-history')">
-                <v-card-text class="text-center pa-6">
-                  <v-icon size="48" color="warning" class="mb-3">mdi-gas-station</v-icon>
-                  <h3 class="text-h6 mb-2">Refill History</h3>
-                  <p class="text-muted">Detailed fuel refill records with station and cost analysis</p>
-                </v-card-text>
-              </v-card>
-            </v-col>
-            
-            <v-col cols="12" sm="6" md="3">
-              <v-card class="report-card" @click="generateReport('service-due')">
-                <v-card-text class="text-center pa-6">
-                  <v-icon size="48" color="error" class="mb-3">mdi-wrench</v-icon>
-                  <h3 class="text-h6 mb-2">Service Due Report</h3>
-                  <p class="text-muted">Vehicles due for service and maintenance scheduling</p>
-                </v-card-text>
-              </v-card>
-            </v-col>
-          </v-row>
-        </v-card-text>
-      </v-card>
-    </div>
-
+  
     <!-- Key Metrics -->
-    <v-row>
-      <v-col cols="12" lg="8">
-        <v-card class="section-card glass-card">
-          <v-card-title class="section-title">
-            <v-icon class="me-2" color="success">mdi-chart-box</v-icon>
-            Key Metrics
-          </v-card-title>
-          <v-card-text>
-            <div class="metrics-list">
-              <div class="metric-item">
-                <div class="metric-label">Total Distance</div>
-                <div class="metric-value">{{ totalDistance.toLocaleString() }} km</div>
-                <div class="metric-trend positive">+12.5% vs last month</div>
-              </div>
-              <div class="metric-item">
-                <div class="metric-label">Fuel Consumption</div>
-                <div class="metric-value">{{ totalFuelConsumption.toLocaleString() }} L</div>
-                <div class="metric-trend negative">-5.2% vs last month</div>
-              </div>
-              <div class="metric-item">
-                <div class="metric-label">Maintenance Cost</div>
-                <div class="metric-value">{{ totalMaintenanceCost.toLocaleString() }} ETB</div>
-                <div class="metric-trend positive">+8.7% vs last month</div>
-              </div>
-              <div class="metric-item">
-                <div class="metric-label">Vehicle Uptime</div>
-                <div class="metric-value">{{ vehicleUptime.toFixed(1) }}%</div>
-                <div class="metric-trend positive">+2.1% vs last month</div>
-              </div>
-            </div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-      
-      <v-col cols="12" lg="4">
-        <v-card class="section-card glass-card">
-          <v-card-title class="section-title">
-            <v-icon class="me-2" color="warning">mdi-alert</v-icon>
-            Active Alerts
-          </v-card-title>
-          <v-card-text>
-            <div v-if="activeAlerts.length === 0" class="text-center py-4 text-muted">
-              No active alerts
-            </div>
-            <div v-else class="alerts-list">
-              <div
-                v-for="alert in activeAlerts.slice(0, 5)"
-                :key="alert.id"
-                class="alert-item"
-              >
-                <div class="d-flex align-center">
-                  <v-icon
-                    :color="getAlertColor(alert.severity)"
-                    size="small"
-                    class="me-2"
-                  >
-                    mdi-alert-circle
-                  </v-icon>
-                  <div class="flex-grow-1">
-                    <div class="font-weight-medium">{{ alert.description }}</div>
-                    <div class="text-caption text-muted">
-                      {{ alert.licensePlate || alert.cardNumber }}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
+
 
     <!-- Export Options -->
-    <div class="export-section">
-      <v-card class="section-card glass-card">
-        <v-card-title class="section-title">
-          <v-icon class="me-2" color="success">mdi-download</v-icon>
-          Export Analytics & Reports
-        </v-card-title>
-        <v-card-text>
-          <v-row>
-            <v-col cols="12" sm="6" md="3">
-              <v-btn
-                block
-                color="primary"
-                variant="outlined"
-                prepend-icon="mdi-file-excel"
-                class="export-btn"
-                @click="exportToExcel"
-              >
-                Export to Excel
-              </v-btn>
-            </v-col>
-            <v-col cols="12" sm="6" md="3">
-              <v-btn
-                block
-                color="error"
-                variant="outlined"
-                prepend-icon="mdi-file-pdf-box"
-                class="export-btn"
-                @click="exportToPDF"
-              >
-                Export to PDF
-              </v-btn>
-            </v-col>
-            <v-col cols="12" sm="6" md="3">
-              <v-btn
-                block
-                color="success"
-                variant="outlined"
-                prepend-icon="mdi-file-csv"
-                class="export-btn"
-                @click="exportToCSV"
-              >
-                Export to CSV
-              </v-btn>
-            </v-col>
-            <v-col cols="12" sm="6" md="3">
-              <v-btn
-                block
-                color="info"
-                variant="outlined"
-                prepend-icon="mdi-chart-box"
-                class="export-btn"
-                @click="generateReport"
-              >
-                Generate Report
-              </v-btn>
-            </v-col>
-          </v-row>
-        </v-card-text>
-      </v-card>
-    </div>
+ 
 
     <!-- Success Snackbar -->
     <v-snackbar

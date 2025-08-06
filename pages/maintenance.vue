@@ -219,7 +219,7 @@
         </v-col>
 
         <!-- Quick Actions & Stats -->
-        <v-col cols="12" lg="4">
+        <v-col cols="12" lg="12" md="12">
           <!-- Maintenance Statistics -->
           <v-card class="content-card" elevation="0">
             <v-card-title class="card-title">
@@ -269,76 +269,7 @@
           </v-card>
 
           <!-- Quick Actions -->
-          <v-card class="content-card" elevation="0">
-            <v-card-title class="card-title">
-              <v-icon class="title-icon" color="success">mdi-lightning-bolt</v-icon>
-              <span class="title-text">Quick Actions</span>
-            </v-card-title>
-            <v-card-text>
-              <div class="actions-grid">
-                <v-btn
-                  block
-                  color="primary"
-                  variant="outlined"
-                  prepend-icon="mdi-plus"
-                  class="action-btn"
-                  @click="showServiceDialog = true"
-                >
-                  Schedule Service
-                </v-btn>
-                <v-btn
-                  block
-                  color="success"
-                  variant="outlined"
-                  prepend-icon="mdi-wrench"
-                  class="action-btn"
-                  @click="showMaintenanceDialog = true"
-                >
-                  Add Record
-                </v-btn>
-                <v-btn
-                  block
-                  color="info"
-                  variant="outlined"
-                  prepend-icon="mdi-file-chart"
-                  class="action-btn"
-                  @click="generateMaintenanceReport"
-                >
-                  Generate Report
-                </v-btn>
-                <v-btn
-                  block
-                  color="warning"
-                  variant="outlined"
-                  prepend-icon="mdi-export"
-                  class="action-btn"
-                  @click="exportMaintenanceData"
-                >
-                  Export Data
-                </v-btn>
-                <v-btn
-                  block
-                  color="error"
-                  variant="outlined"
-                  prepend-icon="mdi-alert"
-                  class="action-btn"
-                  @click="showUrgentAlerts"
-                >
-                  Urgent Alerts
-                </v-btn>
-                <v-btn
-                  block
-                  color="secondary"
-                  variant="outlined"
-                  prepend-icon="mdi-settings"
-                  class="action-btn"
-                  @click="showMaintenanceSettings"
-                >
-                  Settings
-                </v-btn>
-              </div>
-            </v-card-text>
-          </v-card>
+  
         </v-col>
       </v-row>
     </div>
