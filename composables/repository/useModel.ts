@@ -84,6 +84,24 @@ const deleteModel = async (id: number) => {
     loading.value = false
   }
 }
+const updateModel = async (id: number, body: Model , modelId: number) => {
+      try {
+      const data = await $apiFetch<{ result: Model[] }>(`/model/${id}/${modelId}`, {
+        method: 'PUT',
+        body
+      })
+
+      // modelList.value.push(data.result)
+      let vd = modelList.value.findIndex((v:Model) => v.id == id)
+      modelList.value[vd] = data.result
+
+    } catch (e) {
+      error.value = 'Failed to edit model'
+      console.error(e)
+    } finally {
+      loading.value = false
+    }
+  }
 const changeModelStatus = async (id: number, status: string) => {
   loading.value = true
   try {
@@ -104,6 +122,7 @@ const changeModelStatus = async (id: number, status: string) => {
     getByVendor,
     createModel,
     deleteModel,
+    updateModel,
     changeModelStatus,
     loading,
     error

@@ -60,7 +60,7 @@ export function useCard() {
     }
   }
 
-  const updateCard = async (id: string, body: any) => {
+  const updateCardss = async (id: string, body: any) => {
     loading.value = true
     error.value = null
     try {
@@ -77,6 +77,24 @@ export function useCard() {
 
     } catch (e) {
       error.value = 'Failed to update card'
+      console.error(e)
+    } finally {
+      loading.value = false
+    }
+  }
+    const updateCard = async (id: number, body: Card) => {
+      try {
+      const data = await $apiFetch<{ result: Card[] }>(`/card/${id}`, {
+        method: 'PUT',
+        body
+      })
+
+      // vendorList.value.push(data.result)
+      let vd = cardList.value.findIndex((v:Card) => v.id == id)
+      cardList.value[vd] = data.result
+
+    } catch (e) {
+      error.value = 'Failed to  edit fuel card'
       console.error(e)
     } finally {
       loading.value = false

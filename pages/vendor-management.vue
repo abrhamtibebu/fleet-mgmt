@@ -182,24 +182,41 @@
           color="primary"
           @click.stop="editBrand(brand)"
         ></v-btn>
-        <v-btn
+        <!-- <v-btn
       icon
       size="small"
       variant="text"
-      :color="brand.status === 1 ? 'success' : 'error'"
+      :color="brand.status === 1 ? 'error' : 'success'"
       @click.stop="toggleVendorStatus(brand)"
       :title="brand.status === 1 ? 'Active (click to deactivate)' : 'Inactive (click to activate)'"
     >
-      <v-icon>{{ brand.status === 1 ? 'mdi-check' : 'mdi-close' }}</v-icon>
-    </v-btn>
+      <v-icon>{{ brand.status === 1 ? 'mdi-close' : 'mdi-check' }}</v-icon>
+    </v-btn> -->
+     <v-tooltip location="top">
+    <template v-slot:activator="{ props }">
+      <v-btn
+        v-bind="props"
+        icon
+        size="small"
+        variant="text"
+        :color="brand.status === 1 ? 'error' : 'success'"
+        @click.stop="toggleVendorStatus(brand)"
+      >
+        <v-icon>{{ brand.status === 1 ? 'mdi-close' : 'mdi-check' }}</v-icon>
+      </v-btn>
+    </template>
+    <span>
+      {{ brand.status === 1 ? 'Active (click to deactivate)' : 'Inactive (click to activate)' }}
+    </span>
+  </v-tooltip>
         <!-- DELETE BUTTON GOES HERE -->
-        <v-btn
+        <!-- <v-btn
   icon="mdi-delete"
   size="small"
   variant="text"
   color="error"
   @click.stop="deleteBrandItem(brand)"
-></v-btn>
+></v-btn> -->
       </div>
     </template>
   </v-list-item>
@@ -255,24 +272,32 @@
                           color="success"
                           @click.stop="editModel(model)"
                         ></v-btn>
+                        <v-tooltip location="top">
+    <template v-slot:activator="{ props }">
                         <v-btn
+     v-bind="props"
       icon
       size="small"
       variant="text"
-      :color="model.status === 1 ? 'success' : 'error'"
+      :color="model.status === 1 ? 'error' : 'success'"
       @click.stop="toggleModelStatus(model)"
       :title="model.status === 1 ? 'Active (click to deactivate)' : 'Inactive (click to activate)'"
     >
-      <v-icon>{{ model.status === 1 ? 'mdi-check' : 'mdi-close' }}</v-icon>
+      <v-icon>{{ model.status === 1 ? 'mdi-close' : ' mdi-check' }}</v-icon>
     </v-btn>
+     </template>
+    <span>
+      {{ model.status === 1 ? 'Active (click to deactivate)' : 'Inactive (click to activate)' }}
+    </span>
+  </v-tooltip>
                         
-                        <v-btn
+                        <!-- <v-btn
   icon="mdi-delete"
   size="small"
   variant="text"
   color="error"
   @click.stop="deleteModelItem(model)"
-></v-btn>
+></v-btn> -->
                       </div>
                     </template>
                   </v-list-item>
@@ -297,7 +322,7 @@
                 icon="mdi-plus"
                 variant="text"
                 size="small"
-                @click="showCardDialog = true"
+                @click="resetCardForm(), showCardDialog = true, editingCard = false"
               ></v-btn>
             </v-card-title>
             <v-card-text>
@@ -319,7 +344,7 @@
 
                     <div class="card-info">
                       <v-icon size="small" class="me-2">mdi-credit-card</v-icon>
-                      <span class="font-weight-medium">{{(item.cardNumber) }}</span>
+                      <span class="font-weight-medium">{{(item.number) }}</span>
                     </div>
                   </template>
                   <!-- <template v-slot:item.balance="{ item }"> -->
@@ -355,15 +380,33 @@
       :title="'View details for ' + (item.number)"
     ></v-btn> -->
     <v-btn
+      icon="mdi-gas-station"
+      size="small"
+      variant="text"
+      color="success"
+      @click.stop="openRefillDialog(item)"
+      :disabled="item.balance <= 0"
+      :title="item.balance <= 0 ? 'Card is depleted' : 'Refill card'"
+    ></v-btn>
+  
+    <v-tooltip location="top">
+    <template v-slot:activator="{ props }">
+    <v-btn
+      v-bind="props"
       icon
       size="small"
       variant="text"
-      :color="item.status === 1 ? 'success' : 'error'"
+      :color="item.status === 1 ? 'error' : 'success'"
       @click.stop="toggleCardStatus(item)"
       :title="item.status === 1 ? 'Active (click to deactivate)' : 'Inactive (click to activate)'"
 >
-      <v-icon>{{ item.status === 1 ? 'mdi-check' : 'mdi-close' }}</v-icon>
+      <v-icon>{{ item.status === 1 ? 'mdi-close' : ' mdi-check' }}</v-icon>
     </v-btn>
+     </template>
+    <span>
+      {{ item.status === 1 ? 'Active (click to deactivate)' : 'Inactive (click to activate)' }}
+    </span>
+  </v-tooltip>
     <v-btn
       icon="mdi-pencil"
       size="small"
@@ -701,7 +744,7 @@
                 <label class="detail-label">Card Number</label>
                 <div class="detail-value">
                   <v-icon size="small" class="me-2">mdi-credit-card</v-icon>
-                  {{ maskCardNumber(selectedCard.number) }}
+                  {{(selectedCard.number) }}
                 </div>
               </div>
             </v-col>
@@ -797,7 +840,7 @@
               <div class="d-flex align-center">
                 <v-icon class="me-2">mdi-credit-card</v-icon>
                 <div>
-                  <div class="font-weight-medium">{{ maskCardNumber(selectedCardForRefill.number) }}</div>
+                  <div class="font-weight-medium">{{(selectedCardForRefill.number) }}</div>
                   <div class="text-caption">Current Balance: {{ selectedCardForRefill.balance.toLocaleString() }} ETB</div>
                 </div>
               </div>
@@ -920,8 +963,8 @@ import { ref, computed, onMounted } from 'vue'
 
 
 const {createVendor, getVendor, vendorList, editVendor, deleteVendor, changeVendorStatus} = useVendor()
-const {createModel, getModel, modelList, deleteModel, changeModelStatus} = useModel()
-const {createCard, getCard, getUsers, cardList, usersList , deleteCard, changeCardStatus} = useCard()
+const {createModel, getModel, modelList, deleteModel,updateModel, changeModelStatus} = useModel()
+const {createCard, getCard, getUsers, cardList, usersList ,updateCard, deleteCard, changeCardStatus} = useCard()
 
 // Reactive data
 // neww
@@ -1099,19 +1142,29 @@ const confirmDeleteBrand = async () => {
 }
 
 const confirmDeleteModel = async () => {
+  if (!modelToDelete.value || !modelToDelete.value.id) {
+    showErrorMessage('No model selected for deletion.')
+    return
+  }
+
   deletingModel.value = true
+
   try {
     await deleteModel(modelToDelete.value.id)
+
     modelList.value = modelList.value.filter(m => m.id !== modelToDelete.value.id)
     showSuccessMessage('Model deleted successfully')
     showDeleteModelDialog.value = false
   } catch (error) {
-    showErrorMessage('Failed to delete model: ' + (error.value || error.message))
+    // ✅ Show only backend error from response
+    const backendErrorMessage = error?.response?.data?.error || 'Failed to delete model'
+    showErrorMessage(backendErrorMessage)
   } finally {
     deletingModel.value = false
     modelToDelete.value = null
   }
 }
+
 
 const confirmDeleteCard = async () => {
   deletingCard.value = true

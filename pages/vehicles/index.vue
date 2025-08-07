@@ -26,7 +26,7 @@
             color="primary"
             prepend-icon="mdi-plus"
             class="vehicles-btn"
-            @click="showAddDialog = true"
+            @click=" resetVehicleForm(), showAddDialog = true, editingVehicle = false" 
           >
             Add New Vehicle
           </v-btn>
@@ -134,6 +134,14 @@
       @click="addMileageEntry(vehicle)"
     >
       Fuel
+    </v-btn>
+     <v-btn
+      variant="outlined"
+      size="small"
+      class="vehicle-btn"
+      @click="vehicleDetail(vehicle)"
+    >
+      Detail
     </v-btn>
   </v-card-actions>
 </v-card>
@@ -300,6 +308,62 @@
       </v-card>
     </v-dialog>
     <!-- </v-form> -->
+<!-- detail records dialog  -->
+ <v-dialog v-model="vehicleDetailDialog" max-width="700px">
+  <v-card>
+    <v-card-title>
+      <v-icon class="me-2" color="primary">mdi-details</v-icon>
+      Vehicle Details - {{ selectedVehicle?.plateNo }}
+    </v-card-title>
+
+    <v-card-text>
+      <!-- Fuel Records -->
+      <v-row>
+        <v-col cols="12" md="6">
+          <h1 class="text-subtitle-1 mb-2" style="font-weight: bold; font-size: 30px;">Fuel Records</h1>
+          <div v-if="selectedVehicle?.fuelRecord?.length">
+            <div
+              v-for="(fuel, index) in selectedVehicle.fuelRecord"
+              :key="'fuel-' + index"
+              class="mb-3 pa-3 border rounded"
+            >
+              <div><strong>Quantity:</strong> {{ fuel.quantity }}</div>
+              <div><strong>Amount:</strong> {{ fuel.amount }}</div>
+              <div><strong>Odometer:</strong> {{ fuel.odometerReading }}</div>
+              <div><strong>Fuel Station:</strong> {{ fuel.fuelStation }}</div>
+              <div><strong>Date:</strong> {{ formatDate(fuel.createdAt) }}</div>
+            </div>
+          </div>
+          <div v-else>No fuel records available.</div>
+        </v-col>
+
+      <!-- Maintenance Records -->
+        <v-col cols="12" md="6">
+          <h1 class="text-subtitle-1 mb-2" style="font-weight: bold;">Maintenance Records</h1>
+          <div v-if="selectedVehicle?.maintenanceRecord?.length">
+            <div
+              v-for="(maint, index) in selectedVehicle.maintenanceRecord"
+              :key="'maint-' + index"
+              class="mb-3 pa-3 border rounded"
+            >
+              <div><strong>Service Type:</strong> {{ maint.serviceType }}</div>
+              <div><strong>Total Cost:</strong> {{ maint.totalCost }}</div>
+              <div><strong>Serviced On:</strong> {{ maint.servicedOn }}</div>
+              <div><strong>Service Provider:</strong> {{ maint.serviceProvider }}</div>
+              <div><strong>Remark:</strong> {{ maint.remark }}</div>
+            </div>
+          </div>
+          <div v-else>No maintenance records available.</div>
+        </v-col>
+      </v-row>
+    </v-card-text>
+
+    <v-card-actions>
+      <v-spacer></v-spacer>
+      <v-btn text @click="vehicleDetailDialog = false">Close</v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
 
         <!-- Success Snackbar -->
     <v-snackbar
@@ -344,11 +408,12 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
+// import vehicles from "~/server/api/vehicles";
 const { $apiFetch } = useNuxtApp();
 const vehicleFormRef = ref();
 
 // Composables
-const { vehicleList, loading, getVehicles, createVehicle, updateVehicle, vehicleTypes, statusMap } = useVehicles();
+const { vehicleList, loading, getVehicles, createVehicle, updateVehicle, vehicleTypes, statusMap,getVehicleById } = useVehicles();
 
 // Vehicle status options for the form
 const vehicleStatusOptions = computed(() => {
@@ -358,7 +423,7 @@ const vehicleStatusOptions = computed(() => {
   }));
 });
 const { getCard, getUsers, cardList, usersList } = useCard();
-const { getByVendor, modelList } = useModel()
+const { getByVendor, modelList } = useModel();
 const {
   vendorList,
   getVendor,
@@ -368,11 +433,14 @@ const {
 const currItem = ref(null)
 const searchQuery = ref("");
 const showAddDialog = ref(false);
+const vehicleDetailDialog = ref(false);
+const selectedVehicle = ref(null);
 const editingVehicle = ref(null);
 const addFuelModal = ref(false)
 const addMainModal = ref(false)
 const saving = ref(false);
 const formValid = ref(false);
+// const vehicles = ref([]);
 const vehicleForm = ref({
   plateNo: "",
   vendorId: "",
@@ -473,7 +541,7 @@ const saveVehicle = async () => {
       showSuccessMessage('Vehicle created successfully')
     }
     showAddDialog.value = false;
-    resetForm();
+    resetVehicleForm();
   } catch (error) {
     showErrorMessage(editingVehicle.value ? 'Failed to update vehicle' : 'Failed to create vehicle')
   } finally {
@@ -498,7 +566,7 @@ const onBrandChange = async (item: Number) => {
 const getStatusDetails = (status: Number) => {
   return statusMap.find(v => v.id == status)
 }
-const resetForm = () => {
+const resetVehicleForm = () => {
   vehicleForm.value = {
     plateNo: "",
     vendorId: null,
@@ -512,6 +580,20 @@ const resetForm = () => {
   };
   editingVehicle.value = null;
 };
+// async function loadVehicles() {
+//   vehicles.value = await getVehicles()
+// }
+
+// When clicking Detail
+async function vehicleDetail(vehicle) {
+  try {
+    const detail = await getVehicleById(vehicle.id)
+    selectedVehicle.value = detail
+    vehicleDetailDialog.value = true
+  } catch (error) {
+    console.error('Failed to load vehicle detail', error)
+  }
+}
 
 // Lifecycle
 onMounted(async () => {

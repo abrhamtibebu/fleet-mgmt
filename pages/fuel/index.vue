@@ -157,6 +157,9 @@
                 class="fuel-table"
                 density="comfortable"
               >
+              <template v-slot:item.createdBy="{ item }">
+    {{ getUserName(item.createdBy) }}
+  </template>
                 <template v-slot:item.vehicleId="{ item }">
                   <div class="d-flex align-center">
                     <v-icon size="small" class="me-2">mdi-truck</v-icon>
@@ -180,7 +183,7 @@
                 <template v-slot:item.createdAt="{ item }">
                   {{ formatDate(item.createdAt) }}
                 </template>
-                <template v-slot:item.actions="{ item }">
+                <!-- <template v-slot:item.actions="{ item }">
                   <v-btn
                     icon="mdi-eye"
                     size="small"
@@ -188,7 +191,7 @@
                     color="primary"
                     @click="viewFuelRecord(item)"
                   ></v-btn>
-                </template>
+                </template> -->
               </v-data-table>
             </div>
           </v-card-text>
@@ -486,7 +489,7 @@ import moment from 'moment'
 // Composables
 const { vehicleList, getVehicles } = useVehicles()
 const { fuelRecords, fuelCards, loading, getFuelRecords, getFuelCards, lowBalanceCards, activeCards, refillFuelCard } = useFuel()
-const {cardList, getCard} = useCard()
+const {cardList, getCard,getUsers, usersList} = useCard()
 // Reactive data
 const activeTab = ref('records')
 const searchQuery = ref('')
@@ -497,6 +500,11 @@ const showFuelEntryDialog = ref(false)
 const showCardDialog = ref(false)
 const saving = ref(false)
 const fuelFormValid = ref(false)
+const fuelRecord = ref([])
+const users = ref([])
+const loadingg= ref(true)
+
+
 
 // Refill functionality
 const showRefillDialog = ref(false)
@@ -537,8 +545,10 @@ const fuelRecordHeaders = [
   { title: 'Quantity', key: 'quantity', sortable: true },
   { title: 'Amount', key: 'amount', sortable: true },
   { title: 'Station', key: 'fuelStation', sortable: true },
+  // { title: 'created By', key: 'createdBy', sortable: true },
+
   // { title: 'Efficiency', key: 'fuelEfficiency', sortable: true },
-  { title: 'Actions', key: 'actions', sortable: false }
+  //{ title: 'Actions', key: 'actions', sortable: false }
 ]
 
 // Computed properties
@@ -684,13 +694,41 @@ onMounted(async () => {
     await Promise.all([
       getVehicles(),
       getFuelRecords(),
-      getCard()
+      getCard(),
+      getUsers()
       
     ])
+    
+    
   } catch (error) {
     console.error('Error loading fuel data:', error)
   }
-})
+});
+
+// const userMap = computed(() => {
+//   const map = {};
+//   cardList.value.forEach(cardList => {
+//     map[cardList.id] = cardList.name; // or user.first_name + ' ' + user.last_name
+//   });
+//   return map;
+// });
+
+// Add names to fuel records
+const fuelRecordsWithNames = computed(() => {
+  return fuelRecords.value.map(record => {
+    return {
+      ...record,
+      createdByName: userMap.value[record.createdBy] || 'Unknown'
+    };
+  });
+});
+
+const getUserName = (userId) => {
+  const user = users.value.find(u => u.id === userId);
+  return user ? user.name : 'Unknown';
+};
+// Filtered fuel records (if you need filtering)
+
 </script>
 
 <style scoped>
