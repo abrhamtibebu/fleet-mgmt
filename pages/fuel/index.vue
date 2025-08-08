@@ -157,7 +157,7 @@
                 class="fuel-table"
                 density="comfortable"
               >
-              <template v-slot:item.createdBy="{ item }">
+             <template v-slot:item.createdBy="{ item }">
     {{ getUserName(item.createdBy) }}
   </template>
                 <template v-slot:item.vehicleId="{ item }">
@@ -545,7 +545,7 @@ const fuelRecordHeaders = [
   { title: 'Quantity', key: 'quantity', sortable: true },
   { title: 'Amount', key: 'amount', sortable: true },
   { title: 'Station', key: 'fuelStation', sortable: true },
-  // { title: 'created By', key: 'createdBy', sortable: true },
+  { title: 'created By', key: 'createdBy', sortable: true },
 
   // { title: 'Efficiency', key: 'fuelEfficiency', sortable: true },
   //{ title: 'Actions', key: 'actions', sortable: false }
@@ -704,31 +704,17 @@ onMounted(async () => {
     console.error('Error loading fuel data:', error)
   }
 });
-
-// const userMap = computed(() => {
-//   const map = {};
-//   cardList.value.forEach(cardList => {
-//     map[cardList.id] = cardList.name; // or user.first_name + ' ' + user.last_name
-//   });
-//   return map;
-// });
-
-// Add names to fuel records
-const fuelRecordsWithNames = computed(() => {
-  return fuelRecords.value.map(record => {
-    return {
-      ...record,
-      createdByName: userMap.value[record.createdBy] || 'Unknown'
-    };
-  });
+const usersMap = computed(() => {
+  const map = {};
+  if (usersList.value) {
+    usersList.value.forEach(user => {
+      map[user.id] = user.name;
+    });
+  }
+  return map;
 });
 
-const getUserName = (userId) => {
-  const user = users.value.find(u => u.id === userId);
-  return user ? user.name : 'Unknown';
-};
-// Filtered fuel records (if you need filtering)
-
+const getUserName = (userId) => usersMap.value[userId] || userId;
 </script>
 
 <style scoped>
