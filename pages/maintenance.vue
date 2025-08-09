@@ -692,7 +692,7 @@ const maintenanceHistoryHeaders = [
   { title: 'Date', key: 'createdAt', sortable: true },
   { title: 'Cost', key: 'cost', sortable: true },
   { title: 'Recorded By', key: 'createdBy', sortable: true },
-  { title: 'Actions', key: 'actions', sortable: false }
+ // { title: 'Actions', key: 'actions', sortable: false }
 ]
 
 // Mock maintenance history data

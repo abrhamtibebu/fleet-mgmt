@@ -168,12 +168,13 @@
                   v-model="showNotifications"
                   :close-on-content-click="false"
                   offset-y
-                  location="bottom center"
+                  location="top center" 
+
                   class="notification-menu"
                   :max-width="400"
                   :min-width="350"
                 >
-                  <v-card class="notification-card">
+                  <v-card class="notification-card rounded ">
                     <!-- Pointer/Caret -->
                     <div class="notification-pointer"></div>
                     
@@ -1136,14 +1137,23 @@ onMounted(() => {
   opacity: 0.3;
 }
 
-.notification-menu {
+/* .notification-menu {
   margin-top: 8px;
   z-index: 1000;
   position: absolute;
   right: 0;
   top: 100%;
+} */
+ .notification-menu {
+  position: fixed !important;       
+  top: 30 !important;                
+  left: 80% !important;             
+  transform: translateX(-50%) !important; 
+  max-width: 400px;
+  min-width: 350px;
+  z-index: 3000;                    
+  margin-top: 50 !important;         
 }
-
 /* Notification Card Styles */
 .notification-card {
   border-radius: 16px;
@@ -1152,6 +1162,7 @@ onMounted(() => {
   max-height: 500px;
   position: relative;
   background: white;
+  margin-top: 70px;
 }
 
 /* Notification Pointer/Caret */
