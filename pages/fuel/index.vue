@@ -350,8 +350,11 @@
 
     <!-- Add Fuel Entry Dialog -->
     <v-dialog v-model="showFuelEntryDialog" max-width="600px">
-      <v-card>
-        <v-card-title class="text-h6 pa-4">Add Fuel Entry</v-card-title>
+      <v-card class="dialog-card">
+        <v-card-title class="dialog-title">
+          <span class="title-icon-badge"><v-icon size="20" color="warning">mdi-gas-station</v-icon></span>
+          Add Fuel Entry
+        </v-card-title>
         <v-card-text class="pa-4">
           <v-form ref="fuelForm" v-model="fuelFormValid">
             <v-row>
@@ -421,17 +424,10 @@
             </v-row>
           </v-form>
         </v-card-text>
-        <v-card-actions class="pa-4">
+        <v-card-actions class="dialog-actions">
           <v-spacer></v-spacer>
           <v-btn variant="outlined" @click="showFuelEntryDialog = false">Cancel</v-btn>
-          <v-btn
-            color="success"
-            :loading="saving"
-            :disabled="!fuelFormValid"
-            @click="saveFuelEntry"
-          >
-            Add Entry
-          </v-btn>
+          <v-btn color="warning" :loading="saving" :disabled="!fuelFormValid" @click="saveFuelEntry" prepend-icon="mdi-content-save">Add Entry</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

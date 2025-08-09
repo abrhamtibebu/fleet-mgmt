@@ -437,7 +437,7 @@
     <v-dialog v-model="showBrandDialog" max-width="500px" persistent>
       <v-card class="dialog-card">
         <v-card-title class="dialog-title">
-          <v-icon class="me-2" color="primary">mdi-tag</v-icon>
+          <span class="title-icon-badge"><v-icon size="20" color="warning">mdi-tag</v-icon></span>
           {{ editingBrand ? 'Edit Brand' : 'Add New Brand' }}
         </v-card-title>
         <v-card-text>
@@ -488,7 +488,7 @@
     <v-dialog v-model="showModelDialog" max-width="600px" persistent>
       <v-card class="dialog-card">
         <v-card-title class="dialog-title">
-          <v-icon class="me-2" color="success">mdi-car</v-icon>
+          <span class="title-icon-badge"><v-icon size="20" color="warning">mdi-car</v-icon></span>
           {{ editingModel ? 'Edit Model' : 'Add New Model' }}
         </v-card-title>
         <v-card-text>
@@ -570,7 +570,7 @@
     <v-dialog v-model="showCardDialog" max-width="600px" persistent>
       <v-card class="dialog-card">
         <v-card-title class="dialog-title">
-          <v-icon class="me-2" color="info">mdi-credit-card</v-icon>
+          <span class="title-icon-badge"><v-icon size="20" color="warning">mdi-credit-card</v-icon></span>
           {{ editingCard ? 'Edit Card' : 'Add New Card' }}
         </v-card-title>
         <v-card-text>
@@ -678,7 +678,7 @@
 <v-dialog v-model="showDeleteBrandDialog" max-width="500px" persistent>
   <v-card class="dialog-card">
     <v-card-title class="dialog-title">
-      <v-icon class="me-2" color="error">mdi-alert-circle</v-icon>
+      <span class="title-icon-badge"><v-icon size="20" color="error">mdi-alert-circle</v-icon></span>
       Confirm Brand Deletion
     </v-card-title>
     <v-card-text>
@@ -699,7 +699,7 @@
 <v-dialog v-model="showDeleteModelDialog" max-width="500px" persistent>
   <v-card class="dialog-card">
     <v-card-title class="dialog-title">
-      <v-icon class="me-2" color="error">mdi-alert-circle</v-icon>
+      <span class="title-icon-badge"><v-icon size="20" color="error">mdi-alert-circle</v-icon></span>
       Confirm Model Deletion
     </v-card-title>
     <v-card-text>
@@ -717,7 +717,7 @@
 <v-dialog v-model="showDeleteCardDialog" max-width="500px" persistent>
   <v-card class="dialog-card">
     <v-card-title class="dialog-title">
-      <v-icon class="me-2" color="error">mdi-alert-circle</v-icon>
+      <span class="title-icon-badge"><v-icon size="20" color="error">mdi-alert-circle</v-icon></span>
       Confirm Card Deletion
     </v-card-title>
     <v-card-text>

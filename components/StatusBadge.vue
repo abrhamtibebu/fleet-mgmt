@@ -1,12 +1,18 @@
 <template>
-  <v-chip :color="props.status.color" class="status-badge" size="small" props.status.label>
-    {{ props.status.label }}
+  <v-chip :color="status?.color || 'primary'" class="status-badge" size="small">
+    {{ status?.label || 'Unknown' }}
   </v-chip>
 </template>
 
 <script setup lang="ts">
+interface Status {
+  id?: number
+  color?: string
+  label?: string
+}
+
 const props = defineProps<{
-  status: Object
+  status?: Status
 }>()
 </script>
 

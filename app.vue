@@ -40,4 +40,53 @@ html, body {
 ::-webkit-scrollbar-thumb:hover {
   background: #495057;
 }
+
+/* Global dialog look & feel */
+.dialog-card {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.08);
+  background: #fff;
+}
+.dialog-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  color: #040707;
+  font-size: 1.25rem;
+  font-weight: 700;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+.dialog-actions {
+  padding: 20px 24px;
+  background: #fff;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+.dialog-subtitle {
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+.title-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 193, 7, 0.15);
+  border-radius: 10px;
+  padding: 6px;
+}
+.section-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 193, 7, 0.12);
+  border-radius: 8px;
+  padding: 4px;
+}
+/* Compact grid spacing helper */
+.grid-gap-sm > .v-col {
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}
 </style>

@@ -2,9 +2,12 @@
   <v-dialog v-model="showDialog" max-width="500px" persistent>
     <v-card class="dialog-card">
       <v-card-title class="dialog-title">
-        <v-icon class="me-2" color="success">mdi-gas-station</v-icon>
+        <span class="title-icon-badge"><v-icon size="20" color="warning">mdi-gas-station</v-icon></span>
         Refill Fuel Card
       </v-card-title>
+      <div class="dialog-subtitle pa-4 pt-2" v-if="selectedCard">
+        Add balance to the selected fuel card. This will be recorded as a refill transaction.
+      </div>
       <v-card-text>
         <div v-if="selectedCard" class="refill-info mb-4">
           <v-alert type="info" variant="tonal" class="mb-4">
@@ -25,6 +28,7 @@
               <v-text-field
                 v-model="refillForm.amount"
                 label="Refill Amount (ETB)"
+                placeholder="Enter amount"
                 type="number"
                 variant="outlined"
                 :rules="[
@@ -43,9 +47,9 @@
               <v-textarea
                 v-model="refillForm.notes"
                 label="Refill Notes (Optional)"
+                placeholder="Reason or memo"
                 variant="outlined"
                 rows="3"
-                placeholder="Reason for refill, location, or any additional notes..."
               ></v-textarea>
             </v-col>
             <v-col cols="12">
@@ -71,12 +75,12 @@
           Cancel
         </v-btn>
         <v-btn
-          color="success"
+          color="warning"
           :loading="processing"
           :disabled="!formValid"
           @click="processRefill"
+          prepend-icon="mdi-gas-station"
         >
-          <v-icon class="me-2">mdi-gas-station</v-icon>
           Process Refill
         </v-btn>
       </v-card-actions>

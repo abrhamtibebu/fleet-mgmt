@@ -311,36 +311,18 @@
 
         <!-- Logout Confirmation Dialog -->
         <v-dialog v-model="showLogoutPage" max-width="400" persistent>
-          <v-card class="modern-logout-dialog">
-            <v-card-title class="d-flex align-center justify-center mb-4">
-              <v-avatar color="error" size="48" class="me-3">
-                <v-icon size="24" color="white">mdi-logout</v-icon>
-              </v-avatar>
-              <span class="text-h5 font-weight-bold">Sign Out</span>
+          <v-card class="dialog-card">
+            <v-card-title class="dialog-title">
+              <span class="title-icon-badge"><v-icon size="20" color="warning">mdi-logout</v-icon></span>
+              Confirm Logout
             </v-card-title>
-            <v-card-text class="text-center mb-6">
-              <p class="text-body-1 mb-2">Are you sure you want to log out of your account?</p>
-              <p class="text-caption text-medium-emphasis">You'll need to sign in again to access the dashboard.</p>
+            <v-card-text>
+              Are you sure you want to log out?
             </v-card-text>
-            <v-card-actions class="justify-center pb-6">
-              <v-btn
-                variant="outlined"
-                color="primary"
-                @click="showLogoutPage = false"
-                class="px-6"
-              >
-                Cancel
-              </v-btn>
-              <v-btn
-                color="error"
-                variant="elevated"
-                prepend-icon="mdi-logout"
-                @click="handleLogout"
-                class="px-6"
-                :loading="logoutLoading"
-              >
-                Sign Out
-              </v-btn>
+            <v-card-actions class="dialog-actions">
+              <v-spacer></v-spacer>
+              <v-btn variant="outlined" @click="showLogoutPage = false">Cancel</v-btn>
+              <v-btn color="warning" @click="logout">Logout</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>

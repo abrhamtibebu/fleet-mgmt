@@ -237,9 +237,12 @@
 
     <!-- Add Mileage Entry Dialog -->
     <v-dialog v-model="showMileageEntryDialog" max-width="600px">
-      <v-card>
-        <v-card-title class="text-h6 pa-4">Add Mileage Entry</v-card-title>
-        <v-card-text class="pa-4">
+      <v-card class="dialog-card">
+        <v-card-title class="dialog-title">
+          <span class="title-icon-badge"><v-icon size="20" color="warning">mdi-speedometer</v-icon></span>
+          Add Mileage Entry
+        </v-card-title>
+        <v-card-text>
           <v-form ref="mileageForm" v-model="mileageFormValid">
             <v-row>
               <v-col cols="12">
@@ -295,17 +298,10 @@
             </v-row>
           </v-form>
         </v-card-text>
-        <v-card-actions class="pa-4">
+        <v-card-actions class="dialog-actions">
           <v-spacer></v-spacer>
           <v-btn variant="outlined" @click="showMileageEntryDialog = false">Cancel</v-btn>
-          <v-btn
-            color="primary"
-            :loading="saving"
-            :disabled="!mileageFormValid"
-            @click="saveMileageEntry"
-          >
-            Add Entry
-          </v-btn>
+          <v-btn color="warning" :loading="saving" :disabled="!mileageFormValid" @click="saveMileageEntry">Add Entry</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

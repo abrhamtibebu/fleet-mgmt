@@ -153,32 +153,60 @@
     <!-- Add/Edit Vehicle Dialog -->
     <!-- <v-form ref="vehicleFormRef" v-model="formValid"> -->
 
-    <v-dialog v-model="showAddDialog" max-width="600px">
-      <v-card>
-        <v-card-title class="text-h6 pa-4">
-          <v-icon class="me-2" color="primary">mdi-truck</v-icon>
+    <v-dialog v-model="showAddDialog" max-width="720px" persistent>
+      <v-card class="dialog-card">
+        <v-card-title class="dialog-title">
+          <span class="title-icon-badge"><v-icon size="20" color="warning">mdi-clipboard-plus-outline</v-icon></span>
           {{ editingVehicle ? `Edit Vehicle - ${editingVehicle.plateNo}` : "Add New Vehicle" }}
         </v-card-title>
-        <v-card-text class="pa-4">
+
+        <div class="dialog-subtitle pa-4 pt-2">
+          Provide the vehicle details below. Fields marked with an asterisk are required.
+        </div>
+
+        <v-card-text class="pa-4 pt-0">
           <v-form ref="vehicleFormRef" v-model="formValid">
-            <v-row>
+            <!-- Basic Information -->
+            <div class="form-section-title mb-3">
+              <span class="section-icon-badge"><v-icon size="18" color="warning">mdi-folder-outline</v-icon></span>
+              Basic Information
+            </div>
+            <v-row class="grid-gap-sm">
               <v-col cols="12" sm="6">
                 <v-text-field
                   density="compact"
                   v-model="vehicleForm.plateNo"
-                  label="License Plate"
+                  label="License Plate*"
+                  placeholder="Enter license plate"
                   variant="outlined"
                   :rules="[(v) => !!v || 'License plate is required']"
                   required
                 ></v-text-field>
               </v-col>
               <v-col cols="12" sm="6">
+                <v-text-field
+                  density="compact"
+                  hide-spin-buttons
+                  v-model="vehicleForm.year"
+                  label="Year*"
+                  placeholder="Enter year"
+                  type="number"
+                  variant="outlined"
+                  :rules="[(v) => !!v || 'Year is required']"
+                  required
+                ></v-text-field>
+              </v-col>
+            </v-row>
+
+            <v-row class="grid-gap-sm">
+              <v-col cols="12" sm="6">
                 <v-autocomplete
                   density="compact"
                   class="text--black"
                   v-model="vehicleForm.vendorId"
                   :items="vendorList"
-                  label="Vendor"
+                  label="Vendor*"
+                  placeholder="Select vendor"
                   variant="outlined"
                   :rules="[(v) => !!v || 'Vendor is required']"
                   required
@@ -192,7 +220,8 @@
                   density="compact"
                   v-model="vehicleForm.modelId"
                   :items="modelList"
-                  label="Model"
+                  label="Model*"
+                  placeholder="Select model"
                   variant="outlined"
                   :rules="[(v) => !!v || 'Model is required']"
                   required
@@ -201,18 +230,16 @@
                   item-value="id"
                 ></v-autocomplete>
               </v-col>
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  density="compact"
-                  hide-spin-buttons
-                  v-model="vehicleForm.year"
-                  label="Year"
-                  type="number"
-                  variant="outlined"
-                  :rules="[(v) => !!v || 'Year is required']"
-                  required
-                ></v-text-field>
-              </v-col>
+            </v-row>
+
+            <v-divider class="my-4"></v-divider>
+
+            <!-- Assignment & Operations -->
+            <div class="form-section-title mb-3">
+              <span class="section-icon-badge"><v-icon size="18" color="warning">mdi-folder-outline</v-icon></span>
+              Assignment & Operations
+            </div>
+            <v-row class="grid-gap-sm">
               <v-col cols="12" sm="6">
                 <v-autocomplete
                   density="compact"
@@ -220,7 +247,8 @@
                   :items="usersList"
                   item-title="name"
                   item-value="id"
-                  label="Assigned Driver"
+                  label="Assigned Driver*"
+                  placeholder="Select driver"
                   variant="outlined"
                   :rules="[(v) => !!v || 'Driver is required']"
                   required
@@ -231,48 +259,65 @@
                   hide-spin-buttons
                   density="compact"
                   v-model="vehicleForm.currentMileage"
-                  label="Current Mileage (km)"
+                  label="Current Mileage (km)*"
+                  placeholder="Enter current mileage"
                   type="number"
                   variant="outlined"
                   :rules="[(v) => !!v || 'Current mileage is required']"
                   required
                 ></v-text-field>
               </v-col>
+            </v-row>
+
+            <v-row class="grid-gap-sm">
               <v-col cols="12" sm="6">
                 <v-text-field
                   hide-spin-buttons
                   density="compact"
                   v-model="vehicleForm.serviceInterval"
-                  label="Service Interval (km)"
+                  label="Service Interval (km)*"
+                  placeholder="Enter service interval"
                   type="number"
                   variant="outlined"
                   :rules="[(v) => !!v || 'Service interval is required']"
                   required
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" md="6">
-                <v-autocomplete
-                  density="compact"
-                  v-model="vehicleForm.cardId"
-                  :items="cardList"
-                  item-title="number"
-                  item-value="id"
-                  label="Fuel Card"
-                  variant="outlined"
-                  :rules="[(v) => !!v || 'Fuel card is required']"
-                  required
-                ></v-autocomplete>
-              </v-col>
-                  <v-col cols="12" md="6">
+              <v-col cols="12" sm="6">
                 <v-autocomplete
                   density="compact"
                   v-model="vehicleForm.type"
                   :items="vehicleTypes"
                   item-title="name"
                   item-value="id"
-                  label="Vehicle Type"
+                  label="Vehicle Type*"
+                  placeholder="Select vehicle type"
                   variant="outlined"
                   :rules="[(v) => !!v || 'Vehicle type is required']"
+                  required
+                ></v-autocomplete>
+              </v-col>
+            </v-row>
+
+            <v-divider class="my-4"></v-divider>
+
+            <!-- Fuel Card -->
+            <div class="form-section-title mb-3">
+              <span class="section-icon-badge"><v-icon size="18" color="warning">mdi-folder-outline</v-icon></span>
+              Fuel Card
+            </div>
+            <v-row class="grid-gap-sm">
+                  <v-col cols="12" md="6">
+                <v-autocomplete
+                  density="compact"
+                  v-model="vehicleForm.cardId"
+                  :items="cardList"
+                  item-title="number"
+                  item-value="id"
+                  label="Fuel Card*"
+                  placeholder="Select fuel card"
+                  variant="outlined"
+                  :rules="[(v) => !!v || 'Fuel card is required']"
                   required
                 ></v-autocomplete>
               </v-col>
@@ -283,7 +328,7 @@
                    :items="vehicleStatusOptions"
                    item-title="name"
                    item-value="id"
-                   label="Vehicle Status"
+                  label="Vehicle Status*"
                    variant="outlined"
                    :rules="[(v) => !!v || 'Vehicle status is required']"
                    required
@@ -292,75 +337,318 @@
             </v-row>
           </v-form>
         </v-card-text>
-        <v-card-actions class="pa-4 justify-center">
+
+        <v-card-actions class="dialog-actions">
+          <v-spacer></v-spacer>
           <v-btn variant="outlined" @click="showAddDialog = false">
             Cancel
           </v-btn>
           <v-btn 
-            color="primary" 
+            color="warning" 
             :loading="saving" 
             :disabled="!formValid"
             @click="saveVehicle"
+            prepend-icon="mdi-content-save"
           >
-            {{ editingVehicle ? "Update" : "Add" }} Vehicle
+            {{ editingVehicle ? "Update Vehicle" : "Add Vehicle" }}
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
     <!-- </v-form> -->
 <!-- detail records dialog  -->
- <v-dialog v-model="vehicleDetailDialog" max-width="700px">
-  <v-card>
-    <v-card-title>
-      <v-icon class="me-2" color="primary">mdi-details</v-icon>
+<v-dialog v-model="vehicleDetailDialog" max-width="1200px" persistent>
+  <v-card class="dialog-card">
+    <v-card-title class="dialog-title">
+      <v-icon class="me-2" color="primary">mdi-truck</v-icon>
       Vehicle Details - {{ selectedVehicle?.plateNo }}
     </v-card-title>
 
-    <v-card-text>
-      <!-- Fuel Records -->
+    <v-card-text class="pa-0">
+      <!-- Tabs -->
+      <v-tabs
+        v-model="activeTab"
+        color="primary"
+        grow
+        class="vehicle-details-tabs"
+      >
+        <v-tab value="overview" class="vehicle-tab">
+          <v-icon class="me-2">mdi-information</v-icon>
+          Overview
+        </v-tab>
+        <v-tab value="fuel" class="vehicle-tab">
+          <v-icon class="me-2">mdi-gas-station</v-icon>
+          Fuel Records
+        </v-tab>
+        <v-tab value="maintenance" class="vehicle-tab">
+          <v-icon class="me-2">mdi-wrench</v-icon>
+          Maintenance
+        </v-tab>
+        <v-tab value="analytics" class="vehicle-tab">
+          <v-icon class="me-2">mdi-chart-line</v-icon>
+          Analytics
+        </v-tab>
+      </v-tabs>
+
+      <v-window v-model="activeTab" class="vehicle-details-window">
+        <!-- Overview Tab -->
+        <v-window-item value="overview">
+          <div class="overview-content pa-6">
       <v-row>
+              <!-- Vehicle Information Card -->
         <v-col cols="12" md="6">
-          <h1 class="text-subtitle-1 mb-2" style="font-weight: bold; font-size: 30px;">Fuel Records</h1>
-          <div v-if="selectedVehicle?.fuelRecord?.length">
-            <div
+                <v-card class="info-card" elevation="0">
+                  <v-card-title class="info-card-title">
+                    <v-icon class="me-2" color="primary">mdi-car-info</v-icon>
+                    Vehicle Information
+                  </v-card-title>
+                  <v-card-text>
+                    <div class="info-grid">
+                      <div class="info-item">
+                        <div class="info-label">License Plate</div>
+                        <div class="info-value">{{ selectedVehicle?.plateNo }}</div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Brand & Model</div>
+                        <div class="info-value">{{ selectedVehicle?.vendor?.name }} {{ selectedVehicle?.model?.name }}</div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Year</div>
+                        <div class="info-value">{{ selectedVehicle?.year }}</div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Current Mileage</div>
+                        <div class="info-value">{{ selectedVehicle?.currentMileage?.toLocaleString() }} km</div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Assigned Driver</div>
+                        <div class="info-value">{{ usersList.find(x => x.id == selectedVehicle?.driver)?.name || 'Unassigned' }}</div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Status</div>
+                        <div class="info-value">
+                          <StatusBadge :status="getStatusDetails(selectedVehicle?.status)" />
+                        </div>
+                      </div>
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+
+              <!-- Service Status Card -->
+              <v-col cols="12" md="6">
+                <v-card class="info-card" elevation="0">
+                  <v-card-title class="info-card-title">
+                    <v-icon class="me-2" color="warning">mdi-wrench-clock</v-icon>
+                    Service Status
+                  </v-card-title>
+                  <v-card-text>
+                    <div class="service-status-content">
+                      <div class="service-progress-section">
+                        <div class="d-flex align-center justify-space-between mb-2">
+                          <span class="service-label">Service Progress</span>
+                          <span class="service-percentage">{{ getServiceProgress(selectedVehicle) }}%</span>
+                        </div>
+                        <v-progress-linear
+                          :model-value="getServiceProgress(selectedVehicle)"
+                          :color="getServiceColor(selectedVehicle)"
+                          height="12"
+                          rounded
+                          class="service-progress"
+                        ></v-progress-linear>
+                        <div class="service-details mt-4">
+                          <div class="service-detail-item">
+                            <v-icon size="small" class="me-2">mdi-calendar</v-icon>
+                            <span>Last Service: {{ formatDate(selectedVehicle?.lastServiceDate || '2025-01-01') }}</span>
+                          </div>
+                          <div class="service-detail-item">
+                            <v-icon size="small" class="me-2">mdi-speedometer</v-icon>
+                            <span>Service Interval: {{ selectedVehicle?.serviceInterval || 0 }} km</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+            </v-row>
+          </div>
+        </v-window-item>
+
+        <!-- Fuel Records Tab -->
+        <v-window-item value="fuel">
+          <div class="fuel-content pa-6">
+            <div class="d-flex align-center justify-space-between mb-4">
+              <h3 class="section-title">Fuel Records</h3>
+              <v-btn
+                color="primary"
+                prepend-icon="mdi-plus"
+                @click="addMileageEntry(selectedVehicle)"
+              >
+                Add Fuel Record
+              </v-btn>
+            </div>
+            
+            <div v-if="selectedVehicle?.fuelRecord?.length" class="fuel-records-grid">
+              <v-card
               v-for="(fuel, index) in selectedVehicle.fuelRecord"
               :key="'fuel-' + index"
-              class="mb-3 pa-3 border rounded"
-            >
-              <div><strong>Quantity:</strong> {{ fuel.quantity }}</div>
-              <div><strong>Amount:</strong> {{ fuel.amount }}</div>
-              <div><strong>Odometer:</strong> {{ fuel.odometerReading }}</div>
-              <div><strong>Fuel Station:</strong> {{ fuel.fuelStation }}</div>
-              <div><strong>Date:</strong> {{ formatDate(fuel.createdAt) }}</div>
+                class="fuel-record-card"
+                elevation="0"
+              >
+                <v-card-text class="fuel-record-content">
+                  <div class="fuel-record-header">
+                    <div class="fuel-record-date">
+                      <v-icon class="me-2" color="primary">mdi-calendar</v-icon>
+                      {{ formatDate(fuel.createdAt) }}
+            </div>
+                    <v-chip
+                      :color="fuel.quantity > 50 ? 'success' : 'warning'"
+                      size="small"
+                      variant="tonal"
+                    >
+                      {{ fuel.quantity }}L
+                    </v-chip>
+          </div>
+                  <div class="fuel-record-details">
+                    <div class="fuel-detail-item">
+                      <v-icon size="small" class="me-2">mdi-currency-usd</v-icon>
+                      <span class="fuel-label">Amount:</span>
+                      <span class="fuel-value">{{ fuel.amount?.toLocaleString() }} ETB</span>
+                    </div>
+                    <div class="fuel-detail-item">
+                      <v-icon size="small" class="me-2">mdi-speedometer</v-icon>
+                      <span class="fuel-label">Odometer:</span>
+                      <span class="fuel-value">{{ fuel.odometerReading?.toLocaleString() }} km</span>
+                    </div>
+                    <div class="fuel-detail-item">
+                      <v-icon size="small" class="me-2">mdi-gas-station</v-icon>
+                      <span class="fuel-label">Station:</span>
+                      <span class="fuel-value">{{ fuel.fuelStation || 'N/A' }}</span>
+                    </div>
+                  </div>
+                </v-card-text>
+              </v-card>
+            </div>
+            <div v-else class="empty-state">
+              <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-gas-station-off</v-icon>
+              <h3 class="text-h6 text-muted mb-2">No fuel records</h3>
+              <p class="text-muted">Add your first fuel record to get started</p>
             </div>
           </div>
-          <div v-else>No fuel records available.</div>
-        </v-col>
+        </v-window-item>
 
-      <!-- Maintenance Records -->
-        <v-col cols="12" md="6">
-          <h1 class="text-subtitle-1 mb-2" style="font-weight: bold;">Maintenance Records</h1>
-          <div v-if="selectedVehicle?.maintenanceRecord?.length">
-            <div
+        <!-- Maintenance Records Tab -->
+        <v-window-item value="maintenance">
+          <div class="maintenance-content pa-6">
+            <div class="d-flex align-center justify-space-between mb-4">
+              <h3 class="section-title">Maintenance Records</h3>
+              <v-btn
+                color="primary"
+                prepend-icon="mdi-plus"
+                @click="addMainEntry(selectedVehicle)"
+              >
+                Add Maintenance
+              </v-btn>
+            </div>
+            
+            <div v-if="selectedVehicle?.maintenanceRecord?.length" class="maintenance-records-grid">
+              <v-card
               v-for="(maint, index) in selectedVehicle.maintenanceRecord"
               :key="'maint-' + index"
-              class="mb-3 pa-3 border rounded"
-            >
-              <div><strong>Service Type:</strong> {{ maint.serviceType }}</div>
-              <div><strong>Total Cost:</strong> {{ maint.totalCost }}</div>
-              <div><strong>Serviced On:</strong> {{ maint.servicedOn }}</div>
-              <div><strong>Service Provider:</strong> {{ maint.serviceProvider }}</div>
-              <div><strong>Remark:</strong> {{ maint.remark }}</div>
+                class="maintenance-record-card"
+                elevation="0"
+              >
+                <v-card-text class="maintenance-record-content">
+                  <div class="maintenance-record-header">
+                    <div class="maintenance-record-type">
+                      <v-icon class="me-2" color="warning">mdi-wrench</v-icon>
+                      {{ maint.serviceType }}
+            </div>
+                    <v-chip
+                      color="primary"
+                      size="small"
+                      variant="tonal"
+                    >
+                      {{ maint.totalCost?.toLocaleString() }} ETB
+                    </v-chip>
+          </div>
+                  <div class="maintenance-record-details">
+                    <div class="maintenance-detail-item">
+                      <v-icon size="small" class="me-2">mdi-calendar</v-icon>
+                      <span class="maintenance-label">Serviced On:</span>
+                      <span class="maintenance-value">{{ formatDate(maint.servicedOn) }}</span>
+                    </div>
+                    <div class="maintenance-detail-item">
+                      <v-icon size="small" class="me-2">mdi-account</v-icon>
+                      <span class="maintenance-label">Provider:</span>
+                      <span class="maintenance-value">{{ maint.serviceProvider || 'N/A' }}</span>
+                    </div>
+                    <div v-if="maint.remark" class="maintenance-detail-item">
+                      <v-icon size="small" class="me-2">mdi-note-text</v-icon>
+                      <span class="maintenance-label">Remark:</span>
+                      <span class="maintenance-value">{{ maint.remark }}</span>
+                    </div>
+                  </div>
+                </v-card-text>
+              </v-card>
+            </div>
+            <div v-else class="empty-state">
+              <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-wrench-off</v-icon>
+              <h3 class="text-h6 text-muted mb-2">No maintenance records</h3>
+              <p class="text-muted">Add your first maintenance record to get started</p>
             </div>
           </div>
-          <div v-else>No maintenance records available.</div>
+        </v-window-item>
+
+        <!-- Analytics Tab -->
+        <v-window-item value="analytics">
+          <div class="analytics-content pa-6">
+            <h3 class="section-title mb-4">Vehicle Analytics</h3>
+            <v-row>
+              <v-col cols="12" md="4">
+                <v-card class="analytics-card" elevation="0">
+                  <v-card-text class="text-center">
+                    <v-icon size="48" color="primary" class="mb-2">mdi-speedometer</v-icon>
+                    <div class="analytics-value">{{ selectedVehicle?.currentMileage?.toLocaleString() || 0 }}</div>
+                    <div class="analytics-label">Total Kilometers</div>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+              <v-col cols="12" md="4">
+                <v-card class="analytics-card" elevation="0">
+                  <v-card-text class="text-center">
+                    <v-icon size="48" color="success" class="mb-2">mdi-gas-station</v-icon>
+                    <div class="analytics-value">
+                      {{ selectedVehicle?.fuelRecord?.reduce((sum, record) => sum + (record.quantity || 0), 0) || 0 }}L
+                    </div>
+                    <div class="analytics-label">Total Fuel Used</div>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+              <v-col cols="12" md="4">
+                <v-card class="analytics-card" elevation="0">
+                  <v-card-text class="text-center">
+                    <v-icon size="48" color="warning" class="mb-2">mdi-wrench</v-icon>
+                    <div class="analytics-value">{{ selectedVehicle?.maintenanceRecord?.length || 0 }}</div>
+                    <div class="analytics-label">Maintenance Records</div>
+                  </v-card-text>
+                </v-card>
         </v-col>
       </v-row>
+          </div>
+        </v-window-item>
+      </v-window>
     </v-card-text>
 
-    <v-card-actions>
+    <v-card-actions class="dialog-actions">
       <v-spacer></v-spacer>
-      <v-btn text @click="vehicleDetailDialog = false">Close</v-btn>
+      <v-btn
+        variant="outlined"
+        @click="vehicleDetailDialog = false"
+      >
+        Close
+      </v-btn>
     </v-card-actions>
   </v-card>
 </v-dialog>
@@ -440,6 +728,7 @@ const addFuelModal = ref(false)
 const addMainModal = ref(false)
 const saving = ref(false);
 const formValid = ref(false);
+const activeTab = ref('overview'); // Add this for the new tabbed interface
 // const vehicles = ref([]);
 const vehicleForm = ref({
   plateNo: "",
@@ -478,7 +767,7 @@ const filteredVehicles = computed(() => {
 // })
 
 // Methods
-const getServiceProgress = (vehicle) => {
+const getServiceProgress = (vehicle: any) => {
   const progress =
     ((vehicle.currentMileage - vehicle.lastServiceMileage) /
       vehicle.serviceInterval) *
@@ -486,7 +775,7 @@ const getServiceProgress = (vehicle) => {
   return Math.min(progress, 100);
 };
 
-const getServiceColor = (vehicle) => {
+const getServiceColor = (vehicle: any) => {
   const progress = getServiceProgress(vehicle);
   if (progress >= 100) return "error";
   if (progress >= 80) return "warning";
@@ -497,21 +786,21 @@ const formatDate = (dateString: Date) => {
   return new Date(dateString).toLocaleDateString();
 };
 
-const addMainEntry = (vehicle) => {
+const addMainEntry = (vehicle: any) => {
   // Navigate to vehicle details page
   currItem.value = vehicle 
   addMainModal.value = true 
   console.log("View vehicle details:", vehicle);
 };
 
-const editVehicle = (vehicle) => {
+const editVehicle = (vehicle: any) => {
   editingVehicle.value = vehicle;
   vehicleForm.value = { ...vehicle };
   showAddDialog.value = true;
   console.log("Editing vehicle:", vehicle);
 };
 
-const addMileageEntry = (vehicle) => {
+const addMileageEntry = (vehicle: any) => {
   // Navigate to mileage entry page
   currItem.value = vehicle
   addFuelModal.value = true
@@ -569,9 +858,9 @@ const getStatusDetails = (status: Number) => {
 const resetVehicleForm = () => {
   vehicleForm.value = {
     plateNo: "",
-    vendorId: null,
-    modelId: null,
-    cardId: null,
+    vendorId: null as any,
+    modelId: null as any,
+    cardId: null as any,
     year: "",
     driver: "",
     currentMileage: 0,
@@ -585,10 +874,11 @@ const resetVehicleForm = () => {
 // }
 
 // When clicking Detail
-async function vehicleDetail(vehicle) {
+async function vehicleDetail(vehicle: any) {
   try {
     const detail = await getVehicleById(vehicle.id)
     selectedVehicle.value = detail
+    activeTab.value = 'overview' // Reset to overview tab
     vehicleDetailDialog.value = true
   } catch (error) {
     console.error('Failed to load vehicle detail', error)
@@ -717,15 +1007,315 @@ onMounted(async () => {
 }
 
 .vehicle-card-actions {
-  padding: 16px 24px 20px 24px;
+  padding: 16px 24px;
   border-top: 1px solid #f0f1f3;
-  gap: 8px;
+  background: linear-gradient(135deg, #f8fafb 0%, #f1f3f4 100%);
 }
 
 .vehicle-btn {
+  font-weight: 500;
+  border-radius: 8px;
+  text-transform: none;
+  min-width: 100px;
+}
+
+/* Vehicle Details Dialog Styles - Simple and Modern */
+.vehicle-details-tabs {
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.vehicle-tab {
   font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0.5px;
+}
+
+.vehicle-details-window {
+  min-height: 500px;
+}
+
+.overview-content,
+.fuel-content,
+.maintenance-content,
+.analytics-content {
+  background: white;
+  min-height: 500px;
+}
+
+.info-card {
+  border-radius: 12px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  transition: all 0.3s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.info-card-title {
+  font-weight: 600;
+  color: #1a1a1a;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 12px;
+}
+
+.info-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-weight: 500;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.info-value {
+  font-weight: 600;
+  color: #1a1a1a;
+  text-align: right;
+}
+
+.service-status-content {
+  padding: 8px 0;
+}
+
+.service-progress-section {
+  margin-bottom: 16px;
+}
+
+.service-label {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.service-percentage {
+  font-weight: 700;
+  color: #1976d2;
+  font-size: 1.1rem;
+}
+
+.service-progress {
+  border-radius: 8px;
+}
+
+.service-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.service-detail-item {
+  display: flex;
+  align-items: center;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.fuel-records-grid,
+.maintenance-records-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.fuel-record-card,
+.maintenance-record-card {
+  border-radius: 12px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  transition: all 0.3s ease;
+}
+
+.fuel-record-card:hover,
+.maintenance-record-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.fuel-record-content,
+.maintenance-record-content {
+  padding: 16px;
+}
+
+.fuel-record-header,
+.maintenance-record-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.fuel-record-date,
+.maintenance-record-type {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.fuel-record-details,
+.maintenance-record-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fuel-detail-item,
+.maintenance-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fuel-label,
+.maintenance-label {
+  font-weight: 500;
+  color: #666;
+  min-width: 80px;
+}
+
+.fuel-value,
+.maintenance-value {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: #666;
+}
+
+.analytics-card {
+  border-radius: 12px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.analytics-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.analytics-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 8px 0;
+}
+
+.analytics-label {
+  font-weight: 500;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .fuel-records-grid,
+  .maintenance-records-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .info-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .info-value {
+    text-align: left;
+  }
+}
+
+/* Dialog styles to match other dialogs */
+.dialog-card {
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.dialog-title {
+  background: white;
+  color: #040707;
+  font-size: 1.375rem;
+  font-weight: 700;
+  padding: 28px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.dialog-subtitle {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin-top: -8px;
+}
+
+.form-section-title {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.section-icon {
+  background: rgba(25, 118, 210, 0.08);
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.grid-gap-sm > .v-col {
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}
+
+.dialog-actions {
+  padding: 28px;
+  background: white;
+}
+
+.title-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 193, 7, 0.15);
   border-radius: 10px;
-  min-width: 120px;
-  flex: 1;
+  padding: 6px;
+  margin-right: 8px;
+}
+
+.section-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 193, 7, 0.12);
+  border-radius: 8px;
+  padding: 4px;
+  margin-right: 8px;
 }
 </style>
