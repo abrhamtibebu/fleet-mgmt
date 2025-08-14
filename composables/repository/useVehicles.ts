@@ -11,7 +11,25 @@ interface Vehicle {
   status: number,
   currentMileage: number,
   serviceInterval: number,
-  type: number
+  type: number,
+  // Insurance entries array
+  insuranceEntries?: any[],
+  // Safety inspection fields
+  safetyInspectionStatus?: number,
+  safetyInspectionNumber?: string,
+  safetyInspectionDate?: string,
+  safetyInspectionExpiry?: string,
+  safetyInspectionCenter?: string,
+  safetyInspectionCost?: number,
+  safetyInspectionNotes?: string,
+  // Road fund fields
+  roadFundStatus?: number,
+  roadFundNumber?: string,
+  roadFundIssueDate?: string,
+  roadFundExpiryDate?: string,
+  roadFundAmount?: number,
+  roadFundIssuingOffice?: string,
+  roadFundNotes?: string
 }
 
 export const useVehicles = () => {

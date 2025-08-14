@@ -75,7 +75,7 @@
     <div class="vehicle-info">
       <div class="vehicle-model">
         <v-icon class="vehicle-main-icon me-2">mdi-truck</v-icon>
-        {{ vehicle.vendor.name }} {{ vehicle.model.name }} ({{ vehicle.year }})
+        {{ vendorList.find(v => v.id === vehicle.vendorId)?.name || 'Unknown' }} {{ modelList.find(m => m.id === vehicle.modelId)?.name || 'Unknown' }} ({{ vehicle.year }})
       </div>
 
       <div class="vehicle-details">
@@ -301,9 +301,442 @@
 
             <v-divider class="my-4"></v-divider>
 
+            <!-- Insurance Details -->
+            <div class="form-section-title mb-3">
+              <span class="section-icon-badge"><v-icon size="18" color="info">mdi-shield-check</v-icon></span>
+              Insurance Details
+            </div>
+            
+            <!-- Insurance Entry Form -->
+            <div class="insurance-entry-form mb-4">
+              <v-row class="grid-gap-sm">
+                <v-col cols="12" sm="6">
+                  <v-select
+                    density="compact"
+                    v-model="currentInsuranceEntry.insuranceType"
+                    :items="insuranceTypeOptions"
+                    item-title="name"
+                    item-value="id"
+                    label="Insurance Type"
+                    placeholder="Select insurance type to add"
+                    variant="outlined"
+                  ></v-select>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    density="compact"
+                    v-model="currentInsuranceEntry.insuranceProvider"
+                    label="Insurance Provider"
+                    placeholder="Enter insurance company name"
+                    variant="outlined"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+
+              <v-row class="grid-gap-sm">
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    density="compact"
+                    v-model="currentInsuranceEntry.insurancePolicyNumber"
+                    label="Policy Number"
+                    placeholder="Enter policy number"
+                    variant="outlined"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    density="compact"
+                    v-model="currentInsuranceEntry.insurancePremium"
+                    label="Annual Premium (ETB)"
+                    placeholder="Enter annual premium amount"
+                    type="number"
+                    variant="outlined"
+                    hide-spin-buttons
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+
+              <v-row class="grid-gap-sm">
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    density="compact"
+                    v-model="currentInsuranceEntry.insuranceCoverage"
+                    label="Coverage Amount (ETB)"
+                    placeholder="Enter coverage amount"
+                    type="number"
+                    variant="outlined"
+                    hide-spin-buttons
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    density="compact"
+                    v-model="currentInsuranceEntry.insuranceStartDate"
+                    label="Insurance Start Date"
+                    placeholder="Select start date"
+                    type="date"
+                    variant="outlined"
+                    @update:model-value="(value) => autoCalculateExpiry(value, 'insurance')"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+
+              <v-row class="grid-gap-sm">
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    density="compact"
+                    v-model="currentInsuranceEntry.insuranceEndDate"
+                    label="Insurance End Date (Auto-calculated)"
+                    placeholder="Auto-calculated from start date"
+                    type="date"
+                    variant="outlined"
+                    readonly
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    density="compact"
+                    v-model="currentInsuranceEntry.insuranceAgent"
+                    label="Insurance Agent"
+                    placeholder="Enter agent name and contact"
+                    variant="outlined"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+
+              <v-row class="grid-gap-sm">
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    density="compact"
+                    v-model="currentInsuranceEntry.insurancePhone"
+                    label="Agent Phone"
+                    placeholder="Enter agent phone number"
+                    variant="outlined"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-textarea
+                    density="compact"
+                    v-model="currentInsuranceEntry.insuranceNotes"
+                    label="Insurance Notes"
+                    placeholder="Enter any additional insurance notes"
+                    variant="outlined"
+                    rows="2"
+                    auto-grow
+                  ></v-textarea>
+                </v-col>
+              </v-row>
+
+              <v-row class="grid-gap-sm">
+                <v-col cols="12" class="text-right">
+                  <v-btn
+                    color="primary"
+                    prepend-icon="mdi-plus"
+                    @click="addInsuranceEntry"
+                    :disabled="!currentInsuranceEntry.insuranceType"
+                    class="add-insurance-btn"
+                  >
+                    Add Insurance Entry
+                  </v-btn>
+                </v-col>
+              </v-row>
+            </div>
+
+            <!-- Insurance Entries List -->
+            <div v-if="vehicleForm.insuranceEntries.length > 0" class="insurance-entries-list mb-4">
+              <div class="section-subtitle mb-3">
+                <v-icon class="me-2" color="info">mdi-format-list-bulleted</v-icon>
+                Added Insurance Entries
+              </div>
+              
+              <v-card
+                v-for="(entry, index) in vehicleForm.insuranceEntries"
+                :key="index"
+                class="insurance-entry-card mb-3"
+                elevation="1"
+              >
+                <v-card-text class="pa-3">
+                  <div class="d-flex align-center justify-space-between">
+                    <div class="insurance-entry-header">
+                      <v-chip
+                        :color="getInsuranceTypeColor(entry.insuranceType)"
+                        size="small"
+                        variant="tonal"
+                        class="me-2"
+                      >
+                        {{ insuranceTypeOptions.find(t => t.id === entry.insuranceType)?.name }}
+                      </v-chip>
+                      <span class="insurance-provider">{{ entry.insuranceProvider }}</span>
+                    </div>
+                    <v-btn
+                      icon="mdi-delete"
+                      variant="text"
+                      size="small"
+                      color="error"
+                      @click="removeInsuranceEntry(index)"
+                    ></v-btn>
+                  </div>
+                  
+                  <div class="insurance-entry-details mt-2">
+                    <div class="detail-row">
+                      <span class="detail-label">Policy:</span>
+                      <span class="detail-value">{{ entry.insurancePolicyNumber }}</span>
+                    </div>
+                    <div class="detail-row">
+                      <span class="detail-label">Premium:</span>
+                      <span class="detail-value">{{ entry.insurancePremium ? `${entry.insurancePremium.toLocaleString()} ETB` : 'Not specified' }}</span>
+                    </div>
+                    <div class="detail-row">
+                      <span class="detail-label">Coverage:</span>
+                      <span class="detail-value">{{ entry.insuranceCoverage ? `${entry.insuranceCoverage.toLocaleString()} ETB` : 'Not specified' }}</span>
+                    </div>
+                    <div class="detail-row">
+                      <span class="detail-label">Period:</span>
+                      <span class="detail-value">
+                        {{ entry.insuranceStartDate ? formatDate(entry.insuranceStartDate) : 'Not specified' }} - 
+                        {{ entry.insuranceEndDate ? formatDate(entry.insuranceEndDate) : 'Not specified' }}
+                      </span>
+                    </div>
+                  </div>
+                </v-card-text>
+              </v-card>
+            </div>
+
+            <!-- Insurance Requirements Notice -->
+            <v-alert
+              v-if="!hasRequiredInsurance"
+              type="warning"
+              variant="tonal"
+              class="mb-4"
+            >
+              <div class="d-flex align-center">
+                <v-icon class="me-2">mdi-alert-circle</v-icon>
+                <span>Both Comprehensive and Third Party insurance are required to create a vehicle.</span>
+              </div>
+            </v-alert>
+
+            <!-- Renewal Reminders -->
+            <div v-if="hasRenewalReminders" class="renewal-reminders mb-4">
+              <div class="section-subtitle mb-3">
+                <v-icon class="me-2" color="warning">mdi-calendar-clock</v-icon>
+                Renewal Reminders
+              </div>
+              
+              <v-alert
+                v-for="reminder in renewalReminders"
+                :key="reminder.id"
+                :type="reminder.severity"
+                variant="tonal"
+                class="mb-2"
+              >
+                <div class="d-flex align-center justify-space-between">
+                  <div class="d-flex align-center">
+                    <v-icon class="me-2">{{ reminder.icon }}</v-icon>
+                    <span>{{ reminder.message }}</span>
+                  </div>
+                  <v-btn
+                    size="small"
+                    variant="text"
+                    color="primary"
+                    @click="reminder.action"
+                  >
+                    {{ reminder.actionText }}
+                  </v-btn>
+                </div>
+              </v-alert>
+            </div>
+
+            <v-divider class="my-4"></v-divider>
+
+            <!-- Safety Inspection -->
+            <div class="form-section-title mb-3">
+              <span class="section-icon-badge"><v-icon size="18" color="success">mdi-car-wrench</v-icon></span>
+              Safety Inspection
+            </div>
+            <v-row class="grid-gap-sm">
+              <v-col cols="12" sm="6">
+                <v-select
+                  density="compact"
+                  v-model="vehicleForm.safetyInspectionStatus"
+                  :items="safetyInspectionStatusOptions"
+                  item-title="name"
+                  item-value="id"
+                  label="Safety Inspection Status"
+                  placeholder="Select inspection status"
+                  variant="outlined"
+                ></v-select>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  density="compact"
+                  v-model="vehicleForm.safetyInspectionNumber"
+                  label="Inspection Certificate Number"
+                  placeholder="Enter certificate number"
+                  variant="outlined"
+                ></v-text-field>
+              </v-col>
+            </v-row>
+
+                          <v-row class="grid-gap-sm">
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    density="compact"
+                    v-model="vehicleForm.safetyInspectionDate"
+                    label="Last Inspection Date"
+                    placeholder="Select inspection date"
+                    type="date"
+                    variant="outlined"
+                    @update:model-value="(value) => autoCalculateExpiry(value, 'safety')"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    density="compact"
+                    v-model="vehicleForm.safetyInspectionExpiry"
+                    label="Inspection Expiry Date (Auto-calculated)"
+                    placeholder="Auto-calculated from inspection date"
+                    type="date"
+                    variant="outlined"
+                    readonly
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+
+            <v-row class="grid-gap-sm">
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  density="compact"
+                  v-model="vehicleForm.safetyInspectionCenter"
+                  label="Inspection Center"
+                  placeholder="Enter inspection center name"
+                  variant="outlined"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  density="compact"
+                  v-model="vehicleForm.safetyInspectionCost"
+                  label="Inspection Cost (ETB)"
+                  placeholder="Enter inspection cost"
+                  type="number"
+                  variant="outlined"
+                  hide-spin-buttons
+                ></v-text-field>
+              </v-col>
+            </v-row>
+
+            <v-row class="grid-gap-sm">
+              <v-col cols="12">
+                <v-textarea
+                  density="compact"
+                  v-model="vehicleForm.safetyInspectionNotes"
+                  label="Inspection Notes"
+                  placeholder="Enter any inspection findings or notes"
+                  variant="outlined"
+                  rows="2"
+                  auto-grow
+                ></v-textarea>
+              </v-col>
+            </v-row>
+
+            <v-divider class="my-4"></v-divider>
+
+            <!-- Road Fund -->
+            <div class="form-section-title mb-3">
+              <span class="section-icon-badge"><v-icon size="18" color="info">mdi-road</v-icon></span>
+              Road Fund
+            </div>
+            <v-row class="grid-gap-sm">
+              <v-col cols="12" sm="6">
+                <v-select
+                  density="compact"
+                  v-model="vehicleForm.roadFundStatus"
+                  :items="roadFundStatusOptions"
+                  item-title="name"
+                  item-value="id"
+                  label="Road Fund Status"
+                  placeholder="Select road fund status"
+                  variant="outlined"
+                ></v-select>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  density="compact"
+                  v-model="vehicleForm.roadFundNumber"
+                  label="Road Fund Number"
+                  placeholder="Enter road fund number"
+                  variant="outlined"
+                ></v-text-field>
+              </v-col>
+            </v-row>
+
+                          <v-row class="grid-gap-sm">
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    density="compact"
+                    v-model="vehicleForm.roadFundIssueDate"
+                    label="Issue Date"
+                    placeholder="Select issue date"
+                    type="date"
+                    variant="outlined"
+                    @update:model-value="(value) => autoCalculateExpiry(value, 'road')"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    density="compact"
+                    v-model="vehicleForm.roadFundExpiryDate"
+                    label="Expiry Date (Auto-calculated)"
+                    placeholder="Auto-calculated from issue date"
+                    type="date"
+                    variant="outlined"
+                    readonly
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+
+            <v-row class="grid-gap-sm">
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  density="compact"
+                  v-model="vehicleForm.roadFundAmount"
+                  label="Road Fund Amount (ETB)"
+                  placeholder="Enter road fund amount"
+                  type="number"
+                  variant="outlined"
+                  hide-spin-buttons
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  density="compact"
+                  v-model="vehicleForm.roadFundIssuingOffice"
+                  label="Issuing Office"
+                  placeholder="Enter issuing office"
+                  variant="outlined"
+                ></v-text-field>
+              </v-col>
+            </v-row>
+
+            <v-row class="grid-gap-sm">
+              <v-col cols="12">
+                <v-textarea
+                  density="compact"
+                  v-model="vehicleForm.roadFundNotes"
+                  label="Road Fund Notes"
+                  placeholder="Enter any additional road fund notes"
+                  variant="outlined"
+                  rows="2"
+                  auto-grow
+                ></v-textarea>
+              </v-col>
+            </v-row>
+
+            <v-divider class="my-4"></v-divider>
+
             <!-- Fuel Card -->
             <div class="form-section-title mb-3">
-              <span class="section-icon-badge"><v-icon size="18" color="warning">mdi-folder-outline</v-icon></span>
+              <span class="section-icon-badge"><v-icon size="18" color="warning">mdi-credit-card</v-icon></span>
               Fuel Card
             </div>
             <v-row class="grid-gap-sm">
@@ -466,6 +899,175 @@
                             <span>Service Interval: {{ selectedVehicle?.serviceInterval || 0 }} km</span>
                           </div>
                         </div>
+                      </div>
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+
+              <!-- Insurance Information Card -->
+              <v-col cols="12" md="6">
+                <v-card class="info-card" elevation="0">
+                  <v-card-title class="info-card-title">
+                    <v-icon class="me-2" color="info">mdi-shield-check</v-icon>
+                    Insurance Information
+                  </v-card-title>
+                  <v-card-text>
+                    <div v-if="selectedVehicle?.insuranceEntries && selectedVehicle.insuranceEntries.length > 0">
+                      <div
+                        v-for="(entry, index) in selectedVehicle.insuranceEntries"
+                        :key="index"
+                        class="insurance-entry-display mb-3"
+                      >
+                        <div class="insurance-entry-header-display">
+                          <v-chip
+                            :color="getInsuranceTypeColor(entry.insuranceType)"
+                            size="small"
+                            variant="tonal"
+                            class="me-2"
+                          >
+                            {{ insuranceTypeOptions.find(t => t.id === entry.insuranceType)?.name }}
+                          </v-chip>
+                          <span class="insurance-provider-display">{{ entry.insuranceProvider }}</span>
+                        </div>
+                        
+                        <div class="insurance-entry-details-display mt-2">
+                          <div class="detail-row-display">
+                            <span class="detail-label-display">Policy:</span>
+                            <span class="detail-value-display">{{ entry.insurancePolicyNumber || 'Not specified' }}</span>
+                          </div>
+                          <div class="detail-row-display">
+                            <span class="detail-label-display">Premium:</span>
+                            <span class="detail-value-display">{{ entry.insurancePremium ? `${entry.insurancePremium.toLocaleString()} ETB` : 'Not specified' }}</span>
+                          </div>
+                          <div class="detail-row-display">
+                            <span class="detail-label-display">Coverage:</span>
+                            <span class="detail-value-display">{{ entry.insuranceCoverage ? `${entry.insuranceCoverage.toLocaleString()} ETB` : 'Not specified' }}</span>
+                          </div>
+                          <div class="detail-row-display">
+                            <span class="detail-label-display">Period:</span>
+                            <span class="detail-value-display">
+                              {{ entry.insuranceStartDate ? formatDate(entry.insuranceStartDate) : 'Not specified' }} - 
+                              {{ entry.insuranceEndDate ? formatDate(entry.insuranceEndDate) : 'Not specified' }}
+                            </span>
+                          </div>
+                          <div v-if="entry.insuranceAgent" class="detail-row-display">
+                            <span class="detail-label-display">Agent:</span>
+                            <span class="detail-value-display">{{ entry.insuranceAgent }}</span>
+                          </div>
+                          <div v-if="entry.insurancePhone" class="detail-row-display">
+                            <span class="detail-label-display">Phone:</span>
+                            <span class="detail-value-display">{{ entry.insurancePhone }}</span>
+                          </div>
+                          <div v-if="entry.insuranceNotes" class="detail-row-display">
+                            <span class="detail-label-display">Notes:</span>
+                            <span class="detail-value-display">{{ entry.insuranceNotes }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div v-else class="no-insurance-message">
+                      <v-icon size="24" color="grey-lighten-1" class="mb-2">mdi-shield-off</v-icon>
+                      <span class="text-muted">No insurance information available</span>
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+
+              <!-- Safety Inspection Card -->
+              <v-col cols="12" md="6">
+                <v-card class="info-card" elevation="0">
+                  <v-card-title class="info-card-title">
+                    <v-icon class="me-2" color="success">mdi-car-wrench</v-icon>
+                    Safety Inspection
+                  </v-card-title>
+                  <v-card-text>
+                    <div class="info-grid">
+                      <div class="info-item">
+                        <div class="info-label">Status</div>
+                        <div class="info-value">
+                          <v-chip
+                            :color="getSafetyInspectionStatusColor(selectedVehicle?.safetyInspectionStatus)"
+                            size="small"
+                            variant="tonal"
+                          >
+                            {{ safetyInspectionStatusOptions.find(s => s.id === selectedVehicle?.safetyInspectionStatus)?.name || 'Not specified' }}
+                          </v-chip>
+                        </div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Certificate Number</div>
+                        <div class="info-value">{{ selectedVehicle?.safetyInspectionNumber || 'Not specified' }}</div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Last Inspection</div>
+                        <div class="info-value">{{ selectedVehicle?.safetyInspectionDate ? formatDate(selectedVehicle.safetyInspectionDate) : 'Not specified' }}</div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Expiry Date</div>
+                        <div class="info-value">{{ selectedVehicle?.safetyInspectionExpiry ? formatDate(selectedVehicle.safetyInspectionExpiry) : 'Not specified' }}</div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Inspection Center</div>
+                        <div class="info-value">{{ selectedVehicle?.safetyInspectionCenter || 'Not specified' }}</div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Cost</div>
+                        <div class="info-value">{{ selectedVehicle?.safetyInspectionCost ? `${selectedVehicle.safetyInspectionCost.toLocaleString()} ETB` : 'Not specified' }}</div>
+                      </div>
+                      <div v-if="selectedVehicle?.safetyInspectionNotes" class="info-item">
+                        <div class="info-label">Notes</div>
+                        <div class="info-value">{{ selectedVehicle.safetyInspectionNotes }}</div>
+                      </div>
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+
+              <!-- Road Fund Card -->
+              <v-col cols="12" md="6">
+                <v-card class="info-card" elevation="0">
+                  <v-card-title class="info-card-title">
+                    <v-icon class="me-2" color="info">mdi-road</v-icon>
+                    Road Fund
+                  </v-card-title>
+                  <v-card-text>
+                    <div class="info-grid">
+                      <div class="info-item">
+                        <div class="info-label">Status</div>
+                        <div class="info-value">
+                          <v-chip
+                            :color="getRoadFundStatusColor(selectedVehicle?.roadFundStatus)"
+                            size="small"
+                            variant="tonal"
+                          >
+                            {{ roadFundStatusOptions.find(s => s.id === selectedVehicle?.roadFundStatus)?.name || 'Not specified' }}
+                          </v-chip>
+                        </div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Road Fund Number</div>
+                        <div class="info-value">{{ selectedVehicle?.roadFundNumber || 'Not specified' }}</div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Issue Date</div>
+                        <div class="info-value">{{ selectedVehicle?.roadFundIssueDate ? formatDate(selectedVehicle.roadFundIssueDate) : 'Not specified' }}</div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Expiry Date</div>
+                        <div class="info-value">{{ selectedVehicle?.roadFundExpiryDate ? formatDate(selectedVehicle.roadFundExpiryDate) : 'Not specified' }}</div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Amount</div>
+                        <div class="info-value">{{ selectedVehicle?.roadFundAmount ? `${selectedVehicle.roadFundAmount.toLocaleString()} ETB` : 'Not specified' }}</div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Issuing Office</div>
+                        <div class="info-value">{{ selectedVehicle?.roadFundIssuingOffice || 'Not specified' }}</div>
+                      </div>
+                      <div v-if="selectedVehicle?.roadFundNotes" class="info-item">
+                        <div class="info-label">Notes</div>
+                        <div class="info-value">{{ selectedVehicle.roadFundNotes }}</div>
                       </div>
                     </div>
                   </v-card-text>
@@ -691,6 +1293,87 @@
 
     <LazyAddFuel v-if="addFuelModal" :vehicle="currItem" @close="addFuelModal = false" @showSuccess="showSuccess"/>
     <LazyAddMaintenance v-if="addMainModal" :vehicle="currItem" @close="addMainModal = false" @showSuccess="showSuccess"/>
+
+    <!-- Manual Renewal Dialog -->
+    <v-dialog v-model="renewalDialog" max-width="600px" persistent>
+      <v-card>
+        <v-card-title class="d-flex align-center">
+          <v-icon class="me-2" color="primary">mdi-calendar-clock</v-icon>
+          {{ getRenewalDialogTitle() }}
+        </v-card-title>
+        
+        <v-card-text>
+          <div class="renewal-form">
+            <v-row class="grid-gap-sm">
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  density="compact"
+                  v-model="manualRenewalForm.startDate"
+                  label="Renewal Start Date"
+                  placeholder="Select start date"
+                  type="date"
+                  variant="outlined"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  density="compact"
+                  v-model="manualRenewalForm.endDate"
+                  label="Renewal End Date"
+                  placeholder="Select end date (optional - auto-calculated)"
+                  type="date"
+                  variant="outlined"
+                ></v-text-field>
+              </v-col>
+            </v-row>
+            
+            <v-row class="grid-gap-sm">
+              <v-col cols="12">
+                <v-textarea
+                  density="compact"
+                  v-model="manualRenewalForm.notes"
+                  label="Renewal Notes"
+                  placeholder="Enter any additional notes about this renewal"
+                  variant="outlined"
+                  rows="3"
+                  auto-grow
+                ></v-textarea>
+              </v-col>
+            </v-row>
+            
+            <v-alert
+              type="info"
+              variant="tonal"
+              class="mt-4"
+            >
+              <div class="d-flex align-center">
+                <v-icon class="me-2">mdi-information</v-icon>
+                <span>If no end date is provided, it will be automatically calculated as 12 months from the start date.</span>
+              </div>
+            </v-alert>
+          </div>
+        </v-card-text>
+        
+        <v-card-actions class="pa-4">
+          <v-spacer></v-spacer>
+          <v-btn
+            variant="text"
+            @click="renewalDialog = false"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
+            color="primary"
+            @click="applyManualRenewal"
+            :disabled="!manualRenewalForm.startDate"
+            prepend-icon="mdi-check"
+          >
+            Apply Renewal
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -710,6 +1393,35 @@ const vehicleStatusOptions = computed(() => {
     name: status.label
   }));
 });
+
+// Insurance type options
+const insuranceTypeOptions = [
+  { id: 1, name: 'Comprehensive Insurance' },
+  { id: 2, name: 'Third Party Liability' },
+  { id: 3, name: 'Third Party Fire & Theft' },
+  { id: 4, name: 'Commercial Vehicle Insurance' },
+  { id: 5, name: 'Fleet Insurance' },
+  { id: 6, name: 'Self Insurance' },
+  { id: 7, name: 'Other' }
+]
+
+// Safety inspection status options
+const safetyInspectionStatusOptions = [
+  { id: 1, name: 'Valid' },
+  { id: 2, name: 'Expired' },
+  { id: 3, name: 'Pending' },
+  { id: 4, name: 'Failed' },
+  { id: 5, name: 'Under Review' }
+]
+
+// Road fund status options
+const roadFundStatusOptions = [
+  { id: 1, name: 'Valid' },
+  { id: 2, name: 'Expired' },
+  { id: 3, name: 'Pending' },
+  { id: 4, name: 'Not Required' },
+  { id: 5, name: 'Under Review' }
+]
 const { getCard, getUsers, cardList, usersList } = useCard();
 const { getByVendor, modelList } = useModel();
 const {
@@ -722,7 +1434,7 @@ const currItem = ref(null)
 const searchQuery = ref("");
 const showAddDialog = ref(false);
 const vehicleDetailDialog = ref(false);
-const selectedVehicle = ref(null);
+const selectedVehicle = ref<any>(null);
 const editingVehicle = ref(null);
 const addFuelModal = ref(false)
 const addMainModal = ref(false)
@@ -732,14 +1444,47 @@ const activeTab = ref('overview'); // Add this for the new tabbed interface
 // const vehicles = ref([]);
 const vehicleForm = ref({
   plateNo: "",
-  vendorId: "",
-  modelId: "",
-  cardId: "",
+  vendorId: null as any,
+  modelId: null as any,
+  cardId: null as any,
   year: "",
   driver: "",
   currentMileage: 0,
   serviceInterval: 0,
-  type: 1
+  type: 1,
+  status: 1,
+  // Insurance entries array
+  insuranceEntries: [] as any[],
+  // Safety inspection fields
+  safetyInspectionStatus: null as any,
+  safetyInspectionNumber: "",
+  safetyInspectionDate: "",
+  safetyInspectionExpiry: "",
+  safetyInspectionCenter: "",
+  safetyInspectionCost: "",
+  safetyInspectionNotes: "",
+  // Road fund fields
+  roadFundStatus: null as any,
+  roadFundNumber: "",
+  roadFundIssueDate: "",
+  roadFundExpiryDate: "",
+  roadFundAmount: "",
+  roadFundIssuingOffice: "",
+  roadFundNotes: ""
+});
+
+// Current insurance entry for the form
+const currentInsuranceEntry = ref({
+  insuranceType: null as any,
+  insuranceProvider: "",
+  insurancePolicyNumber: "",
+  insurancePremium: "",
+  insuranceCoverage: "",
+  insuranceStartDate: "",
+  insuranceEndDate: "",
+  insuranceAgent: "",
+  insurancePhone: "",
+  insuranceNotes: ""
 });
 const showSuccessSnackbar = ref(false)
 const showErrorSnackbar = ref(false)
@@ -782,7 +1527,7 @@ const getServiceColor = (vehicle: any) => {
   return "success";
 };
 
-const formatDate = (dateString: Date) => {
+const formatDate = (dateString: string | Date) => {
   return new Date(dateString).toLocaleDateString();
 };
 
@@ -848,12 +1593,396 @@ const showErrorMessage = (message: string) => {
   showErrorSnackbar.value = true
 }
 
-const onBrandChange = async (item: Number) => {
+const onBrandChange = async (item: any) => {
   await getByVendor(item)
 };
 
 const getStatusDetails = (status: Number) => {
   return statusMap.find(v => v.id == status)
+}
+
+const getSafetyInspectionStatusColor = (status: number) => {
+  const colors: { [key: number]: string } = {
+    1: 'success', // Valid
+    2: 'error',   // Expired
+    3: 'warning', // Pending
+    4: 'error',   // Failed
+    5: 'info'     // Under Review
+  }
+  return colors[status] || 'default'
+}
+
+const getRoadFundStatusColor = (status: number) => {
+  const colors: { [key: number]: string } = {
+    1: 'success', // Valid
+    2: 'error',   // Expired
+    3: 'warning', // Pending
+    4: 'info',    // Not Required
+    5: 'info'     // Under Review
+  }
+  return colors[status] || 'default'
+}
+
+// Insurance workflow functions
+const addInsuranceEntry = () => {
+  if (!currentInsuranceEntry.value.insuranceType) return
+  
+  // Check if this insurance type is already added
+  const existingEntry = vehicleForm.value.insuranceEntries.find(
+    entry => entry.insuranceType === currentInsuranceEntry.value.insuranceType
+  )
+  
+  if (existingEntry) {
+    showErrorMessage('This insurance type has already been added. Please select a different type.')
+    return
+  }
+  
+  // Add the entry to the list
+  vehicleForm.value.insuranceEntries.push({
+    ...currentInsuranceEntry.value,
+    id: Date.now() // Temporary ID for tracking
+  })
+  
+  // Clear the form
+  clearInsuranceEntry()
+}
+
+const removeInsuranceEntry = (index: number) => {
+  vehicleForm.value.insuranceEntries.splice(index, 1)
+}
+
+const clearInsuranceEntry = () => {
+  currentInsuranceEntry.value = {
+    insuranceType: null as any,
+    insuranceProvider: "",
+    insurancePolicyNumber: "",
+    insurancePremium: "",
+    insuranceCoverage: "",
+    insuranceStartDate: "",
+    insuranceEndDate: "",
+    insuranceAgent: "",
+    insurancePhone: "",
+    insuranceNotes: ""
+  }
+}
+
+const getInsuranceTypeColor = (type: number) => {
+  const colors: { [key: number]: string } = {
+    1: 'primary',   // Comprehensive Insurance
+    2: 'secondary', // Third Party Liability
+    3: 'warning',   // Third Party Fire & Theft
+    4: 'info',      // Commercial Vehicle Insurance
+    5: 'success',   // Fleet Insurance
+    6: 'error',     // Self Insurance
+    7: 'default'    // Other
+  }
+  return colors[type] || 'default'
+}
+
+// Manual renewal dialog variables
+const renewalDialog = ref(false)
+const selectedRenewalType = ref<'insurance' | 'safety' | 'road' | null>(null)
+const selectedRenewalIndex = ref<number | null>(null)
+const manualRenewalForm = ref({
+  startDate: '',
+  endDate: '',
+  notes: ''
+})
+
+// Reset manual renewal form
+const resetManualRenewalForm = () => {
+  manualRenewalForm.value = {
+    startDate: '',
+    endDate: '',
+    notes: ''
+  }
+}
+
+// Apply manual renewal
+const applyManualRenewal = () => {
+  if (!selectedRenewalType.value || !manualRenewalForm.value.startDate) {
+    return
+  }
+
+  const startDate = manualRenewalForm.value.startDate
+  const endDate = manualRenewalForm.value.endDate || calculateExpiryDate(startDate, 12)
+
+  switch (selectedRenewalType.value) {
+    case 'insurance':
+      if (selectedRenewalIndex.value !== null) {
+        const entry = vehicleForm.value.insuranceEntries[selectedRenewalIndex.value]
+        vehicleForm.value.insuranceEntries[selectedRenewalIndex.value] = {
+          ...entry,
+          insuranceStartDate: startDate,
+          insuranceEndDate: endDate,
+          insuranceNotes: manualRenewalForm.value.notes || entry.insuranceNotes
+        }
+        showSuccessMessage('Insurance renewed successfully')
+      }
+      break
+    case 'safety':
+      vehicleForm.value.safetyInspectionDate = startDate
+      vehicleForm.value.safetyInspectionExpiry = endDate
+      vehicleForm.value.safetyInspectionStatus = 1 // Valid
+      vehicleForm.value.safetyInspectionNotes = manualRenewalForm.value.notes || vehicleForm.value.safetyInspectionNotes
+      showSuccessMessage('Safety inspection renewed successfully')
+      break
+    case 'road':
+      vehicleForm.value.roadFundIssueDate = startDate
+      vehicleForm.value.roadFundExpiryDate = endDate
+      vehicleForm.value.roadFundStatus = 1 // Valid
+      vehicleForm.value.roadFundNotes = manualRenewalForm.value.notes || vehicleForm.value.roadFundNotes
+      showSuccessMessage('Road fund renewed successfully')
+      break
+  }
+
+  // Close dialog and reset form
+  renewalDialog.value = false
+  resetManualRenewalForm()
+  selectedRenewalType.value = null
+  selectedRenewalIndex.value = null
+}
+
+// Get renewal dialog title
+const getRenewalDialogTitle = () => {
+  switch (selectedRenewalType.value) {
+    case 'insurance':
+      if (selectedRenewalIndex.value !== null) {
+        const entry = vehicleForm.value.insuranceEntries[selectedRenewalIndex.value]
+        const insuranceType = insuranceTypeOptions.find(t => t.id === entry.insuranceType)?.name
+        return `Renew ${insuranceType}`
+      }
+      return 'Renew Insurance'
+    case 'safety':
+      return 'Renew Safety Inspection'
+    case 'road':
+      return 'Renew Road Fund'
+    default:
+      return 'Renew Document'
+  }
+}
+
+// Computed property to check if required insurance types are present
+const hasRequiredInsurance = computed(() => {
+  const hasComprehensive = vehicleForm.value.insuranceEntries.some(
+    entry => entry.insuranceType === 1 // Comprehensive Insurance
+  )
+  const hasThirdParty = vehicleForm.value.insuranceEntries.some(
+    entry => entry.insuranceType === 2 // Third Party Liability
+  )
+  return hasComprehensive && hasThirdParty
+})
+
+// Renewal logic functions
+const calculateExpiryDate = (startDate: string, durationMonths: number = 12) => {
+  if (!startDate) return null
+  const start = new Date(startDate)
+  const expiry = new Date(start)
+  expiry.setMonth(expiry.getMonth() + durationMonths)
+  return expiry.toISOString().split('T')[0]
+}
+
+const getDaysUntilExpiry = (expiryDate: string) => {
+  if (!expiryDate) return null
+  const expiry = new Date(expiryDate)
+  const today = new Date()
+  const diffTime = expiry.getTime() - today.getTime()
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  return diffDays
+}
+
+const getExpiryStatus = (expiryDate: string) => {
+  const daysUntilExpiry = getDaysUntilExpiry(expiryDate)
+  if (daysUntilExpiry === null) return 'unknown'
+  if (daysUntilExpiry < 0) return 'expired'
+  if (daysUntilExpiry <= 30) return 'critical'
+  if (daysUntilExpiry <= 90) return 'warning'
+  return 'valid'
+}
+
+const getExpirySeverity = (status: string) => {
+  const severityMap: { [key: string]: string } = {
+    'expired': 'error',
+    'critical': 'error',
+    'warning': 'warning',
+    'valid': 'success',
+    'unknown': 'info'
+  }
+  return severityMap[status] || 'info'
+}
+
+// Auto-calculate expiry dates when start dates are entered
+const autoCalculateExpiry = (startDate: string, type: 'insurance' | 'safety' | 'road') => {
+  if (!startDate) return
+  
+  const expiryDate = calculateExpiryDate(startDate, 12) // 12 months for annual renewal
+  
+  switch (type) {
+    case 'insurance':
+      currentInsuranceEntry.value.insuranceEndDate = expiryDate
+      break
+    case 'safety':
+      vehicleForm.value.safetyInspectionExpiry = expiryDate
+      break
+    case 'road':
+      vehicleForm.value.roadFundExpiryDate = expiryDate
+      break
+  }
+}
+
+// Renewal reminders
+const renewalReminders = computed(() => {
+  const reminders: any[] = []
+  
+  // Check insurance entries
+  vehicleForm.value.insuranceEntries.forEach((entry, index) => {
+    if (entry.insuranceEndDate) {
+      const status = getExpiryStatus(entry.insuranceEndDate)
+      const daysUntilExpiry = getDaysUntilExpiry(entry.insuranceEndDate)
+      
+      if (status === 'expired') {
+        reminders.push({
+          id: `insurance-expired-${index}`,
+          severity: 'error',
+          icon: 'mdi-shield-alert',
+          message: `${insuranceTypeOptions.find(t => t.id === entry.insuranceType)?.name} expired ${Math.abs(daysUntilExpiry)} days ago`,
+          actionText: 'Update Renewal',
+          action: () => renewInsuranceEntry(index)
+        })
+      } else if (status === 'critical') {
+        reminders.push({
+          id: `insurance-critical-${index}`,
+          severity: 'error',
+          icon: 'mdi-shield-alert',
+          message: `${insuranceTypeOptions.find(t => t.id === entry.insuranceType)?.name} expires in ${daysUntilExpiry} days`,
+          actionText: 'Update Renewal',
+          action: () => renewInsuranceEntry(index)
+        })
+      } else if (status === 'warning') {
+        reminders.push({
+          id: `insurance-warning-${index}`,
+          severity: 'warning',
+          icon: 'mdi-shield-clock',
+          message: `${insuranceTypeOptions.find(t => t.id === entry.insuranceType)?.name} expires in ${daysUntilExpiry} days`,
+          actionText: 'Plan Renewal',
+          action: () => planRenewal('insurance', index)
+        })
+      }
+    }
+  })
+  
+  // Check safety inspection
+  if (vehicleForm.value.safetyInspectionExpiry) {
+    const status = getExpiryStatus(vehicleForm.value.safetyInspectionExpiry)
+    const daysUntilExpiry = getDaysUntilExpiry(vehicleForm.value.safetyInspectionExpiry)
+    
+          if (status === 'expired') {
+        reminders.push({
+          id: 'safety-expired',
+          severity: 'error',
+          icon: 'mdi-car-wrench-alert',
+          message: `Safety inspection expired ${Math.abs(daysUntilExpiry)} days ago`,
+          actionText: 'Update Renewal',
+          action: () => renewSafetyInspection()
+        })
+      } else if (status === 'critical') {
+        reminders.push({
+          id: 'safety-critical',
+          severity: 'error',
+          icon: 'mdi-car-wrench-alert',
+          message: `Safety inspection expires in ${daysUntilExpiry} days`,
+          actionText: 'Update Renewal',
+          action: () => renewSafetyInspection()
+        })
+    } else if (status === 'warning') {
+      reminders.push({
+        id: 'safety-warning',
+        severity: 'warning',
+        icon: 'mdi-car-wrench-clock',
+        message: `Safety inspection expires in ${daysUntilExpiry} days`,
+        actionText: 'Plan Inspection',
+        action: () => planRenewal('safety')
+      })
+    }
+  }
+  
+  // Check road fund
+  if (vehicleForm.value.roadFundExpiryDate) {
+    const status = getExpiryStatus(vehicleForm.value.roadFundExpiryDate)
+    const daysUntilExpiry = getDaysUntilExpiry(vehicleForm.value.roadFundExpiryDate)
+    
+          if (status === 'expired') {
+        reminders.push({
+          id: 'road-expired',
+          severity: 'error',
+          icon: 'mdi-road-alert',
+          message: `Road fund expired ${Math.abs(daysUntilExpiry)} days ago`,
+          actionText: 'Update Renewal',
+          action: () => renewRoadFund()
+        })
+      } else if (status === 'critical') {
+        reminders.push({
+          id: 'road-critical',
+          severity: 'error',
+          icon: 'mdi-road-alert',
+          message: `Road fund expires in ${daysUntilExpiry} days`,
+          actionText: 'Update Renewal',
+          action: () => renewRoadFund()
+        })
+    } else if (status === 'warning') {
+      reminders.push({
+        id: 'road-warning',
+        severity: 'warning',
+        icon: 'mdi-road-clock',
+        message: `Road fund expires in ${daysUntilExpiry} days`,
+        actionText: 'Plan Renewal',
+        action: () => planRenewal('road')
+      })
+    }
+  }
+  
+  return reminders
+})
+
+const hasRenewalReminders = computed(() => renewalReminders.value.length > 0)
+
+// Renewal action functions
+// Renewal action functions - Manual update mode
+const renewInsuranceEntry = (index: number) => {
+  // Open manual update dialog for insurance
+  selectedRenewalType.value = 'insurance'
+  selectedRenewalIndex.value = index
+  renewalDialog.value = true
+}
+
+const renewSafetyInspection = () => {
+  // Open manual update dialog for safety inspection
+  selectedRenewalType.value = 'safety'
+  selectedRenewalIndex.value = null
+  renewalDialog.value = true
+}
+
+const renewRoadFund = () => {
+  // Open manual update dialog for road fund
+  selectedRenewalType.value = 'road'
+  selectedRenewalIndex.value = null
+  renewalDialog.value = true
+}
+
+const planRenewal = (type: string, index?: number) => {
+  let message = ''
+  switch (type) {
+    case 'insurance':
+      message = `Planning renewal for ${insuranceTypeOptions.find(t => t.id === vehicleForm.value.insuranceEntries[index!].insuranceType)?.name}`
+      break
+    case 'safety':
+      message = 'Planning safety inspection renewal'
+      break
+    case 'road':
+      message = 'Planning road fund renewal'
+      break
+  }
+  showSuccessMessage(message)
 }
 const resetVehicleForm = () => {
   vehicleForm.value = {
@@ -865,8 +1994,28 @@ const resetVehicleForm = () => {
     driver: "",
     currentMileage: 0,
     serviceInterval: 0,
-    type: 1
+    type: 1,
+    status: 1,
+    // Insurance entries array
+    insuranceEntries: [] as any[],
+    // Safety inspection fields
+    safetyInspectionStatus: null as any,
+    safetyInspectionNumber: "",
+    safetyInspectionDate: "",
+    safetyInspectionExpiry: "",
+    safetyInspectionCenter: "",
+    safetyInspectionCost: "",
+    safetyInspectionNotes: "",
+    // Road fund fields
+    roadFundStatus: null as any,
+    roadFundNumber: "",
+    roadFundIssueDate: "",
+    roadFundExpiryDate: "",
+    roadFundAmount: "",
+    roadFundIssuingOffice: "",
+    roadFundNotes: ""
   };
+  clearInsuranceEntry();
   editingVehicle.value = null;
 };
 // async function loadVehicles() {
@@ -876,8 +2025,8 @@ const resetVehicleForm = () => {
 // When clicking Detail
 async function vehicleDetail(vehicle: any) {
   try {
-    const detail = await getVehicleById(vehicle.id)
-    selectedVehicle.value = detail
+    const detail = getVehicleById(vehicle.id)
+    selectedVehicle.value = detail || null
     activeTab.value = 'overview' // Reset to overview tab
     vehicleDetailDialog.value = true
   } catch (error) {
@@ -1317,5 +2466,184 @@ onMounted(async () => {
   border-radius: 8px;
   padding: 4px;
   margin-right: 8px;
+}
+
+/* Insurance workflow styles */
+.insurance-entry-form {
+  background: rgba(248, 250, 252, 0.5);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+.section-subtitle {
+  font-weight: 600;
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+.insurance-entry-card {
+  border-radius: 8px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  transition: all 0.2s ease;
+}
+
+.insurance-entry-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.insurance-entry-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.insurance-provider {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 0.9rem;
+}
+
+.insurance-entry-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.detail-label {
+  font-weight: 500;
+  color: #64748b;
+  min-width: 80px;
+}
+
+.detail-value {
+  font-weight: 600;
+  color: #1e293b;
+  text-align: right;
+}
+
+.add-insurance-btn {
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+/* Insurance display styles for vehicle details */
+.insurance-entry-display {
+  padding: 12px;
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  border-radius: 8px;
+  background: rgba(248, 250, 252, 0.3);
+}
+
+.insurance-entry-header-display {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.insurance-provider-display {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 0.9rem;
+}
+
+.insurance-entry-details-display {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-row-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.detail-label-display {
+  font-weight: 500;
+  color: #64748b;
+  min-width: 80px;
+}
+
+.detail-value-display {
+  font-weight: 600;
+  color: #1e293b;
+  text-align: right;
+}
+
+.no-insurance-message {
+  text-align: center;
+  padding: 24px;
+  color: #64748b;
+}
+
+/* Renewal reminder styles */
+.renewal-reminders {
+  background: rgba(255, 248, 220, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid rgba(251, 191, 36, 0.2);
+}
+
+.renewal-reminders .v-alert {
+  margin-bottom: 8px;
+  border-radius: 8px;
+}
+
+.renewal-reminders .v-alert:last-child {
+  margin-bottom: 0;
+}
+
+/* Auto-calculated field styles */
+.v-text-field[readonly] {
+  background: rgba(248, 250, 252, 0.8);
+}
+
+.v-text-field[readonly] .v-field__input {
+  color: #64748b;
+  font-style: italic;
+}
+
+/* Expiry status indicators */
+.expiry-status-expired {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.expiry-status-critical {
+  color: #f59e0b;
+  font-weight: 600;
+}
+
+.expiry-status-warning {
+  color: #f59e0b;
+  font-weight: 500;
+}
+
+.expiry-status-valid {
+  color: #10b981;
+  font-weight: 500;
+}
+
+/* Manual renewal dialog styles */
+.renewal-form {
+  padding: 8px 0;
+}
+
+.renewal-form .v-text-field {
+  margin-bottom: 8px;
+}
+
+.renewal-form .v-textarea {
+  margin-bottom: 8px;
 }
 </style>

@@ -38,6 +38,21 @@
           <p class="login-subtitle">Sign in to your account to continue</p>
         </div>
 
+        <!-- Error Alert -->
+        <v-alert
+          v-if="errorMessage"
+          type="error"
+          variant="tonal"
+          class="error-alert"
+          closable
+          @click:close="clearError"
+        >
+          <div class="error-content">
+            <v-icon icon="mdi-alert-circle" class="error-icon"></v-icon>
+            <span class="error-text">{{ errorMessage }}</span>
+          </div>
+        </v-alert>
+
         <v-form ref="form" v-model="valid" lazy-validation @submit.prevent="handleLogin" class="login-form">
           <div class="form-group">
             <label class="form-label">Email Address</label>
@@ -53,6 +68,7 @@
               class="custom-input"
               hide-details="auto"
               required
+              @input="clearError"
             />
           </div>
 
@@ -72,6 +88,7 @@
               class="custom-input"
               hide-details="auto"
               required
+              @input="clearError"
             />
           </div>
 
@@ -124,6 +141,7 @@ const form = ref()
 const showPassword = ref(false)
 const rememberMe = ref(false)
 const loading = ref(false)
+const errorMessage = ref('')
 
 definePageMeta({
   layout: 'empty'
@@ -139,15 +157,36 @@ const passwordRules = [
   (v: string) => v.length >= 6 || 'Minimum 6 characters',
 ]
 
+const clearError = () => {
+  errorMessage.value = ''
+}
+
 const handleLogin = async () => {
   if (!form.value?.validate()) return
   
   loading.value = true
+  errorMessage.value = ''
+  
   try {
     await login(email.value, password.value)
     router.push('/')
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login failed:', error)
+    
+    // Handle different types of errors
+    if (error?.response?.status === 401) {
+      errorMessage.value = 'Invalid email or password. Please check your credentials and try again.'
+    } else if (error?.response?.status === 422) {
+      errorMessage.value = 'Please check your email and password format.'
+    } else if (error?.response?.status === 500) {
+      errorMessage.value = 'Server error. Please try again later.'
+    } else if (error?.message?.includes('Network Error') || error?.message?.includes('fetch')) {
+      errorMessage.value = 'Network error. Please check your internet connection and try again.'
+    } else if (error?.response?.data?.message) {
+      errorMessage.value = error.response.data.message
+    } else {
+      errorMessage.value = 'Login failed. Please try again.'
+    }
   } finally {
     loading.value = false
   }
@@ -251,6 +290,32 @@ const handleLogin = async () => {
 .login-subtitle {
   color: #666;
   font-size: 1rem;
+}
+
+/* Error Alert Styles */
+.error-alert {
+  margin-bottom: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(220, 53, 69, 0.2);
+  background: rgba(220, 53, 69, 0.05);
+}
+
+.error-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.error-icon {
+  color: #dc3545;
+  font-size: 18px;
+}
+
+.error-text {
+  color: #dc3545;
+  font-weight: 500;
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 .login-form {
