@@ -179,16 +179,23 @@
                     <div class="notification-pointer"></div>
                     
                     <!-- Header -->
-                    <div class="notification-header">
+                    <!-- <div class="notification-header">
                       <div class="header-content">
                         <v-icon color="primary" class="header-icon">mdi-bell</v-icon>
                         <span class="header-title">Notifications</span>
                         <v-icon color="grey" class="header-icon-right">mdi-chat</v-icon>
                       </div>
-                    </div>
+                    </div> -->
+                    <div class="notification-header">
+      <div class="header-content">
+        <v-icon color="primary" class="header-icon">mdi-bell</v-icon>
+        <span class="header-title">Notifications</span>
+        <v-icon color="grey" class="header-icon-right">mdi-chat</v-icon>
+      </div>
+    </div>
                     
                     <!-- Notifications List -->
-                    <div class="notifications-list">
+                    <!-- <div class="notifications-list">
                       <div
                         v-for="notification in displayNotifications"
                         :key="notification.id"
@@ -208,13 +215,41 @@
                         </div>
                         <div class="notification-time">{{ notification.time }}</div>
                       </div>
-                      
+                       -->
+                      <div class="notifications-list">
+      <div
+        v-for="notification in latestNotificationList"
+        :key="notification.id"
+        :class="{ 'notification-item': true, 'notification-item-selected': notification.selected }"
+        @click="handleNotificationClick(notification)"
+      >
+        <div class="notification-avatar">
+          <img 
+            :src="notification.avatar || '/default-avatar.png'" 
+            alt="notification"
+            class="avatar-image"
+          />
+        </div>
+        <div class="notification-content">
+          <!-- Title in bold -->
+          <div class="notification-name font-weight-bold">{{ notification.title }}</div>
+          <!-- Description below -->
+          <!-- <div class="notification-message">{{ notification.description }}</div> -->
+        </div>
+        <!-- Formatted time -->
+        <div class="notification-time">{{ formatTime(notification.createdAt) }}</div>
+      </div>
                       <!-- Empty State -->
-                      <div v-if="displayNotifications.length === 0" class="empty-notifications">
+                      <!-- <div v-if="displayNotifications.length === 0" class="empty-notifications">
                         <v-icon size="48" color="grey-lighten-1">mdi-bell-off</v-icon>
                         <div class="empty-text">No notifications</div>
                       </div>
-                    </div>
+                    </div> -->
+                    <div v-if="latestNotificationList.length === 0" class="empty-notifications">
+                   <v-icon size="48" color="grey-lighten-1">mdi-bell-off</v-icon>
+                   <div class="empty-text">No notifications</div>
+                   </div>
+                   </div>
                     
                     <!-- Footer -->
                     <div class="notification-footer">
@@ -338,6 +373,8 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+const {   latestNotificationList,getLatestNotification } = useNotification();
+
 
 // Auth composables
 const { logout } = useAuth()
@@ -538,8 +575,25 @@ const clearSearchResults = () => {
   clearSearch()
   showSearchResults.value = false
 }
-
 const handleNotificationClick = (notification: any) => {
+  markAsRead(notification.id)
+
+  if (notification.actionUrl) {
+    navigateTo(notification.actionUrl)
+  } else {
+    navigateTo('/alerts')
+  }
+
+    showNotifications.value = false
+
+}
+
+const formatTime = (timestamp: string) => {
+  const date = new Date(timestamp)
+  return date.toLocaleString()
+}
+
+const handleNotificationClickk = (notification: any) => {
   // Mark as read first
   markAsRead(notification.id)
   
@@ -568,6 +622,8 @@ const handleNotificationClick = (notification: any) => {
 onMounted(() => {
   // You can fetch notifications from API here
   console.log('Notifications initialized', currentUser)
+    getLatestNotification()
+
 })
 </script>
 

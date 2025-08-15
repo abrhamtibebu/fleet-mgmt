@@ -71,6 +71,16 @@
                   variant="outlined"
                 ></v-text-field>
               </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  v-model="maintenanceForm.odometerReading"
+                  label="Odometer Reading (km)"
+                  type="number"
+                  variant="outlined"
+                  :rules="[v => !!v || 'Odometer reading is required']"
+                  required
+                ></v-text-field>
+              </v-col>
               <v-col cols="12">
                 <v-textarea
                   v-model="maintenanceForm.remark"
@@ -129,6 +139,7 @@ const maintenanceForm = ref({
   servicedOn: '',
   totalCost: '',
   serviceProvider: '',
+  odometerReading: 0,
   remark: ''
 })
 
@@ -158,6 +169,7 @@ const resetMaintenanceForm = () => {
     cost: '',
     status: 'completed',
     mechanic: '',
+    odometerReading: 0,   
     notes: ''
   }
 }

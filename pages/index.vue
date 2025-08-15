@@ -1,6 +1,5 @@
 <template>
   <div class="modern-dashboard">
-
     <!-- Loading State -->
     <div v-if="status === AuthState.loading" class="text-center py-8">
       <v-progress-circular
@@ -23,6 +22,80 @@
 
     <!-- KPI Cards Row -->
     <div v-else class="kpi-section">
+      <v-row justify="end"> 
+        <v-col md="2" cols="auto">
+          <v-menu
+            v-model="fromMenu"
+            :close-on-content-click="false"
+            transition="scale-transition"
+            offset-y
+          >
+            <template v-slot:activator="{ props }">
+              <v-text-field
+                v-bind="props"
+                label="From"
+                :model-value="formatDate(fromRaw, 'from')"
+                readonly
+                variant="outlined"
+                density="compact"
+                hide-details
+              ></v-text-field>
+            </template>
+            <v-date-picker v-model="fromRaw">
+              <template v-slot:actions>
+                <v-btn variant="text" @click="fromMenu = false">Cancel</v-btn>
+                <v-btn variant="text" color="primary" @click="applyFromDate">OK</v-btn>
+              </template>
+            </v-date-picker>
+          </v-menu>
+        </v-col>
+        
+        <v-col md="2" cols="auto">
+          <v-menu
+            v-model="toMenu"
+            :close-on-content-click="false"
+            transition="scale-transition"
+            offset-y
+          >
+            <template v-slot:activator="{ props }">
+              <v-text-field
+                v-bind="props"
+                label="To"
+                :model-value="formatDate(toRaw, 'to')"
+                readonly
+                variant="outlined"
+                density="compact"
+                hide-details
+              ></v-text-field>
+            </template>
+            <v-date-picker v-model="toRaw">
+              <template v-slot:actions>
+                <v-btn variant="text" @click="toMenu = false">Cancel</v-btn>
+                <v-btn variant="text" color="primary" @click="applyToDate">OK</v-btn>
+              </template>
+            </v-date-picker>
+          </v-menu>
+        </v-col>
+        
+        <v-col cols="auto">
+          <v-btn color="primary" @click="reloadReports">Apply</v-btn>
+        </v-col>
+      </v-row>
+      
+      <v-row justify="end"> 
+        <v-col cols="auto">
+          <v-select
+            v-model="selectedPeriod"
+            :items="['6 months', '1 year', '2 years']"
+            variant="outlined"
+            density="compact"
+            hide-details
+            class="period-select"
+            @update:modelValue="handlePeriodChange"
+          ></v-select>
+        </v-col>
+      </v-row>
+      
       <v-row>
         <v-col cols="12" sm="6" md="3">
           <div class="kpi-card">
@@ -30,7 +103,7 @@
               <v-icon>mdi-truck</v-icon>
             </div>
             <div class="kpi-content">
-              <h3 class="kpi-value">{{ loading ? '...' : vehicleList.length }}</h3>
+              <h3 class="kpi-value">{{ loading ? '...' : totalVehicles }}</h3>
               <p class="kpi-label">Total Vehicles</p>
             </div>
           </div>
@@ -41,7 +114,7 @@
               <v-icon>mdi-check-circle</v-icon>
             </div>
             <div class="kpi-content">
-              <h3 class="kpi-value">{{ loading ? '...' : activeVehicles.length }}</h3>
+              <h3 class="kpi-value">{{ loading ? '...' : activeVehicles }}</h3>
               <p class="kpi-label">Active Vehicles</p>
             </div>
           </div>
@@ -52,7 +125,7 @@
               <v-icon>mdi-wrench</v-icon>
             </div>
             <div class="kpi-content">
-              <h3 class="kpi-value">{{ loading ? '...' : serviceDueVehicles.length }}</h3>
+              <h3 class="kpi-value">{{ loading ? '...' : serviceDueVehicles }}</h3>
               <p class="kpi-label">Service Due</p>
             </div>
           </div>
@@ -63,14 +136,13 @@
               <v-icon>mdi-alert</v-icon>
             </div>
             <div class="kpi-content">
-              <h3 class="kpi-value">{{ loading ? '...' : openAnomalies.length }}</h3>
+              <h3 class="kpi-value">{{ loading ? '...' : openAnomalies }}</h3>
               <p class="kpi-label">Open Alerts</p>
             </div>
           </div>
         </v-col>
       </v-row>
     </div>
-    <!-- End of conditional content -->
 
     <!-- Main Content Grid -->
     <div v-if="status === AuthState.authenticated" class="dashboard-content">
@@ -91,6 +163,7 @@
                   density="compact"
                   hide-details
                   class="period-select"
+                  @update:modelValue="handlePeriodChange"
                 ></v-select>
               </div>
             </div>
@@ -142,287 +215,146 @@
         </v-col>
       </v-row>
 
-
-
-       <!-- Success Snackbar -->
-       <v-snackbar v-model="showSuccessSnackbar" color="success" timeout="3000">
-         {{ successMessage }}
-         <template v-slot:actions>
-           <v-btn color="white" variant="text" @click="showSuccessSnackbar = false">Close</v-btn>
-         </template>
-       </v-snackbar>
-     </div>
-   </div>
- </template>
+      <!-- Success Snackbar -->
+      <v-snackbar v-model="showSuccessSnackbar" color="success" timeout="3000">
+        {{ successMessage }}
+        <template v-slot:actions>
+          <v-btn color="white" variant="text" @click="showSuccessSnackbar = false">Close</v-btn>
+        </template>
+      </v-snackbar>
+    </div>
+  </div>
+</template>
 
 <script setup>
-import { onMounted, computed, ref } from 'vue'
+import { onMounted, computed, ref, watch } from 'vue'
 import * as echarts from 'echarts'
+import moment from 'moment'
 
-
-
-const { vehicleList, loading, getVehicles, activeVehicles, serviceDueVehicles, calculateServiceDue } = useVehicles()
-const { fuelCards, getFuelCards, lowBalanceCards, fuelRecords, getFuelRecords } = useFuel()
-const { anomalies, getAnomalies, openAnomalies } = useAnomalies()
-const { cards, vendorCards, initializeData } = useVendorData()
-const { vendorList,getVendor,error } = useVendor()
-
+// Auth composables
+const { logout } = useAuth()
+const { currentUser, status } = useAuthState()
+const { AuthState } = await import('~/types/auth')
+const { dashboardReport, loading, getAllReport } = useReport()
 
 // Chart refs
 const fleetUtilizationChart = ref(null)
 const costPieChart = ref(null)
 const statusDonutChart = ref(null)
 const topVehiclesBarChart = ref(null)
-const alertsTimelineChart = ref(null)
 
 // Period selector
 const selectedPeriod = ref('6 months')
+const fromMenu = ref(false)
+const toMenu = ref(false)
 
-// KPI/Stats
-const totalFuelSpent = computed(() => fuelCards.value.reduce((sum, card) => sum + card.amountSpent, 0))
-const averageEfficiency = computed(() => vehicleList.value.length === 0 ? 0 : vehicleList.value.reduce((sum, v) => sum + v.fuelEfficiency, 0) / vehicleList.value.length)
-const maintenanceCost = ref(150000)
-const otherCosts = ref(50000)
+// Initialize dates to current month range
+const today = new Date()
+const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0)
 
-// Calculate monthly fuel consumption in liters
-const getMonthlyFuelConsumption = () => {
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul']
-  const currentYear = new Date().getFullYear()
+// Initialize date refs
+const fromRaw = ref(new Date(startOfMonth))
+const toRaw = ref(new Date(endOfMonth))
+
+// Date formatting function
+const formatDate = (dateInput, type) => {
+  if (!dateInput) return ''
+  return moment(dateInput).format('YYYY-MM-DD')
+}
+
+// Apply date selections
+const applyFromDate = () => {
+  fromMenu.value = false
+}
+
+const applyToDate = () => {
+  toMenu.value = false
+}
+
+// Handle period selection
+const handlePeriodChange = () => {
+  const today = new Date()
   
-  return months.map((month, index) => {
-    const monthRecords = fuelRecords.value.filter(record => {
-      const recordDate = new Date(record.date)
-      return recordDate.getFullYear() === currentYear && recordDate.getMonth() === index
-    })
-    
-    return monthRecords.reduce((sum, record) => sum + record.quantity, 0)
-  })
+  switch(selectedPeriod.value) {
+    case '6 months':
+      fromRaw.value = new Date(today.getFullYear(), today.getMonth() - 6, 1)
+      toRaw.value = new Date(today.getFullYear(), today.getMonth() + 1, 0)
+      break
+    case '1 year':
+      fromRaw.value = new Date(today.getFullYear() - 1, today.getMonth(), 1)
+      toRaw.value = new Date(today.getFullYear(), today.getMonth() + 1, 0)
+      break
+    case '2 years':
+      fromRaw.value = new Date(today.getFullYear() - 2, today.getMonth(), 1)
+      toRaw.value = new Date(today.getFullYear(), today.getMonth() + 1, 0)
+      break
+  }
+  
+  reloadReports()
 }
 
-// Fuel Card Data
-const fuelCardData = ref([
-  {
-    id: 1,
-    vehicleName: 'Ford Transit',
-    cardNumber: '**** 1234',
-    status: 'active',
-    currentBalance: 850,
-    totalBalance: 1000,
-    percentage: 85.0,
-    isLowBalance: false,
-    lastRefillDate: '2024-01-20'
-  },
-  {
-    id: 2,
-    vehicleName: 'Toyota Hilux',
-    cardNumber: '**** 5678',
-    status: 'active',
-    currentBalance: 120,
-    totalBalance: 800,
-    percentage: 15.0,
-    isLowBalance: true,
-    lastRefillDate: '2024-01-18'
-  },
-  {
-    id: 3,
-    vehicleName: 'Mercedes Sprinter',
-    cardNumber: '**** 9012',
-    status: 'active',
-    currentBalance: 1200,
-    totalBalance: 1500,
-    percentage: 80.0,
-    isLowBalance: false,
-    lastRefillDate: '2024-01-22'
-  },
-  {
-    id: 4,
-    vehicleName: 'VW Caddy',
-    cardNumber: '**** 3456',
-    status: 'active',
-    currentBalance: 45,
-    totalBalance: 600,
-    percentage: 7.5,
-    isLowBalance: true,
-    lastRefillDate: '2024-01-15'
-  }
-])
+// Reload reports with current dates
+const reloadReports = async () => {
+  const formattedFrom = formatDate(fromRaw.value)
+  const formattedTo = formatDate(toRaw.value)
 
-// Service Schedule Data
-const serviceScheduleData = ref([
-  {
-    id: 1,
-    vehicleName: 'Ford Transit',
-    vehicleId: 'ABC-123',
-    currentMileage: 87500,
-    nextServiceMileage: 90000,
-    nextServiceDate: '2024-01-20',
-    status: 'overdue',
-    statusText: 'overdue (5d overdue)',
-    progressPercentage: 55,
-    isOverdue: true,
-    isUrgent: false
-  },
-  {
-    id: 2,
-    vehicleName: 'Mercedes Sprinter',
-    vehicleId: 'DEF-456',
-    currentMileage: 152000,
-    nextServiceMileage: 160000,
-    nextServiceDate: '2024-01-10',
-    status: 'urgent',
-    statusText: 'urgent (12d overdue)',
-    progressPercentage: 47,
-    isOverdue: true,
-    isUrgent: true
-  },
-  {
-    id: 3,
-    vehicleName: 'Toyota Hilux',
-    vehicleId: 'XYZ-789',
-    currentMileage: 45200,
-    nextServiceMileage: 50000,
-    nextServiceDate: '2024-02-01',
-    status: 'routine',
-    statusText: 'routine',
-    progressPercentage: 52,
-    isOverdue: false,
-    isUrgent: false
-  }
-])
-
-// Helper functions for service schedule
-const getServiceIcon = (status) => {
-  const icons = {
-    overdue: 'mdi-alert',
-    urgent: 'mdi-clock-alert',
-    routine: 'mdi-calendar'
-  }
-  return icons[status] || 'mdi-calendar'
-}
-
-const getServiceIconColor = (status) => {
-  const colors = {
-    overdue: 'error',
-    urgent: 'warning',
-    routine: 'info'
-  }
-  return colors[status] || 'info'
-}
-
-const getServiceStatusColor = (status) => {
-  const colors = {
-    overdue: 'error',
-    urgent: 'warning',
-    routine: 'primary'
-  }
-  return colors[status] || 'primary'
-}
-
-const getServiceProgressColor = (status) => {
-  const colors = {
-    overdue: 'error',
-    urgent: 'warning',
-    routine: 'primary'
-  }
-  return colors[status] || 'primary'
-}
-
-
-const showAddCardDialog = ref(false)
-const savingCard = ref(false)
-const showSuccessSnackbar = ref(false)
-const successMessage = ref('')
-const cardFormRef = ref(null)
-const cardFormValid = ref(false)
-const cardForm = ref({ cardNumber: '', cardHolder: '', totalValue: '', expiryDate: '', status: 'Active', vendorCardId: '' })
-const cardStatusOptions = [
-  { title: 'Active', value: 'Active' },
-  { title: 'Inactive', value: 'Inactive' },
-  { title: 'Suspended', value: 'Suspended' }
-]
-const vendorCardOptions = computed(() => vendorCards.value.map(card => ({ title: `${card.cardHolder} - ${maskCardNumber(card.cardNumber)}`, value: card.id })))
-
-const saveCard = async () => {
-  savingCard.value = true
   try {
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    let newCard
-    if (cardForm.value.vendorCardId) {
-      const vendorCard = vendorCards.value.find(c => c.id === cardForm.value.vendorCardId)
-      if (vendorCard) {
-        newCard = {
-          id: `CARD-${Date.now()}`,
-          cardNumber: vendorCard.cardNumber,
-          cardHolder: vendorCard.cardHolder,
-          totalValueIssued: parseFloat(cardForm.value.totalValue),
-          amountSpent: 0,
-          remainingBalance: parseFloat(cardForm.value.totalValue),
-          status: cardForm.value.status,
-          expiryDate: cardForm.value.expiryDate,
-          lowBalanceThreshold: parseFloat(cardForm.value.totalValue) * 0.2,
-          isLowBalance: false,
-          lastTransactionDate: new Date().toISOString().split('T')[0],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }
-      }
-    } else {
-      newCard = {
-        id: `CARD-${Date.now()}`,
-        cardNumber: cardForm.value.cardNumber,
-        cardHolder: cardForm.value.cardHolder,
-        totalValueIssued: parseFloat(cardForm.value.totalValue),
-        amountSpent: 0,
-        remainingBalance: parseFloat(cardForm.value.totalValue),
-        status: cardForm.value.status,
-        expiryDate: cardForm.value.expiryDate,
-        lowBalanceThreshold: parseFloat(cardForm.value.totalValue) * 0.2,
-        isLowBalance: false,
-        lastTransactionDate: new Date().toISOString().split('T')[0],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-    }
-    fuelCards.value.push(newCard)
-    showAddCardDialog.value = false
-    resetCardForm()
-    successMessage.value = 'Fuel card added successfully'
-    showSuccessSnackbar.value = true
+    loading.value = true
+    await getAllReport(formattedFrom, formattedTo)
+    initializeCharts()
   } catch (error) {
-    console.error('Failed to save card:', error)
+    console.error('Error loading reports:', error)
   } finally {
-    savingCard.value = false
+    loading.value = false
   }
 }
-const resetCardForm = () => {
-  cardForm.value = { cardNumber: '', cardHolder: '', totalValue: '', expiryDate: '', status: 'Active', vendorCardId: '' }
-}
-const maskCardNumber = (cardNumber) => `****-****-****-${cardNumber.slice(-4)}`
 
+// Computed properties from report data
+const totalVehicles = computed(() => {
+  if (!dashboardReport.value?.vehicleStatus) return 0
+  return dashboardReport.value.vehicleStatus.reduce((sum, status) => sum + status.total, 0)
+})
+
+const activeVehicles = computed(() => {
+  if (!dashboardReport.value?.vehicleStatus) return 0
+  const activeStatus = dashboardReport.value.vehicleStatus.find(s => s.status === 1)
+  return activeStatus ? activeStatus.total : 0
+})
+
+const serviceDueVehicles = computed(() => {
+  return dashboardReport.value?.serviceDue || 0
+})
+
+const openAnomalies = computed(() => {
+  return dashboardReport.value?.openNotifications || 0
+})
+
+// Initialize charts
 const initializeCharts = () => {
-  // Fleet Utilization Chart - Now showing Fuel Consumption in Liters
-  if (fleetUtilizationChart.value) {
+  // Fleet Utilization Chart
+  if (fleetUtilizationChart.value && dashboardReport.value?.fuelTrends) {
     const chart = echarts.init(fleetUtilizationChart.value)
-    const monthlyFuelConsumption = getMonthlyFuelConsumption()
     
     chart.setOption({
       tooltip: { 
         trigger: 'axis',
-        formatter: function(params) {
-          return `${params[0].name}<br/>${params[0].seriesName}: ${params[0].value} liters`
+        formatter: (params) => {
+          return `${params[0].name}<br/>Fuel Consumption: ${params[0].value} liters`
         }
       },
-      xAxis: { type: 'category', data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'] },
+      xAxis: { 
+        type: 'category', 
+        data: dashboardReport.value.fuelTrends.map(t => t.ym) 
+      },
       yAxis: { 
         type: 'value', 
         name: 'Liters',
-        axisLabel: { formatter: '{value} L' },
-        nameLocation: 'middle',
-        nameGap: 40
+        axisLabel: { formatter: '{value} L' }
       },
       series: [{
         name: 'Fuel Consumption',
-        data: monthlyFuelConsumption,
+        data: dashboardReport.value.fuelTrends.map(t => t.total),
         type: 'line',
         smooth: true,
         areaStyle: {
@@ -441,16 +373,16 @@ const initializeCharts = () => {
         color: '#f3d70e',
         symbol: 'circle',
         symbolSize: 10,
-        lineStyle: {
-          width: 3
-        }
+        lineStyle: { width: 3 }
       }]
     })
   }
 
   // Cost Pie Chart
-  if (costPieChart.value) {
+  if (costPieChart.value && dashboardReport.value?.costBreakdown) {
     const chart = echarts.init(costPieChart.value)
+    const { fuel, maintenance, other } = dashboardReport.value.costBreakdown
+    
     chart.setOption({
       tooltip: { trigger: 'item' },
       legend: { top: 'bottom' },
@@ -462,19 +394,18 @@ const initializeCharts = () => {
         itemStyle: { borderRadius: 10, borderColor: '#ffffff', borderWidth: 2 },
         label: { show: true, formatter: '{b}: {d}%' },
         data: [
-          { value: totalFuelSpent.value, name: 'Fuel', itemStyle: { color: '#f3d70e' } },
-          { value: maintenanceCost.value, name: 'Maintenance', itemStyle: { color: '#fbb339' } },
-          { value: otherCosts.value, name: 'Other', itemStyle: { color: '#f5e35e' } }
+          { value: fuel, name: 'Fuel', itemStyle: { color: '#f3d70e' } },
+          { value: maintenance, name: 'Maintenance', itemStyle: { color: '#fbb339' } },
+          { value: other, name: 'Other', itemStyle: { color: '#f5e35e' } }
         ]
       }]
     })
   }
 
   // Status Donut Chart
-  if (statusDonutChart.value) {
+  if (statusDonutChart.value && dashboardReport.value?.vehicleStatus) {
     const chart = echarts.init(statusDonutChart.value)
-    const statusCounts = { active: 0, maintenance: 0, inactive: 0 }
-    vehicleList.value.forEach(v => statusCounts[v.status] = (statusCounts[v.status] || 0) + 1)
+    
     chart.setOption({
       tooltip: { trigger: 'item' },
       legend: { top: 'bottom' },
@@ -485,112 +416,79 @@ const initializeCharts = () => {
         avoidLabelOverlap: false,
         itemStyle: { borderRadius: 10, borderColor: '#ffffff', borderWidth: 2 },
         label: { show: true, formatter: '{b}: {d}%' },
-        data: [
-          { value: statusCounts.active, name: 'Active', itemStyle: { color: '#f3d70e' } },
-          { value: statusCounts.maintenance, name: 'Maintenance', itemStyle: { color: '#fbb339' } },
-          { value: statusCounts.inactive, name: 'Inactive', itemStyle: { color: '#f5e35e' } }
-        ]
+        data: dashboardReport.value.vehicleStatus.map(status => ({
+          value: status.total,
+          name: getStatusName(status.status),
+          itemStyle: { color: getStatusColor(status.status) }
+        }))
       }]
     })
   }
 
   // Top Vehicles Bar Chart
-  if (topVehiclesBarChart.value) {
+  if (topVehiclesBarChart.value && dashboardReport.value?.vehiclePerformance) {
     const chart = echarts.init(topVehiclesBarChart.value)
-    const top = [...vehicleList.value].sort((a, b) => b.fuelEfficiency - a.fuelEfficiency).slice(0, 5)
+    const top = [...dashboardReport.value.vehiclePerformance]
+      .sort((a, b) => b.avg_km_per_l - a.avg_km_per_l)
+      .slice(0, 5)
+    
     chart.setOption({
       tooltip: { trigger: 'axis' },
-      xAxis: { type: 'category', data: top.map(v => v.licensePlate) },
-      yAxis: { type: 'value', name: 'km/l' },
+      xAxis: { 
+        type: 'category', 
+        data: top.map(v => v.vehicleData.plateNo) 
+      },
+      yAxis: { 
+        type: 'value', 
+        name: 'km/l' 
+      },
       series: [{
-        data: top.map(v => v.fuelEfficiency),
+        data: top.map(v => v.avg_km_per_l),
         type: 'bar',
         itemStyle: { color: '#f3d70e', borderRadius: [8, 8, 0, 0] },
         barWidth: 32
       }]
     })
   }
-
-  // Alerts Timeline Chart
-  if (alertsTimelineChart.value) {
-    const chart = echarts.init(alertsTimelineChart.value)
-    const alerts = openAnomalies.value.slice(0, 10).map((a, index) => ({
-      name: a.description,
-      value: index + 1,
-      itemStyle: { color: a.severity === 'critical' ? '#fbb339' : a.severity === 'high' ? '#f3d70e' : '#f5e35e' }
-    }))
-    chart.setOption({
-      tooltip: { trigger: 'item', formatter: p => `${p.name}<br>Severity: ${p.data.severity || 'medium'}` },
-      xAxis: { type: 'category', data: alerts.map((_, i) => `Alert ${i + 1}`) },
-      yAxis: { type: 'value', name: 'Severity Level' },
-      series: [{
-        type: 'bar',
-        data: alerts,
-        itemStyle: { borderRadius: [4, 4, 0, 0] },
-        barWidth: 20
-      }]
-    })
-  }
 }
 
-// Auth composables
-const { logout } = useAuth()
-const { currentUser, status } = useAuthState()
-const { AuthState } = await import('~/types/auth')
+// Helper functions for status
+const getStatusName = (statusCode) => {
+  const statusMap = {
+    1: 'Active',
+    2: 'Maintenance',
+    3: 'Inactive'
+  }
+  return statusMap[statusCode] || 'Unknown'
+}
 
-
+const getStatusColor = (statusCode) => {
+  const colorMap = {
+    1: '#f3d70e',    // Active
+    2: '#fbb339',    // Maintenance
+    3: '#f5e35e'     // Inactive
+  }
+  return colorMap[statusCode] || '#cccccc'
+}
 
 // Watch for authentication state changes
 watch(() => status.value, async (newStatus) => {
   if (newStatus === AuthState.authenticated) {
-    try {
-      await Promise.all([
-        getVehicles(),
-        getFuelCards(),
-        getVendor(),
-      ])
-      initializeData()
-      
-      // Initialize charts after data is loaded
-      setTimeout(() => {
-        initializeCharts()
-      }, 100)
-    } catch (error) {
-      console.error('Error loading dashboard data after auth:', error)
-    }
+    await reloadReports()
   }
 })
 
 onMounted(async () => {
-  const { status } = useAuthState()
-  
-  // Wait for authentication to be ready
   await nextTick()
-  
-  // Only load data if user is authenticated
   if (status.value === AuthState.authenticated) {
-    try {
-      await Promise.all([
-        getVehicles(),
-        getFuelCards(),
-        getFuelRecords(),
-        // getAnomalies(),
-        getVendor(),
-      ])
-      initializeData()
-      
-      // Initialize charts after data is loaded
-      setTimeout(() => {
-        initializeCharts()
-      }, 100)
-    } catch (error) {
-      console.error('Error loading dashboard data:', error)
-    }
+    await reloadReports()
   }
 })
 </script>
 
 <style scoped>
+/* ... existing styles ... */
+
 .modern-dashboard {
   padding: 24px;
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
@@ -702,7 +600,11 @@ onMounted(async () => {
 }
 
 .period-select {
-  max-width: 120px;
+  max-width: 150px;
+}
+.date-select {
+  position: absolute;
+  right: 1;
 }
 
 .chart-container {

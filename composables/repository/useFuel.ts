@@ -1,6 +1,8 @@
 import { ref, computed } from 'vue'
 import type { Vehicle } from '~/types/fleet'
 
+
+
 interface FuelRecord {
   id: string
   vehicleId: string
@@ -13,7 +15,10 @@ interface FuelRecord {
   station: string
   fuelEfficiency: number
   createdAt: string
+  to: string
+  from: string
 }
+
 
 interface FuelCard {
   id: string
@@ -33,11 +38,26 @@ interface FuelCard {
   createdAt: string
   updatedAt: string
 }
-
+interface FuelReport {
+  id: string
+  vehicleId: string
+  licensePlate: string
+  date: string
+  quantity: number
+  amount: number
+  odometerReading: number
+  fuelCardId: string
+  station: string
+  fuelEfficiency: number
+  createdAt: string
+  to: string
+  from: string
+}
 export const useFuel = () => {
   const { $apiFetch } = useNuxtApp();
   const fuelRecords = ref<FuelRecord[]>([])
   const fuelCards = ref<FuelCard[]>([])
+  const fuelReports = ref<FuelReport[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -57,6 +77,22 @@ export const useFuel = () => {
       loading.value = false
     }
   }
+  const getFuelReports = async (from : string, to : string  ) => {
+    loading.value = true
+    try {
+      const url = `/report/dashboard/${from}/${to}`
+      const data = await $apiFetch<FuelReport[]>(url, {
+        method: "GET"
+      });
+      fuelReports.value = Array.isArray(data.result) ? data.result : []
+    } catch (e) {
+      fuelReports.value = []
+      error.value = 'Failed to fetch fuel records'
+      console.error(e)
+    } finally {
+      loading.value = false
+    }
+  }
 
   const createFuelRecords = async (body?: Vehicle) => {
         loading.value = true
@@ -67,9 +103,9 @@ export const useFuel = () => {
         body
       });
       fuelRecords.value.push(data?.result)
+      return data
     } catch (e) {
-      fuelRecords.value = []
-      error.value = 'Failed to create fuel records'
+      error.value = e
       console.error(e)
     } finally {
       loading.value = false
@@ -85,7 +121,7 @@ export const useFuel = () => {
       fuelCards.value = Array.isArray(data) ? data : []
     } catch (e) {
       fuelCards.value = []
-      error.value = 'Failed to fetch fuel cards'
+      error.value = e.response.data.error
       console.error(e)
     } finally {
       loading.value = false
@@ -135,19 +171,17 @@ export const useFuel = () => {
     return totalDistance / totalFuel
   }
 
-  const refillFuelCard = async (cardId: string, amount: number, notes?: string) => {
+  const refillFuelCard = async (cardId: string, amount: number, remark?: string) => {
     loading.value = true
     try {
-      const data = await $apiFetch<{ success: boolean; message: string; data: { card: FuelCard; fuelRecord: any } }>('/fuel-cards/refill', {
-        method: "POST",
-        body: {
-          cardId,
-          amount,
-          notes
+      const data = await $apiFetch(`/card/${cardId}/recharge`, {
+        method: "PUT",
+       body: {
+    amount: Number(amount),
+    remark,
         }
       })
       
-      // Update the card in the local state
       const cardIndex = fuelCards.value.findIndex(card => card.id === cardId)
       if (cardIndex !== -1) {
         fuelCards.value[cardIndex] = data.data.card
@@ -184,9 +218,11 @@ export const useFuel = () => {
     addFuelCard,
     fuelRecords,
     fuelCards,
+    fuelReports,
     loading,
     error,
     getFuelRecords,
+    getFuelReports,
     getFuelCards,
     getFuelRecordsByVehicle,
     getFuelRecordsByCard,

@@ -4,7 +4,7 @@
       <v-card>
         <v-card-title class="text-h6 pa-4">
                   <v-icon class="me-2  ml-5" color="green">mdi-fuel</v-icon>
-Add Fuel Entry</v-card-title>
+          Add Fuel Entry</v-card-title>
         <v-card-text class="pa-4">
           <v-form ref="fuelForm" v-model="fuelFormValid">
             <v-row>
@@ -67,6 +67,16 @@ Add Fuel Entry</v-card-title>
                   required
                 ></v-text-field>
               </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  v-model="fuelEntryForm.refillOn"
+                  label="Service Date"
+                  type="date"
+                  variant="outlined"
+                  :rules="[v => !!v || 'Date is required']"
+                  required
+                ></v-text-field>
+              </v-col>
               <v-col cols="12">
                 <v-autocomplete
                   density="compact"
@@ -105,13 +115,15 @@ Add Fuel Entry</v-card-title>
 <script lang="ts" setup>
 
 const {getCard,cardList } = useCard()
-const {createFuelRecords} = useFuel()
+const {createFuelRecords, error} = useFuel()
 const fuelFormValid = ref(false)
 const showFuelEntryDialog = ref(true)
 const saving = ref(false)
 
 const emit = defineEmits<{
-  close: []
+  (e: 'close'):void,
+  (e: 'showSuccess', message: string): void,
+  (e: 'showError', message: string): void
 }>()
 
 const props = defineProps({
@@ -127,7 +139,8 @@ const fuelEntryForm = ref({
   amount: 0,
   odometerReading: 0,
   fuelStation: '',
-  cardId: props.vehicle.cardId
+  cardId: props.vehicle.cardId,
+  refillOn: ''
 })
 
 
@@ -135,16 +148,18 @@ const saveFuelEntry = async () => {
   saving.value = true
   try {
     // TODO: Implement save logic
-    await createFuelRecords(fuelEntryForm.value)
-
-    console.log('Saving fuel entry:', fuelEntryForm.value)
-    emit('showSuccess','Fuel Record Added Successfully')
-    emit('close')
-    resetFuelForm()
-  } catch (error) {
+    const res = await createFuelRecords(fuelEntryForm.value)
+    
+    if(res.status == 'OK'){      
+      console.log('Saving fuel entry:', fuelEntryForm.value)
+      emit('showSuccess','Fuel Record Added Successfully')
+      emit('close')
+      resetFuelForm()
+    }
+  } catch (er) {  
     console.error('Error saving fuel entry:', error)
-  } finally {
-    saving.value = false
+    emit('showError',error.value.data.error)
+    emit('close')
   }
 }
 
@@ -158,7 +173,9 @@ const resetFuelForm = () => {
     amount: 0,
     odometerReading: 0,
     station: '',
-    fuelCardId: ''
+    fuelCardId: '',   
+    date: '',
+
   }
 }
 </script>

@@ -554,7 +554,7 @@
               Safety Inspection
             </div>
             <v-row class="grid-gap-sm">
-              <v-col cols="12" sm="6">
+              <!-- <v-col cols="12" sm="6">
                 <v-select
                   density="compact"
                   v-model="vehicleForm.safetyInspectionStatus"
@@ -565,7 +565,10 @@
                   placeholder="Select inspection status"
                   variant="outlined"
                 ></v-select>
-              </v-col>
+              </v-col> -->
+                          </v-row>
+                <v-row class="grid-gap-sm">
+
               <v-col cols="12" sm="6">
                 <v-text-field
                   density="compact"
@@ -575,9 +578,7 @@
                   variant="outlined"
                 ></v-text-field>
               </v-col>
-            </v-row>
 
-                          <v-row class="grid-gap-sm">
                 <v-col cols="12" sm="6">
                   <v-text-field
                     density="compact"
@@ -589,6 +590,8 @@
                     @update:model-value="(value) => autoCalculateExpiry(value, 'safety')"
                   ></v-text-field>
                 </v-col>
+                </v-row>
+                <v-row class="grid-gap-sm">
                 <v-col cols="12" sm="6">
                   <v-text-field
                     density="compact"
@@ -600,9 +603,6 @@
                     readonly
                   ></v-text-field>
                 </v-col>
-              </v-row>
-
-            <v-row class="grid-gap-sm">
               <v-col cols="12" sm="6">
                 <v-text-field
                   density="compact"
@@ -612,6 +612,8 @@
                   variant="outlined"
                 ></v-text-field>
               </v-col>
+              </v-row>
+              <v-row  class="grid-gap-sm">
               <v-col cols="12" sm="6">
                 <v-text-field
                   density="compact"
@@ -623,10 +625,8 @@
                   hide-spin-buttons
                 ></v-text-field>
               </v-col>
-            </v-row>
 
-            <v-row class="grid-gap-sm">
-              <v-col cols="12">
+              <v-col cols="12" sm="6">
                 <v-textarea
                   density="compact"
                   v-model="vehicleForm.safetyInspectionNotes"
@@ -647,7 +647,7 @@
               Road Fund
             </div>
             <v-row class="grid-gap-sm">
-              <v-col cols="12" sm="6">
+              <!-- <v-col cols="12" sm="6">
                 <v-select
                   density="compact"
                   v-model="vehicleForm.roadFundStatus"
@@ -658,7 +658,9 @@
                   placeholder="Select road fund status"
                   variant="outlined"
                 ></v-select>
-              </v-col>
+              </v-col> -->
+              </v-row>
+                <v-row class="grid-gap-sm">
               <v-col cols="12" sm="6">
                 <v-text-field
                   density="compact"
@@ -668,9 +670,7 @@
                   variant="outlined"
                 ></v-text-field>
               </v-col>
-            </v-row>
 
-                          <v-row class="grid-gap-sm">
                 <v-col cols="12" sm="6">
                   <v-text-field
                     density="compact"
@@ -682,6 +682,8 @@
                     @update:model-value="(value) => autoCalculateExpiry(value, 'road')"
                   ></v-text-field>
                 </v-col>
+                </v-row>
+                 <v-row class="grid-gap-sm">
                 <v-col cols="12" sm="6">
                   <v-text-field
                     density="compact"
@@ -693,9 +695,6 @@
                     readonly
                   ></v-text-field>
                 </v-col>
-              </v-row>
-
-            <v-row class="grid-gap-sm">
               <v-col cols="12" sm="6">
                 <v-text-field
                   density="compact"
@@ -707,6 +706,8 @@
                   hide-spin-buttons
                 ></v-text-field>
               </v-col>
+              </v-row>
+              <v-row class="grid-gap-sm">
               <v-col cols="12" sm="6">
                 <v-text-field
                   density="compact"
@@ -716,10 +717,7 @@
                   variant="outlined"
                 ></v-text-field>
               </v-col>
-            </v-row>
-
-            <v-row class="grid-gap-sm">
-              <v-col cols="12">
+              <v-col cols="12" sm="6">
                 <v-textarea
                   density="compact"
                   v-model="vehicleForm.roadFundNotes"
@@ -1398,11 +1396,11 @@ const vehicleStatusOptions = computed(() => {
 const insuranceTypeOptions = [
   { id: 1, name: 'Comprehensive Insurance' },
   { id: 2, name: 'Third Party Liability' },
-  { id: 3, name: 'Third Party Fire & Theft' },
-  { id: 4, name: 'Commercial Vehicle Insurance' },
-  { id: 5, name: 'Fleet Insurance' },
-  { id: 6, name: 'Self Insurance' },
-  { id: 7, name: 'Other' }
+  // { id: 3, name: 'Third Party Fire & Theft' },
+  // { id: 4, name: 'Commercial Vehicle Insurance' },
+  // { id: 5, name: 'Fleet Insurance' },
+  // { id: 6, name: 'Self Insurance' },
+  // { id: 7, name: 'Other' }
 ]
 
 // Safety inspection status options
@@ -1456,7 +1454,7 @@ const vehicleForm = ref({
   // Insurance entries array
   insuranceEntries: [] as any[],
   // Safety inspection fields
-  safetyInspectionStatus: null as any,
+  // safetyInspectionStatus: null as any,
   safetyInspectionNumber: "",
   safetyInspectionDate: "",
   safetyInspectionExpiry: "",
@@ -1464,7 +1462,7 @@ const vehicleForm = ref({
   safetyInspectionCost: "",
   safetyInspectionNotes: "",
   // Road fund fields
-  roadFundStatus: null as any,
+  // roadFundStatus: null as any,
   roadFundNumber: "",
   roadFundIssueDate: "",
   roadFundExpiryDate: "",
@@ -1770,7 +1768,13 @@ const hasRequiredInsurance = computed(() => {
   const hasThirdParty = vehicleForm.value.insuranceEntries.some(
     entry => entry.insuranceType === 2 // Third Party Liability
   )
-  return hasComprehensive && hasThirdParty
+  const hasSaftyInspection = vehicleForm.value.insuranceEntries.some(
+    entry => entry.insuranceType === 3 // Safty Inspection
+  )
+   const hasRoadFund = vehicleForm.value.insuranceEntries.some(
+    entry => entry.insuranceType === 4 // TRoad Fund
+  )
+  return hasComprehensive && hasThirdParty && hasSaftyInspection && hasRoadFund
 })
 
 // Renewal logic functions

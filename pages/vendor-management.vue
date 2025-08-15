@@ -902,7 +902,7 @@
             color="success"
             :loading="refilling"
             :disabled="!refillFormValid"
-            @click="processRefill"
+            @click="handleRefillProcessed(selectedCardForRefill.id, refillForm.amount, refillForm.notes)"
           >
             <v-icon class="me-2">mdi-gas-station</v-icon>
             Process Refill
@@ -965,6 +965,8 @@ import { ref, computed, onMounted } from 'vue'
 const {createVendor, getVendor, vendorList, editVendor, deleteVendor, changeVendorStatus} = useVendor()
 const {createModel, getModel, modelList, deleteModel,updateModel, changeModelStatus} = useModel()
 const {createCard, getCard, getUsers, cardList, usersList ,updateCard, deleteCard, changeCardStatus} = useCard()
+const {refillFuelCard } = useFuel()
+
 
 // Reactive data
 // neww
@@ -1335,6 +1337,19 @@ const processRefill = async () => {
   }
 }
 
+const handleRefillProcessed = async (cardId, amount, recharge) => {
+  try {
+    const result = await refillFuelCard(cardId, amount, recharge)
+    
+    successMessage.value = result.message
+    showSuccessSnackbar.value = true
+    
+  } catch (error) {
+    errorMessage.value = 'Failed to process refill'
+    showErrorSnackbar.value = true
+    console.error('Error processing refill:', error)
+  }
+}
 const resetRefillForm = () => {
   refillForm.value = {
     amount: '',
