@@ -185,6 +185,7 @@ export const useVehicles = () => {
     loading,
     error,
     vehicleTypes,
+    getInsuranceReport,
     getVehicles,
     createVehicle,
     updateVehicle,
