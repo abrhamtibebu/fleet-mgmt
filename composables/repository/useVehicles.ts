@@ -35,6 +35,7 @@ interface Vehicle {
 export const useVehicles = () => {
   const { $apiFetch } = useNuxtApp();
   const vehicleList = ref<Vehicle[]>([])
+  const insuranceRepList = ref<Vehicle[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -50,6 +51,24 @@ export const useVehicles = () => {
     } catch (e) {
       vehicleList.value = []
       error.value = 'Failed to fetch vehicles'
+      console.error(e)
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const getInsuranceReport = async () => {
+    loading.value = true
+    try {
+
+      const data = await $apiFetch<Vehicle>("/vehicle/insurancerep", {
+        method: "GET"
+      });
+      insuranceRepList.value = Array.isArray(data.result) ? data.result : []
+    
+    } catch (e) {
+      insuranceRepList.value = []
+      error.value = 'Failed to fetch vehicle insurance'
       console.error(e)
     } finally {
       loading.value = false
@@ -162,6 +181,7 @@ export const useVehicles = () => {
   return {
     statusMap,
     vehicleList,
+    insuranceRepList,
     loading,
     error,
     vehicleTypes,
