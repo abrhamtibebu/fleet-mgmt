@@ -51,7 +51,18 @@ A comprehensive fleet management module built with Vue 3, Nuxt 3, and Vuetify 3,
   - Low fuel card balance
   - Data inconsistencies
 
-### 7. User Interface
+### 7. Vehicle Renewals Management
+- Comprehensive renewal tracking for:
+  - Insurance renewals (multiple types supported)
+  - Safety inspection renewals
+  - Road fund renewals
+- Renewal creation and editing with dedicated dialog
+- Filtering by renewal type and urgency
+- Quick renewal functionality
+- Statistics and overview cards
+- Expiry date tracking with visual indicators
+
+### 8. User Interface
 - Clean, responsive design using Vuetify components
 - Exportable tables (CSV/Excel)
 - Admin-friendly interface
