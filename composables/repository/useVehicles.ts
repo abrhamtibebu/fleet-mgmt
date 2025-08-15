@@ -178,7 +178,27 @@ export const useVehicles = () => {
     }
   ]
 
+  const insuranceTypes = [
+    {
+      id: 1,
+      name: 'Comprehensive Insurance'
+    },
+    {
+      id: 2,
+      name: 'Third Party Liability'
+    },
+    {
+      id: 3,
+      name: 'Safty Inspection'
+    },
+    {
+      id: 4,
+      name: 'Road Fund'
+    }
+  ]
+
   return {
+    insuranceTypes,
     statusMap,
     vehicleList,
     insuranceRepList,
