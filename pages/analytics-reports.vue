@@ -113,7 +113,7 @@
         </div>
         
         <v-row>
-          <v-col cols="12" lg="8">
+          <v-col cols="12" lg="12">
             <div class="chart-card">
               <div class="chart-header">
                 <h3>Fuel Consumption Trends</h3>
@@ -131,7 +131,7 @@
               </div>
             </div>
           </v-col>
-          <v-col cols="12" lg="4">
+          <!-- <v-col cols="12" lg="4">
             <div class="chart-card">
               <div class="chart-header">
                 <h3>Fuel Efficiency by Vehicle</h3>
@@ -140,7 +140,7 @@
                 <div ref="fuelEfficiencyChart" class="chart-area"></div>
               </div>
             </div>
-          </v-col>
+          </v-col> -->
         </v-row>
       </div>
 
@@ -172,7 +172,7 @@
         </div>
         
         <v-row>
-          <v-col cols="12" lg="6">
+          <v-col cols="12" lg="12">
             <div class="chart-card">
               <div class="chart-header">
                 <h3>Maintenance Cost Trends</h3>
@@ -182,7 +182,7 @@
               </div>
             </div>
           </v-col>
-          <v-col cols="12" lg="6">
+          <!-- <v-col cols="12" lg="6">
             <div class="chart-card">
               <div class="chart-header">
                 <h3>Maintenance Efficiency Metrics</h3>
@@ -191,7 +191,7 @@
                 <div ref="maintenanceEfficiencyChart" class="chart-area"></div>
               </div>
             </div>
-          </v-col>
+          </v-col> -->
         </v-row>
         
         <v-row>
@@ -427,7 +427,7 @@
         </div>
         
         <v-row>
-          <v-col cols="12" lg="6">
+          <v-col cols="12" lg="12">
             <div class="chart-card">
               <div class="chart-header">
                 <h3>Insurance Cost Distribution</h3>
@@ -437,7 +437,7 @@
               </div>
             </div>
           </v-col>
-          <v-col cols="12" lg="6">
+          <!-- <v-col cols="12" lg="6">
             <div class="chart-card">
               <div class="chart-header">
                 <h3>Compliance Status Overview</h3>
@@ -446,178 +446,12 @@
                 <div ref="complianceChart" class="chart-area"></div>
               </div>
             </div>
-          </v-col>
+          </v-col> -->
         </v-row>
         
-        <v-row>
-          <v-col cols="12">
-            <div class="chart-card">
-              <div class="chart-header">
-                <h3>Upcoming Renewals & Due Dates</h3>
-              </div>
-              <div class="chart-container">
-                <v-data-table
-                  :headers="complianceHeaders"
-                  :items="complianceData"
-                  class="compliance-table"
-                  density="comfortable"
-                  hover
-                >
-                  <template v-slot:item.vehicle="{ item }">
-                    <div class="vehicle-cell">
-                      <v-avatar size="32" color="primary" class="me-2">
-                        <v-icon size="16" color="white">mdi-truck</v-icon>
-                      </v-avatar>
-                      <div>
-                        <div class="vehicle-name">{{ item.vehicle }}</div>
-                        <div class="vehicle-plate">{{ item.plateNumber }}</div>
-                      </div>
-                    </div>
-                  </template>
-                  
-                  <template v-slot:item.type="{ item }">
-                    <v-chip
-                      :color="getComplianceTypeColor(item.type)"
-                      size="small"
-                      variant="tonal"
-                    >
-                      {{ item.type }}
-                    </v-chip>
-                  </template>
-                  
-                  <template v-slot:item.dueDate="{ item }">
-                    <span class="due-date">{{ formatDate(item.dueDate) }}</span>
-                  </template>
-                  
-                  <template v-slot:item.status="{ item }">
-                    <v-chip
-                      :color="getComplianceStatusColor(item.status)"
-                      size="small"
-                      variant="tonal"
-                    >
-                      {{ item.status }}
-                    </v-chip>
-                  </template>
-                  
-                  <template v-slot:item.cost="{ item }">
-                    <span class="cost-value">{{ formatCurrency(item.cost) }}</span>
-                  </template>
-                  
-                  <template v-slot:item.actions="{ item }">
-                    <v-btn
-                      variant="text"
-                      size="small"
-                      prepend-icon="mdi-eye"
-                      @click="viewComplianceDetails(item)"
-                    >
-                      View
-                    </v-btn>
-                  </template>
-                </v-data-table>
-              </div>
-            </div>
-          </v-col>
-        </v-row>
+
       </div>
 
-      <!-- Detailed Reports Table -->
-      <div class="analytics-section">
-        <div class="section-header">
-          <h2 class="section-title">
-            <v-icon class="me-2" color="primary">mdi-table</v-icon>
-            Detailed Reports
-          </h2>
-          <div class="section-actions">
-            <v-btn
-              variant="text"
-              size="small"
-              prepend-icon="mdi-filter"
-              @click="showFilters = !showFilters"
-            >
-              Filters
-            </v-btn>
-            <v-btn
-              variant="text"
-              size="small"
-              prepend-icon="mdi-download"
-              @click="exportTableData"
-            >
-              Export Table
-            </v-btn>
-          </div>
-        </div>
-        
-        <div class="table-card">
-          <v-data-table
-            :headers="tableHeaders"
-            :items="filteredTableData"
-            :loading="tableLoading"
-            :search="filters.searchQuery"
-            class="modern-table"
-            density="comfortable"
-            hover
-          >
-            <template v-slot:item.vehicle="{ item }">
-              <div class="vehicle-cell">
-                <v-avatar size="32" color="primary" class="me-2">
-                  <v-icon size="16" color="white">mdi-truck</v-icon>
-                </v-avatar>
-                <div>
-                  <div class="vehicle-name">{{ item.vehicle }}</div>
-                  <div class="vehicle-plate">{{ item.plateNumber }}</div>
-                </div>
-              </div>
-            </template>
-            
-            <template v-slot:item.status="{ item }">
-              <v-chip
-                :color="getStatusColor(item.status)"
-                size="small"
-                variant="tonal"
-              >
-                {{ item.status }}
-              </v-chip>
-            </template>
-            
-            <template v-slot:item.cost="{ item }">
-              <span class="cost-value">{{ formatCurrency(item.cost) }}</span>
-            </template>
-            
-            <template v-slot:item.efficiency="{ item }">
-              <div class="efficiency-cell">
-                <span class="efficiency-value">{{ item.efficiency }}</span>
-                <v-progress-linear
-                  :model-value="(item.efficiency / 20) * 100"
-                  :color="getEfficiencyColor(item.efficiency)"
-                  height="4"
-                  class="efficiency-bar"
-                />
-              </div>
-            </template>
-            
-            <template v-slot:item.actions="{ item }">
-              <v-menu>
-                <template #activator="{ props }">
-                  <v-btn
-                    icon="mdi-dots-vertical"
-                    variant="text"
-                    size="small"
-                    v-bind="props"
-                  />
-                </template>
-                <v-list>
-                  <v-list-item @click="viewVehicleDetails(item)">
-                    <v-list-item-title>View Details</v-list-item-title>
-                  </v-list-item>
-                  <v-list-item @click="exportVehicleReport(item)">
-                    <v-list-item-title>Export Report</v-list-item-title>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
-            </template>
-          </v-data-table>
-        </div>
-      </div>
     </div>
 
     <!-- Success/Error Notifications -->
