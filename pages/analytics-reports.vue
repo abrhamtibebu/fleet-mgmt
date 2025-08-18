@@ -12,186 +12,15 @@
         </div>
         
         <!-- Advanced Filter Panel -->
-        <div class="filter-panel">
-          <v-expansion-panels variant="accordion" class="filter-accordion">
-            <v-expansion-panel>
-              <v-expansion-panel-title class="filter-title">
-                <v-icon class="me-2">mdi-filter-variant</v-icon>
-                Advanced Filters & Export Options
-              </v-expansion-panel-title>
-              <v-expansion-panel-text>
-                <v-row>
-                  <v-col cols="12" md="3">
-                    <v-select
-                      v-model="filters.timeframe"
-                      :items="timeframeOptions"
-                      label="Time Period"
-                      variant="outlined"
-                      density="compact"
-                      prepend-inner-icon="mdi-calendar"
-                    />
-                  </v-col>
-                  <v-col cols="12" md="3">
-                    <v-select
-                      v-model="filters.vehicleType"
-                      :items="vehicleTypeOptions"
-                      label="Vehicle Type"
-                      variant="outlined"
-                      density="compact"
-                      prepend-inner-icon="mdi-car"
-                      clearable
-                    />
-                  </v-col>
-                  <v-col cols="12" md="3">
-                    <v-select
-                      v-model="filters.status"
-                      :items="statusOptions"
-                      label="Vehicle Status"
-                      variant="outlined"
-                      density="compact"
-                      prepend-inner-icon="mdi-check-circle"
-                      clearable
-                    />
-                  </v-col>
-                  <v-col cols="12" md="3">
-                    <v-select
-                      v-model="filters.reportType"
-                      :items="reportTypeOptions"
-                      label="Report Type"
-                      variant="outlined"
-                      density="compact"
-                      prepend-inner-icon="mdi-file-chart"
-                    />
-                  </v-col>
-                </v-row>
-                
-                <v-row>
-                  <v-col cols="12" md="6">
-                    <v-text-field
-                      v-model="filters.searchQuery"
-                      label="Search Vehicles"
-                      variant="outlined"
-                      density="compact"
-                      prepend-inner-icon="mdi-magnify"
-                      placeholder="Search by plate number, model, or driver"
-                      clearable
-                    />
-                  </v-col>
-                  <v-col cols="12" md="3">
-                    <v-text-field
-                      v-model="filters.minCost"
-                      label="Min Cost (ETB)"
-                      variant="outlined"
-                      density="compact"
-                      prepend-inner-icon="mdi-currency-usd"
-                      type="number"
-                      clearable
-                    />
-                  </v-col>
-                  <v-col cols="12" md="3">
-                    <v-text-field
-                      v-model="filters.maxCost"
-                      label="Max Cost (ETB)"
-                      variant="outlined"
-                      density="compact"
-                      prepend-inner-icon="mdi-currency-usd"
-                      type="number"
-                      clearable
-                    />
-                  </v-col>
-                </v-row>
-                
-                <!-- Export Options -->
-                <v-divider class="my-4"></v-divider>
-                <div class="export-section">
-                  <h4 class="export-title">
-                    <v-icon class="me-2">mdi-download</v-icon>
-                    Export Reports
-                  </h4>
-                  <div class="export-buttons">
-                    <v-btn
-                      color="primary"
-                      variant="outlined"
-                      prepend-icon="mdi-file-excel"
-                      @click="exportReport('excel')"
-                      :loading="exporting.excel"
-                      class="export-btn"
-                    >
-                      Export to Excel
-                    </v-btn>
-                    <v-btn
-                      color="success"
-                      variant="outlined"
-                      prepend-icon="mdi-file-pdf-box"
-                      @click="exportReport('pdf')"
-                      :loading="exporting.pdf"
-                      class="export-btn"
-                    >
-                      Export to PDF
-                    </v-btn>
-                    <v-btn
-                      color="info"
-                      variant="outlined"
-                      prepend-icon="mdi-file-csv"
-                      @click="exportReport('csv')"
-                      :loading="exporting.csv"
-                      class="export-btn"
-                    >
-                      Export to CSV
-                    </v-btn>
-                    <v-btn
-                      color="warning"
-                      variant="outlined"
-                      prepend-icon="mdi-file-word"
-                      @click="exportReport('word')"
-                      :loading="exporting.word"
-                      class="export-btn"
-                    >
-                      Export to Word
-                    </v-btn>
-                  </div>
-                </div>
-              </v-expansion-panel-text>
-            </v-expansion-panel>
-          </v-expansion-panels>
-        </div>
+  
       </div>
     </div>
 
     <!-- Enhanced Stats Cards - Full Width -->
     <div class="stats-section-full">
       <v-row>
-        <v-col cols="12" sm="6" md="4" lg="2">
-          <div class="stat-card primary-gradient">
-            <div class="stat-icon">
-              <v-icon size="24" color="white">mdi-truck</v-icon>
-            </div>
-            <div class="stat-content">
-              <h3 class="stat-value">{{ filteredVehicles.length }}</h3>
-              <p class="stat-label">Total Vehicles</p>
-              <div class="stat-change positive">
-                <v-icon size="14">mdi-trending-up</v-icon>
-                <span>+2.5%</span>
-              </div>
-            </div>
-          </div>
-        </v-col>
-        <v-col cols="12" sm="6" md="4" lg="2">
-          <div class="stat-card success-gradient">
-            <div class="stat-icon">
-              <v-icon size="24" color="white">mdi-check-circle</v-icon>
-            </div>
-            <div class="stat-content">
-              <h3 class="stat-value">{{ activeVehicles.length }}</h3>
-              <p class="stat-label">Active Vehicles</p>
-              <div class="stat-change positive">
-                <v-icon size="14">mdi-trending-up</v-icon>
-                <span>+1.8%</span>
-              </div>
-            </div>
-          </div>
-        </v-col>
-        <v-col cols="12" sm="6" md="4" lg="2">
+
+        <v-col cols="12" sm="6" md="3" lg="3">
           <div class="stat-card orange-gradient">
             <div class="stat-icon">
               <v-icon size="24" color="white">mdi-gas-station</v-icon>
@@ -206,7 +35,7 @@
             </div>
           </div>
         </v-col>
-        <v-col cols="12" sm="6" md="4" lg="2">
+        <v-col cols="12" sm="6" md="3" lg="3">
           <div class="stat-card teal-gradient">
             <div class="stat-icon">
               <v-icon size="24" color="white">mdi-wrench</v-icon>
@@ -221,7 +50,7 @@
             </div>
           </div>
         </v-col>
-        <v-col cols="12" sm="6" md="4" lg="2">
+        <v-col cols="12" sm="6" md="3" lg="3">
           <div class="stat-card info-gradient">
             <div class="stat-icon">
               <v-icon size="24" color="white">mdi-shield-check</v-icon>
@@ -236,7 +65,7 @@
             </div>
           </div>
         </v-col>
-        <v-col cols="12" sm="6" md="4" lg="2">
+        <v-col cols="12" sm="6" md="3" lg="3">
           <div class="stat-card warning-gradient">
             <div class="stat-icon">
               <v-icon size="24" color="white">mdi-currency-usd</v-icon>

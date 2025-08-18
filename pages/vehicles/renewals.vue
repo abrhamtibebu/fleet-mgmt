@@ -3,7 +3,8 @@
     <div class="renewals-header">
       <h1 class="renewals-title">Vehicle Renewals Management</h1>
       <p class="renewals-subtitle">
-        Manage insurance, safety inspection, and road fund renewals for your fleet
+        Manage insurance, safety inspection, and road fund renewals for your
+        fleet
       </p>
     </div>
 
@@ -48,97 +49,89 @@
     <div class="renewal-overview mb-6">
       <v-row>
         <v-col cols="12" md="3">
-          <v-card 
-            class="overview-card insurance-card" 
+          <v-card
+            class="overview-card insurance-card"
             :class="{ 'selected-filter': selectedRenewalType === 'insurance' }"
             @click="filterByType('insurance')"
           >
             <v-card-text class="text-center">
-              <v-icon size="48" color="info" class="mb-3">mdi-shield-check</v-icon>
-              <h3 class="text-h4 font-weight-bold">{{ insuranceRenewals.length }}</h3>
+              <v-icon size="48" color="info" class="mb-3"
+                >mdi-shield-check</v-icon
+              >
+              <h3 class="text-h4 font-weight-bold">
+                {{ insuranceRepList.insuranceRenewals }}
+              </h3>
               <p class="text-muted">Insurance Renewals</p>
             </v-card-text>
           </v-card>
         </v-col>
         <v-col cols="12" md="3">
-          <v-card 
+          <v-card
             class="overview-card safety-card"
             :class="{ 'selected-filter': selectedRenewalType === 'safety' }"
             @click="filterByType('safety')"
           >
             <v-card-text class="text-center">
-              <v-icon size="48" color="success" class="mb-3">mdi-car-wrench</v-icon>
-              <h3 class="text-h4 font-weight-bold">{{ safetyRenewals.length }}</h3>
+              <v-icon size="48" color="success" class="mb-3"
+                >mdi-car-wrench</v-icon
+              >
+              <h3 class="text-h4 font-weight-bold">
+                {{ insuranceRepList.safteyInspections }}
+              </h3>
               <p class="text-muted">Safety Inspections</p>
             </v-card-text>
           </v-card>
         </v-col>
         <v-col cols="12" md="3">
-          <v-card 
+          <v-card
             class="overview-card road-card"
             :class="{ 'selected-filter': selectedRenewalType === 'road' }"
             @click="filterByType('road')"
           >
             <v-card-text class="text-center">
               <v-icon size="48" color="warning" class="mb-3">mdi-road</v-icon>
-              <h3 class="text-h4 font-weight-bold">{{ roadFundRenewals.length }}</h3>
+              <h3 class="text-h4 font-weight-bold">
+                {{ insuranceRepList.roadFundRenewals }}
+              </h3>
               <p class="text-muted">Road Fund Renewals</p>
             </v-card-text>
           </v-card>
         </v-col>
         <v-col cols="12" md="3">
-          <v-card 
+          <v-card
             class="overview-card urgent-card"
             :class="{ 'selected-filter': selectedRenewalType === 'urgent' }"
             @click="filterByType('urgent')"
           >
             <v-card-text class="text-center">
               <v-icon size="48" color="error" class="mb-3">mdi-alert</v-icon>
-              <h3 class="text-h4 font-weight-bold">{{ urgentRenewals.length }}</h3>
+              <h3 class="text-h4 font-weight-bold">
+                {{ getUrgentRenewals(insuranceRepList.vehicleInsurances) }}
+              </h3>
               <p class="text-muted">Urgent Renewals</p>
             </v-card-text>
           </v-card>
         </v-col>
       </v-row>
-      
+
       <!-- Filter Controls -->
       <v-row class="mt-4">
         <v-col cols="12" class="text-center">
           <v-chip-group v-model="selectedRenewalType" mandatory>
-            <v-chip
-              value="all"
-              variant="outlined"
-              @click="clearFilter"
-            >
+            <v-chip value="0" variant="outlined" @click="clearFilter">
               All Renewals
             </v-chip>
-            <v-chip
-              value="insurance"
-              variant="outlined"
-              color="info"
-            >
+            <v-chip value="1" variant="outlined" color="info">
               Insurance
             </v-chip>
-            <v-chip
-              value="safety"
-              variant="outlined"
-              color="success"
-            >
+            <v-chip value="2" variant="outlined" color="success">
               Safety
             </v-chip>
-            <v-chip
-              value="road"
-              variant="outlined"
-              color="warning"
-            >
+            <v-chip value="3" variant="outlined" color="warning">
               Road Fund
             </v-chip>
-            <v-chip
-              value="urgent"
-              variant="outlined"
-              color="error"
-            >
-              Urgent
+            <v-chip value="4" variant="outlined" color="error">
+              Third Party
             </v-chip>
           </v-chip-group>
         </v-col>
@@ -151,7 +144,7 @@
         <v-col cols="12" md="3">
           <v-card class="stat-card">
             <v-card-text class="text-center">
-              <div class="stat-number">{{ totalRenewals }}</div>
+              <div class="stat-number">{{ renewalRep.totalRenewals }}</div>
               <div class="stat-label">Total Renewals</div>
             </v-card-text>
           </v-card>
@@ -159,7 +152,9 @@
         <v-col cols="12" md="3">
           <v-card class="stat-card">
             <v-card-text class="text-center">
-              <div class="stat-number text-warning">{{ expiringThisMonth }}</div>
+              <div class="stat-number text-warning">
+                {{ renewalRep.expiringThisMonth }}
+              </div>
               <div class="stat-label">Expiring This Month</div>
             </v-card-text>
           </v-card>
@@ -167,7 +162,7 @@
         <v-col cols="12" md="3">
           <v-card class="stat-card">
             <v-card-text class="text-center">
-              <div class="stat-number text-error">{{ overdueRenewals }}</div>
+              <div class="stat-number text-error">{{ renewalRep.overdue }}</div>
               <div class="stat-label">Overdue</div>
             </v-card-text>
           </v-card>
@@ -175,7 +170,9 @@
         <v-col cols="12" md="3">
           <v-card class="stat-card">
             <v-card-text class="text-center">
-              <div class="stat-number text-success">{{ recentlyRenewed }}</div>
+              <div class="stat-number text-success">
+                {{ renewalRep.recentlyRenewed }}
+              </div>
               <div class="stat-label">Recently Renewed</div>
             </v-card-text>
           </v-card>
@@ -190,25 +187,23 @@
           <v-icon class="me-2" color="primary">mdi-calendar-clock</v-icon>
           Renewals Due
         </div>
-        <v-chip color="primary" size="small">{{ filteredRenewals.length }} items</v-chip>
+        <v-chip color="primary" size="small"
+          >{{ filteredRenewals.length }} items</v-chip
+        >
       </v-card-title>
-      
+
       <v-card-text class="pa-0">
         <v-data-table
           :headers="renewalHeaders"
-          :items="filteredRenewals"
+          :items="overDues"
           :loading="loading"
           class="renewals-table"
           density="comfortable"
         >
           <template v-slot:item.vehicle="{ item }">
             <div class="d-flex align-center">
-              <v-icon size="small" class="me-2">mdi-truck</v-icon>
               <div>
-                <div class="font-weight-medium">{{ item.vehicle.plateNo }}</div>
-                <div class="text-caption text-muted">
-                  {{ getVehicleModel(item.vehicle) }}
-                </div>
+                <div class="font-weight-medium">{{ item.vehicleData.plateNo }}</div>
               </div>
             </div>
           </template>
@@ -219,23 +214,16 @@
               size="small"
               variant="tonal"
             >
-              <v-icon size="small" class="me-1">{{ getRenewalTypeIcon(item.type) }}</v-icon>
+              <v-icon size="small" class="me-1">{{
+                getRenewalTypeIcon(item.type)
+              }}</v-icon>
               {{ getRenewalTypeLabel(item.type) }}
             </v-chip>
           </template>
 
           <template v-slot:item.expiryDate="{ item }">
             <div class="d-flex align-center">
-              <v-icon 
-                size="small" 
-                :color="getExpiryStatusColor(item.daysUntilExpiry)"
-                class="me-1"
-              >
-                {{ getExpiryStatusIcon(item.daysUntilExpiry) }}
-              </v-icon>
-              <span :class="getExpiryStatusClass(item.daysUntilExpiry)">
-                {{ formatDate(item.expiryDate) }}
-              </span>
+              {{ moment(item.endDate).format('ll') }}
             </div>
           </template>
 
@@ -245,7 +233,7 @@
               size="small"
               variant="flat"
             >
-              {{ getDaysUntilExpiryText(item.daysUntilExpiry) }}
+              {{ moment(item.endDate).diff(moment(), 'days') }} Days
             </v-chip>
           </template>
 
@@ -288,7 +276,9 @@
                 <v-list>
                   <v-list-item @click="quickRenew(item)">
                     <v-list-item-title>
-                      <v-icon class="me-2" size="small">mdi-lightning-bolt</v-icon>
+                      <v-icon class="me-2" size="small"
+                        >mdi-lightning-bolt</v-icon
+                      >
                       Quick Renew
                     </v-list-item-title>
                   </v-list-item>
@@ -307,19 +297,11 @@
     </v-card>
 
     <!-- Success/Error Messages -->
-    <v-snackbar
-      v-model="showSuccessSnackbar"
-      color="success"
-      timeout="3000"
-    >
+    <v-snackbar v-model="showSuccessSnackbar" color="success" timeout="3000">
       {{ successMessage }}
     </v-snackbar>
 
-    <v-snackbar
-      v-model="showErrorSnackbar"
-      color="error"
-      timeout="3000"
-    >
+    <v-snackbar v-model="showErrorSnackbar" color="error" timeout="3000">
       {{ errorMessage }}
     </v-snackbar>
 
@@ -334,318 +316,455 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-
+import { ref, computed, onMounted } from "vue";
+import moment from "moment";
 // Composables
-const { vehicleList, loading, getVehicles } = useVehicles()
-const { vendorList, getVendor } = useVendor()
-const { modelList, getModel } = useModel()
+const {
+  vehicleList,
+  loading,
+  getVehicles,
+  getInsuranceReport,
+  insuranceRepList,
+  insuranceTypes,
+} = useVehicles();
+const { vendorList, getVendor } = useVendor();
+const { modelList, getModel } = useModel();
 
 // Reactive data
-const searchQuery = ref('')
-const successMessage = ref('')
-const showSuccessSnackbar = ref(false)
-const errorMessage = ref('')
-const showErrorSnackbar = ref(false)
-const showRenewalDialog = ref(false)
-const selectedRenewalItem = ref(null)
-const isEditingRenewal = ref(false)
-const selectedRenewalType = ref('all')
+const overDues = ref([]);
+const searchQuery = ref("");
+const successMessage = ref("");
+const showSuccessSnackbar = ref(false);
+const errorMessage = ref("");
+const showErrorSnackbar = ref(false);
+const showRenewalDialog = ref(false);
+const selectedRenewalItem = ref(null);
+const isEditingRenewal = ref(false);
+const selectedRenewalType = ref("0");
 
 // Table headers
 const renewalHeaders = [
-  { title: 'Vehicle', key: 'vehicle', sortable: false },
-  { title: 'Type', key: 'type', sortable: true },
-  { title: 'Expiry Date', key: 'expiryDate', sortable: true },
-  { title: 'Days Left', key: 'daysUntilExpiry', sortable: true },
-  { title: 'Actions', key: 'actions', sortable: false }
-]
+  { title: "Vehicle", key: "vehicle", sortable: false },
+  { title: "Type", key: "type", sortable: true },
+  { title: "Expiry Date", key: "expiryDate", sortable: true },
+  { title: "Days Left", key: "daysUntilExpiry", sortable: true },
+  // { title: "Actions", key: "actions", sortable: false },
+];
+
+const renewalRep = ref({
+  totalRenewals: 0,
+  expiringThisMonth: 0,
+  overdue: 0,
+  recentlyRenewed: 0,
+});
 
 // Insurance type options
 const insuranceTypeOptions = [
-  { id: 1, name: 'Comprehensive Insurance' },
-  { id: 2, name: 'Third Party Liability' },
-  { id: 3, name: 'Third Party Fire & Theft' }
-]
+  { id: 1, name: "Comprehensive Insurance" },
+  { id: 2, name: "Third Party Liability" },
+  { id: 3, name: "Third Party Fire & Theft" },
+];
 
 // Computed properties
 const allRenewals = computed(() => {
-  const renewals = []
-  
-  vehicleList.value.forEach(vehicle => {
+  const renewals = [];
+
+  vehicleList.value.forEach((vehicle) => {
     // Insurance renewals
     if (vehicle.insuranceEntries) {
       vehicle.insuranceEntries.forEach((entry, index) => {
         if (entry.insuranceEndDate) {
-          const daysUntilExpiry = getDaysUntilExpiry(entry.insuranceEndDate)
+          const daysUntilExpiry = getDaysUntilExpiry(entry.insuranceEndDate);
           renewals.push({
             id: `insurance-${vehicle.id}-${index}`,
             vehicle,
-            type: 'insurance',
-            insuranceType: insuranceTypeOptions.find(t => t.id === entry.insuranceType)?.name,
+            type: "insurance",
+            insuranceType: insuranceTypeOptions.find(
+              (t) => t.id === entry.insuranceType
+            )?.name,
             provider: entry.insuranceProvider,
             expiryDate: entry.insuranceEndDate,
             daysUntilExpiry,
-            entryIndex: index
-          })
+            entryIndex: index,
+          });
         }
-      })
+      });
     }
-    
+
     // Safety inspection renewal
     if (vehicle.safetyInspectionExpiry) {
-      const daysUntilExpiry = getDaysUntilExpiry(vehicle.safetyInspectionExpiry)
+      const daysUntilExpiry = getDaysUntilExpiry(
+        vehicle.safetyInspectionExpiry
+      );
       renewals.push({
         id: `safety-${vehicle.id}`,
         vehicle,
-        type: 'safety',
+        type: "safety",
         expiryDate: vehicle.safetyInspectionExpiry,
-        daysUntilExpiry
-      })
+        daysUntilExpiry,
+      });
     }
-    
+
     // Road fund renewal
     if (vehicle.roadFundExpiryDate) {
-      const daysUntilExpiry = getDaysUntilExpiry(vehicle.roadFundExpiryDate)
+      const daysUntilExpiry = getDaysUntilExpiry(vehicle.roadFundExpiryDate);
       renewals.push({
         id: `road-${vehicle.id}`,
         vehicle,
-        type: 'road',
+        type: "road",
         expiryDate: vehicle.roadFundExpiryDate,
-        daysUntilExpiry
-      })
+        daysUntilExpiry,
+      });
     }
-  })
-  
-  return renewals.sort((a, b) => a.daysUntilExpiry - b.daysUntilExpiry)
-})
+  });
+
+  return renewals.sort((a, b) => a.daysUntilExpiry - b.daysUntilExpiry);
+});
 
 const filteredRenewals = computed(() => {
-  let filtered = allRenewals.value
-  
+  let filtered = allRenewals.value;
+
   // Search filter
   if (searchQuery.value) {
-    filtered = filtered.filter(item => 
-      item.vehicle.plateNo.toLowerCase().includes(searchQuery.value.toLowerCase())
-    )
+    filtered = filtered.filter((item) =>
+      item.vehicle.plateNo
+        .toLowerCase()
+        .includes(searchQuery.value.toLowerCase())
+    );
   }
-  
+
+  console.log("selectedRenewalType", selectedRenewalType.value);
+
+  setRenewalReps(selectedRenewalType.value);
+
   // Type filter
-  if (selectedRenewalType.value && selectedRenewalType.value !== 'all') {
-    if (selectedRenewalType.value === 'urgent') {
-      filtered = filtered.filter(item => item.daysUntilExpiry <= 30)
+  if (selectedRenewalType.value && selectedRenewalType.value !== "all") {
+    if (selectedRenewalType.value === "urgent") {
+      filtered = filtered.filter((item) => item.daysUntilExpiry <= 30);
     } else {
-      filtered = filtered.filter(item => item.type === selectedRenewalType.value)
+      filtered = filtered.filter(
+        (item) => item.type === selectedRenewalType.value
+      );
     }
   }
+
+  return filtered;
+});
+
+const setRenewalReps = (type: string) => {
+  //   const renewalRep = ref({
+  //   totalRenewals: 10,
+  //   expiringThisMonth: 10,
+  //   overdue: 20,
+  //   recentlyRenewed: 30
+  // });
+
+  console.log("from the setter", insuranceRepList.value);
+
+  const startDate = moment().startOf('month').format('YYYY-MM-DD')
+  const endDate = moment().endOf('month').format('YYYY-MM-DD')
+
+  const startOfWeek = moment().startOf('week').format('YYYY-MM-DD')
+  const endOfWeek = moment().startOf('week').format('YYYY-MM-DD')
+
+  const today = moment().format('YYYY-MM-DD')
+
   
-  return filtered
-})
+  switch (type) {
+    case "0":
+      if (insuranceRepList.value.renewalRecords) {
+        renewalRep.value.totalRenewals =
+          insuranceRepList.value.renewalRecords.length;
+      }
+      if(insuranceRepList.value.vehicleInsurances){
+        renewalRep.value.expiringThisMonth = insuranceRepList.value.vehicleInsurances.filter(x => x.endDate >= startDate && x.endDate <= endDate).length
+        renewalRep.value.overdue = insuranceRepList.value.vehicleInsurances.filter(x => x.endDate < today).length
+        renewalRep.value.recentlyRenewed = insuranceRepList.value.vehicleInsurances.filter(x => x.startDate >= startOfWeek && x.endDate <= endOfWeek).length
+      }
+      break;
+    case "1":
+      if (insuranceRepList.value.renewalRecords) {
+        renewalRep.value.totalRenewals =
+          insuranceRepList.value.renewalRecords.filter(x => x.type == 1).length;
+      }
 
-const insuranceRenewals = computed(() => 
-  allRenewals.value.filter(item => item.type === 'insurance')
-)
+      if(insuranceRepList.value.vehicleInsurances){
+        renewalRep.value.expiringThisMonth = insuranceRepList.value.vehicleInsurances.filter(x => x.endDate >= startDate && x.endDate <= endDate && x.type == 1).length
+        renewalRep.value.overdue = insuranceRepList.value.vehicleInsurances.filter(x => x.endDate < today && x.type == 1).length
+        renewalRep.value.recentlyRenewed = insuranceRepList.value.vehicleInsurances.filter(x => x.startDate >= startOfWeek && x.endDate <= endOfWeek && x.type == 1).length
+      }
+      break;
 
-const safetyRenewals = computed(() => 
-  allRenewals.value.filter(item => item.type === 'safety')
-)
+    case "2":
+      if (insuranceRepList.value.renewalRecords) {
+        renewalRep.value.totalRenewals =
+          insuranceRepList.value.renewalRecords.filter(x => x.type == 2).length;
+      }
 
-const roadFundRenewals = computed(() => 
-  allRenewals.value.filter(item => item.type === 'road')
-)
+      if(insuranceRepList.value.vehicleInsurances){
+        renewalRep.value.expiringThisMonth = insuranceRepList.value.vehicleInsurances.filter(x => x.endDate >= startDate && x.endDate <= endDate && x.type == 2).length
+        renewalRep.value.overdue = insuranceRepList.value.vehicleInsurances.filter(x => x.endDate < today && x.type == 2).length
+        renewalRep.value.recentlyRenewed = insuranceRepList.value.vehicleInsurances.filter(x => x.startDate >= startOfWeek && x.endDate <= endOfWeek && x.type == 2).length
+      }
+      break;
+    case "3":
+      if (insuranceRepList.value.renewalRecords) {
+        renewalRep.value.totalRenewals =
+          insuranceRepList.value.renewalRecords.filter(x => x.type == 3).length;
+      }
 
-const urgentRenewals = computed(() => 
-  allRenewals.value.filter(item => item.daysUntilExpiry <= 30)
-)
+      if(insuranceRepList.value.vehicleInsurances){
+        renewalRep.value.expiringThisMonth = insuranceRepList.value.vehicleInsurances.filter(x => x.endDate >= startDate && x.endDate <= endDate && x.type == 3).length
+        renewalRep.value.overdue = insuranceRepList.value.vehicleInsurances.filter(x => x.endDate < today && x.type == 3).length
+        renewalRep.value.recentlyRenewed = insuranceRepList.value.vehicleInsurances.filter(x => x.startDate >= startOfWeek && x.endDate <= endOfWeek && x.type == 3).length
+      }
+      break;
+    case "4":
+      if (insuranceRepList.value.renewalRecords) {
+        renewalRep.value.totalRenewals =
+          insuranceRepList.value.renewalRecords.filter(x => x.type == 3).length;
+      }
 
-const totalRenewals = computed(() => allRenewals.value.length)
+      if(insuranceRepList.value.vehicleInsurances){
+        renewalRep.value.expiringThisMonth = insuranceRepList.value.vehicleInsurances.filter(x => x.endDate >= startDate && x.endDate <= endDate && x.type == 3).length
+        renewalRep.value.overdue = insuranceRepList.value.vehicleInsurances.filter(x => x.endDate < today && x.type == 3).length
+        renewalRep.value.recentlyRenewed = insuranceRepList.value.vehicleInsurances.filter(x => x.startDate >= startOfWeek && x.endDate <= endOfWeek && x.type == 3).length
+      }
+      break;
+
+    default:
+      break;
+  }
+};
+const insuranceRenewals = computed(() =>
+  allRenewals.value.filter((item) => item.type === "insurance")
+);
+
+const safetyRenewals = computed(() =>
+  allRenewals.value.filter((item) => item.type === "safety")
+);
+
+const roadFundRenewals = computed(() =>
+  allRenewals.value.filter((item) => item.type === "road")
+);
+
+const urgentRenewals = computed(() =>
+  allRenewals.value.filter((item) => item.daysUntilExpiry <= 30)
+);
+
+const totalRenewals = computed(() => allRenewals.value.length);
 
 const expiringThisMonth = computed(() => {
-  const today = new Date()
-  const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0)
-  return allRenewals.value.filter(item => {
-    const expiryDate = new Date(item.expiryDate)
-    return expiryDate <= endOfMonth && item.daysUntilExpiry > 0
-  }).length
-})
+  const today = new Date();
+  const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+  return allRenewals.value.filter((item) => {
+    const expiryDate = new Date(item.expiryDate);
+    return expiryDate <= endOfMonth && item.daysUntilExpiry > 0;
+  }).length;
+});
 
-const overdueRenewals = computed(() => 
-  allRenewals.value.filter(item => item.daysUntilExpiry < 0).length
-)
+const overdueRenewals = computed(
+  () => allRenewals.value.filter((item) => item.daysUntilExpiry < 0).length
+);
 
 const recentlyRenewed = computed(() => {
-  const thirtyDaysAgo = new Date()
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-  return allRenewals.value.filter(item => {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  return allRenewals.value.filter((item) => {
     // This would need to be implemented based on your data structure
     // For now, return 0 as placeholder
-    return false
-  }).length
-})
+    return false;
+  }).length;
+});
 
 // Methods
 const getDaysUntilExpiry = (expiryDate: string) => {
-  if (!expiryDate) return null
-  const expiry = new Date(expiryDate)
-  const today = new Date()
-  const diffTime = expiry.getTime() - today.getTime()
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-}
+  if (!expiryDate) return null;
+  const expiry = new Date(expiryDate);
+  const today = new Date();
+  const diffTime = expiry.getTime() - today.getTime();
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+};
 
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString()
-}
+  return new Date(dateString).toLocaleDateString();
+};
 
 const getRenewalTypeColor = (type: string) => {
   const colors = {
-    insurance: 'info',
-    safety: 'success',
-    road: 'warning'
-  }
-  return colors[type] || 'grey'
-}
+    insurance: "info",
+    safety: "success",
+    road: "warning",
+  };
+  return colors[type] || "grey";
+};
 
 const getRenewalTypeIcon = (type: string) => {
   const icons = {
-    insurance: 'mdi-shield-check',
-    safety: 'mdi-car-wrench',
-    road: 'mdi-road'
-  }
-  return icons[type] || 'mdi-help'
-}
+    1: "mdi-shield-check",
+    2: "mdi-shield-check",
+    3: "mdi-car-wrench",
+    4: "mdi-road",
+  };
+  return icons[type] || "mdi-help";
+};
 
 const getRenewalTypeLabel = (type: string) => {
   const labels = {
-    insurance: 'Insurance',
-    safety: 'Safety Inspection',
-    road: 'Road Fund'
+    1: "Comprehensive Insurance",
+    2: "Third Party Liability",
+    3: "Safty Inspection",
+    4: "Road Fund"
+  };
+  return labels[type] || "Unknown";
+};
+
+const getUrgentRenewals = (insurances: any) => {
+  let urgent = 0;
+  let threshold = 10;
+  let today = moment();
+  if (insurances) {
+    insurances.forEach((ins: any) => {
+      if (moment(ins.endDate).diff(today, "days") <= threshold) {
+        if((moment(ins.endDate).diff(today, "days") >= 0)){
+          overDues.value.push(ins);
+        }
+        urgent++;
+      }
+    });
   }
-  return labels[type] || 'Unknown'
-}
+
+  return urgent;
+};
 
 const getExpiryStatusColor = (daysUntilExpiry: number) => {
-  if (daysUntilExpiry < 0) return 'error'
-  if (daysUntilExpiry <= 30) return 'warning'
-  if (daysUntilExpiry <= 90) return 'orange'
-  return 'success'
-}
+  if (daysUntilExpiry < 0) return "error";
+  if (daysUntilExpiry <= 30) return "warning";
+  if (daysUntilExpiry <= 90) return "orange";
+  return "success";
+};
 
 const getExpiryStatusIcon = (daysUntilExpiry: number) => {
-  if (daysUntilExpiry < 0) return 'mdi-alert-circle'
-  if (daysUntilExpiry <= 30) return 'mdi-clock-alert'
-  if (daysUntilExpiry <= 90) return 'mdi-clock'
-  return 'mdi-check-circle'
-}
+  if (daysUntilExpiry < 0) return "mdi-alert-circle";
+  if (daysUntilExpiry <= 30) return "mdi-clock-alert";
+  if (daysUntilExpiry <= 90) return "mdi-clock";
+  return "mdi-check-circle";
+};
 
 const getExpiryStatusClass = (daysUntilExpiry: number) => {
-  if (daysUntilExpiry < 0) return 'text-error font-weight-medium'
-  if (daysUntilExpiry <= 30) return 'text-warning font-weight-medium'
-  if (daysUntilExpiry <= 90) return 'text-orange font-weight-medium'
-  return 'text-success font-weight-medium'
-}
+  if (daysUntilExpiry < 0) return "text-error font-weight-medium";
+  if (daysUntilExpiry <= 30) return "text-warning font-weight-medium";
+  if (daysUntilExpiry <= 90) return "text-orange font-weight-medium";
+  return "text-success font-weight-medium";
+};
 
 const getDaysUntilExpiryText = (daysUntilExpiry: number) => {
-  if (daysUntilExpiry < 0) return `${Math.abs(daysUntilExpiry)} days overdue`
-  if (daysUntilExpiry === 0) return 'Expires today'
-  if (daysUntilExpiry === 1) return 'Expires tomorrow'
-  return `${daysUntilExpiry} days left`
-}
+  if (daysUntilExpiry < 0) return `${Math.abs(daysUntilExpiry)} days overdue`;
+  if (daysUntilExpiry === 0) return "Expires today";
+  if (daysUntilExpiry === 1) return "Expires tomorrow";
+  return `${daysUntilExpiry} days left`;
+};
 
 const getVehicleModel = (vehicle: any) => {
-  if (!vehicle) return ''
-  const vendor = vendorList.value.find(v => v.id === vehicle.vendorId)
-  const model = modelList.value.find(m => m.id === vehicle.modelId)
-  return `${vendor?.name || ''} ${model?.name || ''}`.trim()
-}
+  if (!vehicle) return "";
+  const vendor = vendorList.value.find((v) => v.id === vehicle.vendorId);
+  const model = modelList.value.find((m) => m.id === vehicle.modelId);
+  return `${vendor?.name || ""} ${model?.name || ""}`.trim();
+};
 
 const renewItem = (item: any) => {
   // Pre-populate the renewal dialog with the selected item
-  selectedRenewalItem.value = item
-  isEditingRenewal.value = false
-  showRenewalDialog.value = true
-}
+  selectedRenewalItem.value = item;
+  isEditingRenewal.value = false;
+  showRenewalDialog.value = true;
+};
 
 const viewDetails = (item: any) => {
   // Navigate to vehicle details page
-  navigateTo(`/vehicles?id=${item.vehicle.id}`)
-}
+  navigateTo(`/vehicles?id=${item.vehicle.id}`);
+};
 
 const editRenewal = (item: any) => {
   // Pre-populate the renewal dialog for editing
-  selectedRenewalItem.value = item
-  isEditingRenewal.value = true
-  showRenewalDialog.value = true
-}
+  selectedRenewalItem.value = item;
+  isEditingRenewal.value = true;
+  showRenewalDialog.value = true;
+};
 
 const onRenewalSaved = (renewal: any) => {
-  showSuccessMessage(`${renewal.renewalType} renewal saved successfully for vehicle ${renewal.vehicleId}`)
+  showSuccessMessage("renewal saved successfully for vehicle");
   // Refresh the renewals list
-  refreshRenewals()
-}
+  refreshRenewals();
+};
 
 const filterByType = (type: string) => {
-  selectedRenewalType.value = type
-}
+  selectedRenewalType.value = type;
+};
 
 const clearFilter = () => {
-  selectedRenewalType.value = 'all'
-}
+  selectedRenewalType.value = 0;
+};
 
 const quickRenew = (item: any) => {
   // Pre-populate with current expiry date + 1 year for quick renewal
-  const currentDate = new Date()
-  const nextYear = new Date(currentDate.getFullYear() + 1, currentDate.getMonth(), currentDate.getDate())
-  
+  const currentDate = new Date();
+  const nextYear = new Date(
+    currentDate.getFullYear() + 1,
+    currentDate.getMonth(),
+    currentDate.getDate()
+  );
+
   selectedRenewalItem.value = {
     ...item,
     quickRenew: true,
-    suggestedEndDate: nextYear.toISOString().split('T')[0]
-  }
-  isEditingRenewal.value = false
-  showRenewalDialog.value = true
-}
+    suggestedEndDate: nextYear.toISOString().split("T")[0],
+  };
+  isEditingRenewal.value = false;
+  showRenewalDialog.value = true;
+};
 
 const markAsRenewed = async (item: any) => {
   try {
     // This would update the vehicle to mark the renewal as completed
     // For now, just show a success message
-    showSuccessMessage(`${item.type} renewal marked as completed for ${item.vehicle.plateNo}`)
+    showSuccessMessage(
+      `${item.type} renewal marked as completed for ${item.vehicle.plateNo}`
+    );
   } catch (error) {
-    showErrorMessage('Failed to mark renewal as completed')
+    showErrorMessage("Failed to mark renewal as completed");
   }
-}
+};
 
 const refreshRenewals = async () => {
   try {
-    await Promise.all([
-      getVehicles(),
-      getVendor(),
-      getModel()
-    ])
-    showSuccessMessage('Renewals refreshed successfully')
+    await Promise.all([getVehicles(), getVendor(), getModel()]);
+    showSuccessMessage("Renewals refreshed successfully");
   } catch (error) {
-    showErrorMessage('Failed to refresh renewals')
+    showErrorMessage("Failed to refresh renewals");
   }
-}
+};
 
 const showSuccessMessage = (message: string) => {
-  successMessage.value = message
-  showSuccessSnackbar.value = true
-}
+  successMessage.value = message;
+  showSuccessSnackbar.value = true;
+};
 
 const showErrorMessage = (message: string) => {
-  errorMessage.value = message
-  showErrorSnackbar.value = true
-}
+  errorMessage.value = message;
+  showErrorSnackbar.value = true;
+};
 
 // Lifecycle
 onMounted(async () => {
   await Promise.all([
+    getInsuranceReport(),
     getVehicles(),
     getVendor(),
-    getModel()
-  ])
-})
+    getModel(),
+  ]);
+
+  console.log("RENEWAL DATA", insuranceRepList);
+});
 </script>
 
 <style scoped>
@@ -736,7 +855,7 @@ onMounted(async () => {
 }
 
 .renewals-table-card:hover {
-  box-shadow: 0 6px 24px rgba(80, 80, 80, 0.10);
+  box-shadow: 0 6px 24px rgba(80, 80, 80, 0.1);
   transform: translateY(-1px);
 }
 

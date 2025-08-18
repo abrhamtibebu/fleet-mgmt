@@ -16,19 +16,19 @@
           
           <v-row class="grid-gap-sm">
             <v-col cols="12" md="6">
-              <v-select
-                v-model="renewalForm.renewalType"
-                :items="renewalTypeOptions"
+              <v-autocomplete
+                v-model="renewalForm.type"
+                :items="insuranceTypes"
                 item-title="name"
-                item-value="value"
+                item-value="id"
                 label="Renewal Type*"
                 placeholder="Select renewal type"
                 variant="outlined"
                 density="compact"
                 :rules="[(v) => !!v || 'Renewal type is required']"
                 required
-                @update:model-value="onRenewalTypeChange"
-              ></v-select>
+                @change="onRenewalTypeChange"
+              ></v-autocomplete>
             </v-col>
             <v-col cols="12" md="6">
               <v-autocomplete
@@ -42,25 +42,13 @@
                 density="compact"
                 :rules="[(v) => !!v || 'Vehicle is required']"
                 required
-                :disabled="!renewalForm.renewalType"
               >
-                <template v-slot:item="{ props, item }">
-                  <v-list-item v-bind="props">
-                    <template v-slot:prepend>
-                      <v-icon>mdi-truck</v-icon>
-                    </template>
-                    <v-list-item-title>{{ item.raw.plateNo }}</v-list-item-title>
-                    <v-list-item-subtitle>
-                      {{ getVehicleModel(item.raw) }}
-                    </v-list-item-subtitle>
-                  </v-list-item>
-                </template>
               </v-autocomplete>
             </v-col>
           </v-row>
 
           <!-- Insurance Renewal Form -->
-          <div v-if="renewalForm.renewalType === 'insurance'" class="renewal-section mt-6">
+          <div v-if="renewalForm.type == 1 || renewalForm.type == 2" class="renewal-section mt-6">
             <div class="form-section-title mb-4">
               <v-icon class="me-2" color="info">mdi-shield-check</v-icon>
               Insurance Renewal Details
@@ -68,22 +56,8 @@
             
             <v-row class="grid-gap-sm">
               <v-col cols="12" md="6">
-                <v-select
-                  v-model="renewalForm.insuranceType"
-                  :items="insuranceTypeOptions"
-                  item-title="name"
-                  item-value="id"
-                  label="Insurance Type*"
-                  placeholder="Select insurance type"
-                  variant="outlined"
-                  density="compact"
-                  :rules="[(v) => !!v || 'Insurance type is required']"
-                  required
-                ></v-select>
-              </v-col>
-              <v-col cols="12" md="6">
                 <v-text-field
-                  v-model="renewalForm.insuranceProvider"
+                  v-model="renewalForm.provider"
                   label="Insurance Provider*"
                   placeholder="Enter insurance company name"
                   variant="outlined"
@@ -97,7 +71,7 @@
             <v-row class="grid-gap-sm">
               <v-col cols="12" md="6">
                 <v-text-field
-                  v-model="renewalForm.insurancePolicyNumber"
+                  v-model="renewalForm.policyNumber"
                   label="Policy Number*"
                   placeholder="Enter policy number"
                   variant="outlined"
@@ -108,7 +82,7 @@
               </v-col>
               <v-col cols="12" md="6">
                 <v-text-field
-                  v-model="renewalForm.insurancePremium"
+                  v-model="renewalForm.annualPremium"
                   label="Annual Premium (ETB)*"
                   placeholder="Enter annual premium amount"
                   type="number"
@@ -124,7 +98,7 @@
             <v-row class="grid-gap-sm">
               <v-col cols="12" md="6">
                 <v-text-field
-                  v-model="renewalForm.insuranceCoverage"
+                  v-model="renewalForm.coverageAmount"
                   label="Coverage Amount (ETB)*"
                   placeholder="Enter coverage amount"
                   type="number"
@@ -137,7 +111,7 @@
               </v-col>
               <v-col cols="12" md="6">
                 <v-text-field
-                  v-model="renewalForm.insuranceStartDate"
+                  v-model="renewalForm.startDate"
                   label="Start Date*"
                   placeholder="Select start date"
                   type="date"
@@ -152,7 +126,7 @@
             <v-row class="grid-gap-sm">
               <v-col cols="12" md="6">
                 <v-text-field
-                  v-model="renewalForm.insuranceEndDate"
+                  v-model="renewalForm.endDate"
                   label="End Date*"
                   placeholder="Select end date"
                   type="date"
@@ -176,7 +150,7 @@
             <v-row class="grid-gap-sm">
               <v-col cols="12" md="6">
                 <v-text-field
-                  v-model="renewalForm.insurancePhone"
+                  v-model="renewalForm.agentPhone"
                   label="Agent Phone"
                   placeholder="Enter agent phone number"
                   variant="outlined"
@@ -185,7 +159,7 @@
               </v-col>
               <v-col cols="12" md="6">
                 <v-textarea
-                  v-model="renewalForm.insuranceNotes"
+                  v-model="renewalForm.remark"
                   label="Notes"
                   placeholder="Enter any additional notes"
                   variant="outlined"
@@ -198,7 +172,7 @@
           </div>
 
           <!-- Safety Inspection Renewal Form -->
-          <div v-if="renewalForm.renewalType === 'safety'" class="renewal-section mt-6">
+          <div v-if="renewalForm.type == 3" class="renewal-section mt-6">
             <div class="form-section-title mb-4">
               <v-icon class="me-2" color="success">mdi-car-wrench</v-icon>
               Safety Inspection Renewal Details
@@ -206,22 +180,8 @@
             
             <v-row class="grid-gap-sm">
               <v-col cols="12" md="6">
-                <v-select
-                  v-model="renewalForm.safetyInspectionStatus"
-                  :items="safetyInspectionStatusOptions"
-                  item-title="name"
-                  item-value="id"
-                  label="Inspection Status*"
-                  placeholder="Select inspection status"
-                  variant="outlined"
-                  density="compact"
-                  :rules="[(v) => !!v || 'Inspection status is required']"
-                  required
-                ></v-select>
-              </v-col>
-              <v-col cols="12" md="6">
                 <v-text-field
-                  v-model="renewalForm.safetyInspectionNumber"
+                  v-model="renewalForm.certeficateNumber"
                   label="Certificate Number*"
                   placeholder="Enter certificate number"
                   variant="outlined"
@@ -235,7 +195,7 @@
             <v-row class="grid-gap-sm">
               <v-col cols="12" md="6">
                 <v-text-field
-                  v-model="renewalForm.safetyInspectionDate"
+                  v-model="renewalForm.startDate"
                   label="Inspection Date*"
                   placeholder="Select inspection date"
                   type="date"
@@ -247,7 +207,7 @@
               </v-col>
               <v-col cols="12" md="6">
                 <v-text-field
-                  v-model="renewalForm.safetyInspectionExpiry"
+                  v-model="renewalForm.endDate"
                   label="Expiry Date*"
                   placeholder="Select expiry date"
                   type="date"
@@ -262,7 +222,7 @@
             <v-row class="grid-gap-sm">
               <v-col cols="12" md="6">
                 <v-text-field
-                  v-model="renewalForm.safetyInspectionCenter"
+                  v-model="renewalForm.inspectionCenter"
                   label="Inspection Center*"
                   placeholder="Enter inspection center name"
                   variant="outlined"
@@ -273,7 +233,7 @@
               </v-col>
               <v-col cols="12" md="6">
                 <v-text-field
-                  v-model="renewalForm.safetyInspectionCost"
+                  v-model="renewalForm.inspectionCost"
                   label="Inspection Cost (ETB)*"
                   placeholder="Enter inspection cost"
                   type="number"
@@ -289,7 +249,7 @@
             <v-row class="grid-gap-sm">
               <v-col cols="12">
                 <v-textarea
-                  v-model="renewalForm.safetyInspectionNotes"
+                  v-model="renewalForm.remark"
                   label="Inspection Notes"
                   placeholder="Enter any inspection findings or notes"
                   variant="outlined"
@@ -302,27 +262,13 @@
           </div>
 
           <!-- Road Fund Renewal Form -->
-          <div v-if="renewalForm.renewalType === 'road'" class="renewal-section mt-6">
+          <div v-if="renewalForm.type == 4" class="renewal-section mt-6">
             <div class="form-section-title mb-4">
               <v-icon class="me-2" color="warning">mdi-road</v-icon>
               Road Fund Renewal Details
             </div>
             
             <v-row class="grid-gap-sm">
-              <v-col cols="12" md="6">
-                <v-select
-                  v-model="renewalForm.roadFundStatus"
-                  :items="roadFundStatusOptions"
-                  item-title="name"
-                  item-value="id"
-                  label="Road Fund Status*"
-                  placeholder="Select road fund status"
-                  variant="outlined"
-                  density="compact"
-                  :rules="[(v) => !!v || 'Road fund status is required']"
-                  required
-                ></v-select>
-              </v-col>
               <v-col cols="12" md="6">
                 <v-text-field
                   v-model="renewalForm.roadFundNumber"
@@ -339,7 +285,7 @@
             <v-row class="grid-gap-sm">
               <v-col cols="12" md="6">
                 <v-text-field
-                  v-model="renewalForm.roadFundIssueDate"
+                  v-model="renewalForm.startDate"
                   label="Issue Date*"
                   placeholder="Select issue date"
                   type="date"
@@ -351,7 +297,7 @@
               </v-col>
               <v-col cols="12" md="6">
                 <v-text-field
-                  v-model="renewalForm.roadFundExpiryDate"
+                  v-model="renewalForm.endDate"
                   label="Expiry Date*"
                   placeholder="Select expiry date"
                   type="date"
@@ -379,7 +325,7 @@
               </v-col>
               <v-col cols="12" md="6">
                 <v-text-field
-                  v-model="renewalForm.roadFundIssuingOffice"
+                  v-model="renewalForm.issuingOffice"
                   label="Issuing Office*"
                   placeholder="Enter issuing office"
                   variant="outlined"
@@ -393,7 +339,7 @@
             <v-row class="grid-gap-sm">
               <v-col cols="12">
                 <v-textarea
-                  v-model="renewalForm.roadFundNotes"
+                  v-model="renewalForm.remark"
                   label="Road Fund Notes"
                   placeholder="Enter any additional road fund notes"
                   variant="outlined"
@@ -443,7 +389,7 @@ const emit = defineEmits<{
 }>()
 
 // Composables
-const { vehicleList, updateVehicle } = useVehicles()
+const { vehicleList, updateVehicle, getVehicles, insuranceTypes, updateInsurance } = useVehicles()
 const { vendorList } = useVendor()
 const { modelList } = useModel()
 
@@ -454,37 +400,34 @@ const saving = ref(false)
 
 // Form data
 const renewalForm = ref({
-  renewalType: '',
+  type: null,
   vehicleId: '',
+
   // Insurance fields
-  insuranceType: null as any,
-  insuranceProvider: '',
-  insurancePolicyNumber: '',
-  insurancePremium: '',
-  insuranceCoverage: '',
-  insuranceStartDate: '',
-  insuranceEndDate: '',
+  provider: '',
+  policyNumber: '',
+  annualPremium: '',
+  coverageAmount: '',
+  startDate: '',
+  endDate: '',
   insuranceAgent: '',
-  insurancePhone: '',
-  insuranceNotes: '',
+  agentPhone: '',
+  remark: '',
+
   // Safety inspection fields
-  safetyInspectionStatus: null as any,
-  safetyInspectionNumber: '',
-  safetyInspectionDate: '',
-  safetyInspectionExpiry: '',
-  safetyInspectionCenter: '',
-  safetyInspectionCost: '',
-  safetyInspectionNotes: '',
+  certeficateNumber: '',
+  inspectionCenter: '',
+  inspectionCost: '',
+
   // Road fund fields
-  roadFundStatus: null as any,
   roadFundNumber: '',
-  roadFundIssueDate: '',
-  roadFundExpiryDate: '',
   roadFundAmount: '',
-  roadFundIssuingOffice: '',
-  roadFundNotes: ''
+  issuingOffice: ''
 })
 
+onMounted(async() =>{
+  await getVehicles()
+})
 // Options
 const renewalTypeOptions = [
   { name: 'Insurance Renewal', value: 'insurance' },
@@ -538,37 +481,31 @@ const onRenewalTypeChange = () => {
 }
 
 const resetForm = () => {
-  renewalForm.value = {
-    renewalType: renewalForm.value.renewalType,
-    vehicleId: renewalForm.value.vehicleId,
-    // Insurance fields
-    insuranceType: null,
-    insuranceProvider: '',
-    insurancePolicyNumber: '',
-    insurancePremium: '',
-    insuranceCoverage: '',
-    insuranceStartDate: '',
-    insuranceEndDate: '',
-    insuranceAgent: '',
-    insurancePhone: '',
-    insuranceNotes: '',
-    // Safety inspection fields
-    safetyInspectionStatus: null,
-    safetyInspectionNumber: '',
-    safetyInspectionDate: '',
-    safetyInspectionExpiry: '',
-    safetyInspectionCenter: '',
-    safetyInspectionCost: '',
-    safetyInspectionNotes: '',
-    // Road fund fields
-    roadFundStatus: null,
-    roadFundNumber: '',
-    roadFundIssueDate: '',
-    roadFundExpiryDate: '',
-    roadFundAmount: '',
-    roadFundIssuingOffice: '',
-    roadFundNotes: ''
-  }
+    renewalForm.value = {
+      type: renewalForm.value.type,
+      vehicleId: renewalForm.value.vehicleId,
+      
+      // Insurance fields
+      provider: '',
+      policyNumber: '',
+      annualPremium: '',
+      coverageAmount: '',
+      startDate: '',
+      endDate: '',
+      insuranceAgent: '',
+      agentPhone: '',
+      remark: '',
+
+      // Safety inspection fields
+      certeficateNumber: '',
+      inspectionCenter: '',
+      inspectionCost: '',
+
+      // Road fund fields
+      roadFundNumber: '',
+      roadFundAmount: '',
+      issuingOffice: ''
+    }
 }
 
 const closeDialog = () => {
@@ -586,50 +523,54 @@ const saveRenewal = async () => {
     }
 
     // Prepare update data based on renewal type
-    const updateData: any = {}
+    let updateData: any = {}
     
-    if (renewalForm.value.renewalType === 'insurance') {
+    if (renewalForm.value.type == 1 || renewalForm.value.type == 2) {
       // Create new insurance entry
-      const newInsuranceEntry = {
-        insuranceType: renewalForm.value.insuranceType,
-        insuranceProvider: renewalForm.value.insuranceProvider,
-        insurancePolicyNumber: renewalForm.value.insurancePolicyNumber,
-        insurancePremium: parseFloat(renewalForm.value.insurancePremium),
-        insuranceCoverage: parseFloat(renewalForm.value.insuranceCoverage),
-        insuranceStartDate: renewalForm.value.insuranceStartDate,
-        insuranceEndDate: renewalForm.value.insuranceEndDate,
-        insuranceAgent: renewalForm.value.insuranceAgent,
-        insurancePhone: renewalForm.value.insurancePhone,
-        insuranceNotes: renewalForm.value.insuranceNotes
+      updateData = {
+        // type: renewalForm.value.type,
+        vehicleId: renewalForm.value.vehicleId,
+        provider: renewalForm.value.provider,
+        policyNumber: renewalForm.value.policyNumber,
+        annualPremium: parseFloat(renewalForm.value.annualPremium),
+        coverageAmount: parseFloat(renewalForm.value.coverageAmount),
+        startDate: renewalForm.value.startDate,
+        endDate: renewalForm.value.endDate,
+        agentPhone: renewalForm.value.agentPhone,
+        remark: renewalForm.value.remark
       }
 
-      // Add to existing insurance entries or create new array
-      const existingEntries = selectedVehicle.insuranceEntries || []
-      updateData.insuranceEntries = [...existingEntries, newInsuranceEntry]
     }
     
-    else if (renewalForm.value.renewalType === 'safety') {
-      updateData.safetyInspectionStatus = renewalForm.value.safetyInspectionStatus
-      updateData.safetyInspectionNumber = renewalForm.value.safetyInspectionNumber
-      updateData.safetyInspectionDate = renewalForm.value.safetyInspectionDate
-      updateData.safetyInspectionExpiry = renewalForm.value.safetyInspectionExpiry
-      updateData.safetyInspectionCenter = renewalForm.value.safetyInspectionCenter
-      updateData.safetyInspectionCost = parseFloat(renewalForm.value.safetyInspectionCost)
-      updateData.safetyInspectionNotes = renewalForm.value.safetyInspectionNotes
+    else if (renewalForm.value.type === 3) {
+      updateData = {
+        // type: renewalForm.value.type,
+        vehicleId: renewalForm.value.vehicleId,
+        certeficateNumber: renewalForm.value.certeficateNumber,
+        inspectionCenter: renewalForm.value.inspectionCenter,
+        inspectionCost: renewalForm.value.inspectionCost,
+        startDate: renewalForm.value.startDate,
+        endDate: renewalForm.value.endDate,
+        remark: renewalForm.value.remark
+
+      }
     }
     
-    else if (renewalForm.value.renewalType === 'road') {
-      updateData.roadFundStatus = renewalForm.value.roadFundStatus
-      updateData.roadFundNumber = renewalForm.value.roadFundNumber
-      updateData.roadFundIssueDate = renewalForm.value.roadFundIssueDate
-      updateData.roadFundExpiryDate = renewalForm.value.roadFundExpiryDate
-      updateData.roadFundAmount = parseFloat(renewalForm.value.roadFundAmount)
-      updateData.roadFundIssuingOffice = renewalForm.value.roadFundIssuingOffice
-      updateData.roadFundNotes = renewalForm.value.roadFundNotes
+    else if (renewalForm.value.type === 4) {
+      updateData = {
+        // type: renewalForm.value.type,
+        vehicleId: renewalForm.value.vehicleId,
+        roadFundNumber: renewalForm.value.certeficateNumber,
+        roadFundAmount: renewalForm.value.inspectionCenter,
+        issuingOffice: renewalForm.value.inspectionCost,
+        startDate: renewalForm.value.startDate,
+        endDate: renewalForm.value.endDate,
+        remark: renewalForm.value.remark
+      }
     }
 
     // Update the vehicle
-    await updateVehicle(selectedVehicle.id, updateData)
+    await updateInsurance(renewalForm.value.vehicleId, renewalForm.value.type, updateData)
     
     emit('saved', {
       vehicleId: selectedVehicle.id,
