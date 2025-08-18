@@ -188,7 +188,7 @@
           Renewals Due
         </div>
         <v-chip color="primary" size="small"
-          >{{ filteredRenewals.length }} items</v-chip
+          >{{ overDues.length }} items</v-chip
         >
       </v-card-title>
 
