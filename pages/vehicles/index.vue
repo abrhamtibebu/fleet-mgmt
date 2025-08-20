@@ -441,7 +441,7 @@
 
             <!-- Insurance Entries List -->
             <div v-if="!editingVehicle">
-            <div v-if="vehicleForm.insuranceEntries.length > 0"  class="insurance-entries-list mb-4">
+            <div v-if="vehicleForm.insurance.length > 0"  class="insurance-entries-list mb-4">
               <div class="section-subtitle mb-3">
                 <v-icon class="me-2" color="info">mdi-format-list-bulleted</v-icon>
                 Added Insurance Entries
