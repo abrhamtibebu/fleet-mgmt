@@ -1487,7 +1487,7 @@ const addMainEntry = (vehicle: any) => {
 
 const editVehicle = (vehicle: any) => {
   editingVehicle.value = vehicle;
-  vehicleForm.value = { ...vehicle };
+  vehicleForm.value.detail = { ...vehicle };
   showAddDialog.value = true;
   console.log("Editing vehicle:", vehicle);
 };
