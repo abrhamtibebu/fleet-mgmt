@@ -302,13 +302,13 @@
             <v-divider class="my-4"></v-divider>
 
             <!-- Insurance Details -->
-            <div class="form-section-title mb-3">
+            <div v-if="!editingVehicle" class="form-section-title mb-3">
               <span class="section-icon-badge"><v-icon size="18" color="info">mdi-shield-check</v-icon></span>
               Insurance Details
             </div>
             
             <!-- Insurance Entry Form -->
-            <div class="insurance-entry-form mb-4">
+            <div v-if="!editingVehicle" class="insurance-entry-form mb-4">
               <v-row class="grid-gap-sm">
                 <v-col cols="12" sm="6">
                   <v-select
@@ -441,7 +441,8 @@
             </div>
 
             <!-- Insurance Entries List -->
-            <div v-if="vehicleForm.insuranceEntries.length > 0" class="insurance-entries-list mb-4">
+            <div v-if="!editingVehicle">
+            <div v-if="vehicleForm.insuranceEntries.length > 0"  class="insurance-entries-list mb-4">
               <div class="section-subtitle mb-3">
                 <v-icon class="me-2" color="info">mdi-format-list-bulleted</v-icon>
                 Added Insurance Entries
@@ -499,10 +500,12 @@
                 </v-card-text>
               </v-card>
             </div>
+            </div>
 
             <!-- Insurance Requirements Notice -->
+            <div v-if="!editingVehicle">
             <v-alert
-              v-if="!hasRequiredInsurance"
+              v-if="!hasRequiredInsurance" 
               type="warning"
               variant="tonal"
               class="mb-4"
@@ -512,15 +515,16 @@
                 <span>Both Comprehensive and Third Party insurance are required to create a vehicle.</span>
               </div>
             </v-alert>
+            </div>
 
             <v-divider class="my-4"></v-divider>
 
             <!-- Safety Inspection -->
-            <div class="form-section-title mb-3">
+            <div v-if="!editingVehicle" class="form-section-title mb-3">
               <span class="section-icon-badge"><v-icon size="18" color="success">mdi-car-wrench</v-icon></span>
               Safety Inspection
             </div>
-            <v-row class="grid-gap-sm">
+            <v-row v-if="!editingVehicle" class="grid-gap-sm">
               <!-- <v-col cols="12" sm="6">
                 <v-select
                   density="compact"
@@ -606,14 +610,14 @@
               </v-col>
             </v-row>
 
-            <v-divider class="my-4"></v-divider>
+            <v-divider v-if="!editingVehicle" class="my-4"></v-divider>
 
             <!-- Road Fund -->
-            <div class="form-section-title mb-3">
+            <div v-if="!editingVehicle" class="form-section-title mb-3">
               <span class="section-icon-badge"><v-icon size="18" color="info">mdi-road</v-icon></span>
               Road Fund
             </div>
-            <v-row class="grid-gap-sm">
+            <v-row v-if="!editingVehicle" class="grid-gap-sm">
               <!-- <v-col cols="12" sm="6">
                 <v-select
                   density="compact"
