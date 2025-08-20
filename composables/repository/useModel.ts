@@ -63,9 +63,10 @@ export function useModel() {
 
       modelList.value.push(data.result)
 
-    } catch (e) {
+    } catch (e: any) {
       error.value = 'Failed to create model'
       console.error(e)
+      throw e; // Rethrow the original error
     } finally {
       loading.value = false
     }
@@ -86,7 +87,7 @@ const deleteModel = async (id: number) => {
 }
 const updateModel = async (id: number, body: Model , modelId: number) => {
       try {
-      const data = await $apiFetch<{ result: Model[] }>(`/model/${id}/${modelId}`, {
+      const data = await $apiFetch<{ result: Model[] }>(`/model/${id}`, {
         method: 'PUT',
         body
       })
@@ -95,9 +96,11 @@ const updateModel = async (id: number, body: Model , modelId: number) => {
       let vd = modelList.value.findIndex((v:Model) => v.id == id)
       modelList.value[vd] = data.result
 
-    } catch (e) {
+    } catch (e: any) {
       error.value = 'Failed to edit model'
       console.error(e)
+      throw e; // Rethrow the original error
+
     } finally {
       loading.value = false
     }

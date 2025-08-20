@@ -41,9 +41,11 @@ export function useVendor() {
 
       vendorList.value.push(data.result)
 
-    } catch (e) {
+    } catch (e: any) {
       error.value = 'Failed to create vendors'
       console.error(e)
+      throw e; // Rethrow the original error
+
     } finally {
       loading.value = false
     }
@@ -63,6 +65,7 @@ export function useVendor() {
     } catch (e) {
       error.value = 'Failed to create vendors'
       console.error(e)
+      throw e; // Rethrow the original error
     } finally {
       loading.value = false
     }

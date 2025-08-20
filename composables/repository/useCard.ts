@@ -45,16 +45,17 @@ export function useCard() {
     loading.value = true
     error.value = null
     try {
-      const data = await $apiFetch<{ result: Card[] }>('/card/add', {
+      const data = await $apiFetch<{ result: Card }>('/card/add', {
         method: 'POST',
         body
       })
    
       cardList.value.push(data.result)
-
-    } catch (e) {
+     return data; 
+    } catch (e: any) {
       error.value = 'Failed to create card'
       console.error(e)
+      throw e; // Rethrow the original error
     } finally {
       loading.value = false
     }
@@ -84,7 +85,7 @@ export function useCard() {
   }
     const updateCard = async (id: number, body: Card) => {
       try {
-      const data = await $apiFetch<{ result: Card[] }>(`/card/${id}`, {
+      const data = await $apiFetch<{ result: Card }>(`/card/${id}`, {
         method: 'PUT',
         body
       })
@@ -92,10 +93,11 @@ export function useCard() {
       // vendorList.value.push(data.result)
       let vd = cardList.value.findIndex((v:Card) => v.id == id)
       cardList.value[vd] = data.result
-
-    } catch (e) {
+     return data; 
+    } catch (e: any) {
       error.value = 'Failed to  edit fuel card'
       console.error(e)
+     throw e; // Rethrow the original error
     } finally {
       loading.value = false
     }

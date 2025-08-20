@@ -75,48 +75,52 @@ export const useVehicles = () => {
     }
   }
 
-    const createVehicle = async (body: any) => {
-    loading.value = true
-    error.value = null
-    try {
-      const data = await $apiFetch<{ result: Vehicle[] }>('/vehicle/add', {
-        method: 'POST',
-        body
-      })
+ // ~/composables/useVehicle.ts
+const createVehicle = async (body: any) => {
+  loading.value = true;
+  error.value = null;
+  try {
+    const data = await $apiFetch<{ result: Vehicle[] }>('/vehicle/add', {
+      method: 'POST',
+      body
+    });
 
-      vehicleList.value.push(data.result)
-
-    } catch (e) {
-      error.value = 'Failed to create vendors'
-      console.error(e)
-    } finally {
-      loading.value = false
-    }
+    vehicleList.value.push(data.result);
+    return data; // Return the successful response
+  } catch (e: any) {
+    // Preserve the original error structure
+    error.value = e.data?.error || 'Failed to create vehicle';
+    console.error(e);
+    throw e; // Rethrow the original error
+  } finally {
+    loading.value = false;
   }
+};
 
-  const updateVehicle = async (id: string, body: any) => {
-    loading.value = true
-    error.value = null
-    try {
-      const data = await $apiFetch<{ result: Vehicle }>('/vehicle/update', {
-        method: 'PUT',
-        body: { id, ...body }
-      })
 
-      // Update the vehicle in the list
-      const index = vehicleList.value.findIndex(v => v.id === id)
-      if (index !== -1) {
-        vehicleList.value[index] = data.result
-      }
+const updateVehicle = async (id: string, body: any) => {
+  loading.value = true;
+  error.value = null;
+  try {
+    const data = await $apiFetch<{ result: Vehicle }>('/vehicle/update', {
+      method: 'PUT',
+      body: { id, ...body }
+    });
 
-    } catch (e) {
-      error.value = 'Failed to update vehicle'
-      console.error(e)
-    } finally {
-      loading.value = false
+    // Update the vehicle in the list
+    const index = vehicleList.value.findIndex(v => v.id === id);
+    if (index !== -1) {
+      vehicleList.value[index] = data.result;
     }
+    return data; // Return the successful response
+  } catch (e: any) {
+    error.value = e.data?.error || 'Failed to update vehicle';
+    console.error(e);
+    throw e; // Rethrow the original error
+  } finally {
+    loading.value = false;
   }
-
+};
   const activeVehicles = computed(() => 
     vehicleList.value.filter(v => v.status === 1)
   )
@@ -148,6 +152,49 @@ export const useVehicles = () => {
     }
   }
 
+  
+const updateInsurance = async (vehicleId: Number,
+type: Number, body: any) => {
+
+loading.value = true
+
+error.value = null
+
+try {
+
+const data = await $apiFetch<{ result: Vehicle
+}>(`/vehicle/${vehicleId}/type/${type}`,
+{
+
+method: 'PUT',
+
+body
+
+})
+
+
+
+
+return data
+
+ 
+
+
+
+
+} catch (e) {
+
+error.value = 'Failed to update vehicle'
+
+console.error(e)
+
+} finally {
+
+loading.value = false
+
+}
+
+}
   const vehicleTypes = [
       {
         id: 1,
@@ -215,6 +262,7 @@ export const useVehicles = () => {
     getVehicleById,
     getVehicleByLicensePlate,
     getVehiclesByFuelCard,
-    calculateServiceDue
+    calculateServiceDue,
+    updateInsurance
   }
 } 
