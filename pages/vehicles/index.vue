@@ -175,7 +175,7 @@
               <v-col cols="12" sm="6">
                 <v-text-field
                   density="compact"
-                  v-model="vehicleForm.plateNo"
+                  v-model="vehicleForm.detail.plateNo"
                   label="License Plate*"
                   placeholder="Enter license plate"
                   variant="outlined"
@@ -187,7 +187,7 @@
                 <v-text-field
                   density="compact"
                   hide-spin-buttons
-                  v-model="vehicleForm.year"
+                  v-model="vehicleForm.detail.year"
                   label="Year*"
                   placeholder="Enter year"
                   type="number"
@@ -203,7 +203,7 @@
                 <v-autocomplete
                   density="compact"
                   class="text--black"
-                  v-model="vehicleForm.vendorId"
+                  v-model="vehicleForm.detail.vendorId"
                   :items="vendorList"
                   label="Vendor*"
                   placeholder="Select vendor"
@@ -218,14 +218,14 @@
               <v-col cols="12" sm="6">
                 <v-autocomplete
                   density="compact"
-                  v-model="vehicleForm.modelId"
+                  v-model="vehicleForm.detail.modelId"
                   :items="modelList"
                   label="Model*"
                   placeholder="Select model"
                   variant="outlined"
                   :rules="[(v) => !!v || 'Model is required']"
                   required
-                  :disabled="!vehicleForm.vendorId"
+                  :disabled="!vehicleForm.detail.vendorId"
                   item-title="name"
                   item-value="id"
                 ></v-autocomplete>
@@ -243,7 +243,7 @@
               <v-col cols="12" sm="6">
                 <v-autocomplete
                   density="compact"
-                  v-model="vehicleForm.driver"
+                  v-model="vehicleForm.detail.driver"
                   :items="usersList"
                   item-title="name"
                   item-value="id"
@@ -258,7 +258,7 @@
                 <v-text-field
                   hide-spin-buttons
                   density="compact"
-                  v-model="vehicleForm.currentMileage"
+                  v-model="vehicleForm.detail.currentMileage"
                   label="Current Mileage (km)*"
                   placeholder="Enter current mileage"
                   type="number"
@@ -274,7 +274,7 @@
                 <v-text-field
                   hide-spin-buttons
                   density="compact"
-                  v-model="vehicleForm.serviceInterval"
+                  v-model="vehicleForm.detail.serviceInterval"
                   label="Service Interval (km)*"
                   placeholder="Enter service interval"
                   type="number"
@@ -286,7 +286,7 @@
               <v-col cols="12" sm="6">
                 <v-autocomplete
                   density="compact"
-                  v-model="vehicleForm.type"
+                  v-model="vehicleForm.detail.type"
                   :items="vehicleTypes"
                   item-title="name"
                   item-value="id"
@@ -313,7 +313,7 @@
                 <v-col cols="12" sm="6">
                   <v-select
                     density="compact"
-                    v-model="currentInsuranceEntry.insuranceType"
+                    v-model="currentInsuranceEntry.type"
                     :items="insuranceTypeOptions"
                     item-title="name"
                     item-value="id"
@@ -325,7 +325,7 @@
                 <v-col cols="12" sm="6">
                   <v-text-field
                     density="compact"
-                    v-model="currentInsuranceEntry.insuranceProvider"
+                    v-model="currentInsuranceEntry.provider"
                     label="Insurance Provider"
                     placeholder="Enter insurance company name"
                     variant="outlined"
@@ -337,7 +337,7 @@
                 <v-col cols="12" sm="6">
                   <v-text-field
                     density="compact"
-                    v-model="currentInsuranceEntry.insurancePolicyNumber"
+                    v-model="currentInsuranceEntry.policyNumber"
                     label="Policy Number"
                     placeholder="Enter policy number"
                     variant="outlined"
@@ -346,10 +346,9 @@
                 <v-col cols="12" sm="6">
                   <v-text-field
                     density="compact"
-                    v-model="currentInsuranceEntry.insurancePremium"
+                    v-model="currentInsuranceEntry.annualPremium"
                     label="Annual Premium (ETB)"
                     placeholder="Enter annual premium amount"
-                    type="number"
                     variant="outlined"
                     hide-spin-buttons
                   ></v-text-field>
@@ -360,7 +359,7 @@
                 <v-col cols="12" sm="6">
                   <v-text-field
                     density="compact"
-                    v-model="currentInsuranceEntry.insuranceCoverage"
+                    v-model="currentInsuranceEntry.coverageAmount"
                     label="Coverage Amount (ETB)"
                     placeholder="Enter coverage amount"
                     type="number"
@@ -371,7 +370,7 @@
                 <v-col cols="12" sm="6">
                   <v-text-field
                     density="compact"
-                    v-model="currentInsuranceEntry.insuranceStartDate"
+                    v-model="currentInsuranceEntry.startDate"
                     label="Insurance Start Date"
                     placeholder="Select start date"
                     type="date"
@@ -384,7 +383,7 @@
                 <v-col cols="12" sm="6">
                   <v-text-field
                     density="compact"
-                    v-model="currentInsuranceEntry.insuranceEndDate"
+                    v-model="currentInsuranceEntry.endDate"
                     label="Insurance End Date"
                     placeholder="Select end date"
                     type="date"
@@ -406,7 +405,7 @@
                 <v-col cols="12" sm="6">
                   <v-text-field
                     density="compact"
-                    v-model="currentInsuranceEntry.insurancePhone"
+                    v-model="currentInsuranceEntry.agentPhone"
                     label="Agent Phone"
                     placeholder="Enter agent phone number"
                     variant="outlined"
@@ -415,7 +414,7 @@
                 <v-col cols="12" sm="6">
                   <v-textarea
                     density="compact"
-                    v-model="currentInsuranceEntry.insuranceNotes"
+                    v-model="currentInsuranceEntry.remark"
                     label="Insurance Notes"
                     placeholder="Enter any additional insurance notes"
                     variant="outlined"
@@ -431,7 +430,7 @@
                     color="primary"
                     prepend-icon="mdi-plus"
                     @click="addInsuranceEntry"
-                    :disabled="!currentInsuranceEntry.insuranceType"
+                    :disabled="!vehicleForm.detail.type"
                     class="add-insurance-btn"
                   >
                     Add Insurance Entry
@@ -441,14 +440,14 @@
             </div>
 
             <!-- Insurance Entries List -->
-            <div v-if="vehicleForm.insuranceEntries.length > 0" class="insurance-entries-list mb-4">
+            <div v-if="vehicleForm.insurance.length > 0" class="insurance-entries-list mb-4">
               <div class="section-subtitle mb-3">
                 <v-icon class="me-2" color="info">mdi-format-list-bulleted</v-icon>
                 Added Insurance Entries
               </div>
               
               <v-card
-                v-for="(entry, index) in vehicleForm.insuranceEntries"
+                v-for="(entry, index) in vehicleForm.insurance"
                 :key="index"
                 class="insurance-entry-card mb-3"
                 elevation="1"
@@ -457,14 +456,14 @@
                   <div class="d-flex align-center justify-space-between">
                     <div class="insurance-entry-header">
                       <v-chip
-                        :color="getInsuranceTypeColor(entry.insuranceType)"
+                        :color="getInsuranceTypeColor(entry.type)"
                         size="small"
                         variant="tonal"
                         class="me-2"
                       >
-                        {{ insuranceTypeOptions.find(t => t.id === entry.insuranceType)?.name }}
+                        {{ insuranceTypeOptions.find(t => t.id === entry.type)?.name }}
                       </v-chip>
-                      <span class="insurance-provider">{{ entry.insuranceProvider }}</span>
+                      <span class="insurance-provider">{{ entry.provider }}</span>
                     </div>
                     <v-btn
                       icon="mdi-delete"
@@ -478,21 +477,21 @@
                   <div class="insurance-entry-details mt-2">
                     <div class="detail-row">
                       <span class="detail-label">Policy:</span>
-                      <span class="detail-value">{{ entry.insurancePolicyNumber }}</span>
+                      <span class="detail-value">{{ entry.policyNumber }}</span>
                     </div>
                     <div class="detail-row">
                       <span class="detail-label">Premium:</span>
-                      <span class="detail-value">{{ entry.insurancePremium ? `${entry.insurancePremium.toLocaleString()} ETB` : 'Not specified' }}</span>
+                      <span class="detail-value">{{ entry.annualPremium ? `${entry.annualPremium.toLocaleString()} ETB` : 'Not specified' }}</span>
                     </div>
                     <div class="detail-row">
                       <span class="detail-label">Coverage:</span>
-                      <span class="detail-value">{{ entry.insuranceCoverage ? `${entry.insuranceCoverage.toLocaleString()} ETB` : 'Not specified' }}</span>
+                      <span class="detail-value">{{ entry.coverageAmount ? `${entry.coverageAmount.toLocaleString()} ETB` : 'Not specified' }}</span>
                     </div>
                     <div class="detail-row">
                       <span class="detail-label">Period:</span>
                       <span class="detail-value">
-                        {{ entry.insuranceStartDate ? formatDate(entry.insuranceStartDate) : 'Not specified' }} - 
-                        {{ entry.insuranceEndDate ? formatDate(entry.insuranceEndDate) : 'Not specified' }}
+                        {{ entry.startDate ? formatDate(entry.startDate) : 'Not specified' }} - 
+                        {{ entry.endDate ? formatDate(entry.endDate) : 'Not specified' }}
                       </span>
                     </div>
                   </div>
@@ -539,7 +538,7 @@
               <v-col cols="12" sm="6">
                 <v-text-field
                   density="compact"
-                  v-model="vehicleForm.safetyInspectionNumber"
+                  v-model="vehicleForm.safety.certeficateNumber"
                   label="Inspection Certificate Number"
                   placeholder="Enter certificate number"
                   variant="outlined"
@@ -549,7 +548,7 @@
                 <v-col cols="12" sm="6">
                   <v-text-field
                     density="compact"
-                    v-model="vehicleForm.safetyInspectionDate"
+                    v-model="vehicleForm.safety.startDate"
                     label="Last Inspection Date"
                     placeholder="Select inspection date"
                     type="date"
@@ -560,20 +559,28 @@
                 </v-row>
                 <v-row class="grid-gap-sm">
                 <v-col cols="12" sm="6">
-                  <v-text-field
+                  <!-- <v-text-field
                     density="compact"
-                    v-model="vehicleForm.safetyInspectionExpiry"
+                    v-model="vehicleForm.safety.endDate"
                     label="Inspection Expiry Date (Auto-calculated)"
                     placeholder="Auto-calculated from inspection date"
                     type="date"
                     variant="outlined"
                     readonly
+                  ></v-text-field> -->
+                   <v-text-field
+                    density="compact"
+                    v-model="vehicleForm.safety.endDate"
+                    label="Inspection End Date"
+                    placeholder="Inspection Expiry Date "
+                    type="date"
+                    variant="outlined"
                   ></v-text-field>
                 </v-col>
               <v-col cols="12" sm="6">
                 <v-text-field
                   density="compact"
-                  v-model="vehicleForm.safetyInspectionCenter"
+                  v-model="vehicleForm.safety.inspectionCenter"
                   label="Inspection Center"
                   placeholder="Enter inspection center name"
                   variant="outlined"
@@ -584,7 +591,7 @@
               <v-col cols="12" sm="6">
                 <v-text-field
                   density="compact"
-                  v-model="vehicleForm.safetyInspectionCost"
+                  v-model="vehicleForm.safety.inspectionCost"
                   label="Inspection Cost (ETB)"
                   placeholder="Enter inspection cost"
                   type="number"
@@ -596,7 +603,7 @@
               <v-col cols="12" sm="6">
                 <v-textarea
                   density="compact"
-                  v-model="vehicleForm.safetyInspectionNotes"
+                  v-model="vehicleForm.safety.remark"
                   label="Inspection Notes"
                   placeholder="Enter any inspection findings or notes"
                   variant="outlined"
@@ -631,7 +638,7 @@
               <v-col cols="12" sm="6">
                 <v-text-field
                   density="compact"
-                  v-model="vehicleForm.roadFundNumber"
+                  v-model="vehicleForm.road.roadFundNumber"
                   label="Road Fund Number"
                   placeholder="Enter road fund number"
                   variant="outlined"
@@ -641,7 +648,7 @@
                 <v-col cols="12" sm="6">
                   <v-text-field
                     density="compact"
-                    v-model="vehicleForm.roadFundIssueDate"
+                    v-model="vehicleForm.road.startDate"
                     label="Issue Date"
                     placeholder="Select issue date"
                     type="date"
@@ -652,20 +659,28 @@
                 </v-row>
                  <v-row class="grid-gap-sm">
                 <v-col cols="12" sm="6">
-                  <v-text-field
+                  <!-- <v-text-field
                     density="compact"
-                    v-model="vehicleForm.roadFundExpiryDate"
+                    v-model="vehicleForm.road.endDate"
                     label="Expiry Date (Auto-calculated)"
                     placeholder="Auto-calculated from issue date"
                     type="date"
                     variant="outlined"
                     readonly
+                  ></v-text-field> -->
+                   <v-text-field
+                    density="compact"
+                    v-model="vehicleForm.road.endDate"
+                    label="road End Date"
+                    placeholder="Select end date"
+                    type="date"
+                    variant="outlined"
                   ></v-text-field>
                 </v-col>
               <v-col cols="12" sm="6">
                 <v-text-field
                   density="compact"
-                  v-model="vehicleForm.roadFundAmount"
+                  v-model="vehicleForm.road.roadFundAmount"
                   label="Road Fund Amount (ETB)"
                   placeholder="Enter road fund amount"
                   type="number"
@@ -678,7 +693,7 @@
               <v-col cols="12" sm="6">
                 <v-text-field
                   density="compact"
-                  v-model="vehicleForm.roadFundIssuingOffice"
+                  v-model="vehicleForm.road.issuingOffice"
                   label="Issuing Office"
                   placeholder="Enter issuing office"
                   variant="outlined"
@@ -687,7 +702,7 @@
               <v-col cols="12" sm="6">
                 <v-textarea
                   density="compact"
-                  v-model="vehicleForm.roadFundNotes"
+                  v-model="vehicleForm.road.remark"
                   label="Road Fund Notes"
                   placeholder="Enter any additional road fund notes"
                   variant="outlined"
@@ -708,7 +723,7 @@
                   <v-col cols="12" md="6">
                 <v-autocomplete
                   density="compact"
-                  v-model="vehicleForm.cardId"
+                  v-model="vehicleForm.detail.cardId"
                   :items="cardList"
                   item-title="number"
                   item-value="id"
@@ -722,7 +737,7 @@
                              <v-col cols="12" md="6" v-if="editingVehicle">
                  <v-select
                    density="compact"
-                   v-model="vehicleForm.status"
+                   v-model="vehicleForm.detail.status"
                    :items="vehicleStatusOptions"
                    item-title="name"
                    item-value="id"
@@ -807,7 +822,7 @@
                         <div class="info-value">{{ selectedVehicle?.plateNo }}</div>
                       </div>
                       <div class="info-item">
-                        <div class="info-label">Brand & Model</div>
+                 <div class="info-label">Brand & Model</div>
                         <div class="info-value">{{ selectedVehicle?.vendor?.name }} {{ selectedVehicle?.model?.name }}</div>
                       </div>
                       <div class="info-item">
@@ -878,55 +893,55 @@
                     Insurance Information
                   </v-card-title>
                   <v-card-text>
-                    <div v-if="selectedVehicle?.insuranceEntries && selectedVehicle.insuranceEntries.length > 0">
+                    <div v-if="selectedVehicle?.insurance && selectedVehicle.insurance.length > 0">
                       <div
-                        v-for="(entry, index) in selectedVehicle.insuranceEntries"
+                        v-for="(entry, index) in selectedVehicle.insurance"
                         :key="index"
                         class="insurance-entry-display mb-3"
                       >
                         <div class="insurance-entry-header-display">
                           <v-chip
-                            :color="getInsuranceTypeColor(entry.insuranceType)"
+                            :color="getInsuranceTypeColor(entry.type)"
                             size="small"
                             variant="tonal"
                             class="me-2"
                           >
-                            {{ insuranceTypeOptions.find(t => t.id === entry.insuranceType)?.name }}
+                            {{ insuranceTypeOptions.find(t => t.id === entry.type)?.name }}
                           </v-chip>
-                          <span class="insurance-provider-display">{{ entry.insuranceProvider }}</span>
+                          <span class="insurance-provider-display">{{ entry.provider }}</span>
                         </div>
                         
                         <div class="insurance-entry-details-display mt-2">
                           <div class="detail-row-display">
                             <span class="detail-label-display">Policy:</span>
-                            <span class="detail-value-display">{{ entry.insurancePolicyNumber || 'Not specified' }}</span>
+                            <span class="detail-value-display">{{ entry.policyNumber || 'Not specified' }}</span>
                           </div>
                           <div class="detail-row-display">
                             <span class="detail-label-display">Premium:</span>
-                            <span class="detail-value-display">{{ entry.insurancePremium ? `${entry.insurancePremium.toLocaleString()} ETB` : 'Not specified' }}</span>
+                            <span class="detail-value-display">{{ entry.annualPremium ? `${entry.annualPremium.toLocaleString()} ETB` : 'Not specified' }}</span>
                           </div>
                           <div class="detail-row-display">
                             <span class="detail-label-display">Coverage:</span>
-                            <span class="detail-value-display">{{ entry.insuranceCoverage ? `${entry.insuranceCoverage.toLocaleString()} ETB` : 'Not specified' }}</span>
+                            <span class="detail-value-display">{{ entry.coverageAmount ? `${entry.coverageAmount.toLocaleString()} ETB` : 'Not specified' }}</span>
                           </div>
                           <div class="detail-row-display">
                             <span class="detail-label-display">Period:</span>
                             <span class="detail-value-display">
-                              {{ entry.insuranceStartDate ? formatDate(entry.insuranceStartDate) : 'Not specified' }} - 
-                              {{ entry.insuranceEndDate ? formatDate(entry.insuranceEndDate) : 'Not specified' }}
+                              {{ entry.startDate ? formatDate(entry.startDate) : 'Not specified' }} - 
+                              {{ entry.endDate ? formatDate(entry.endDate) : 'Not specified' }}
                             </span>
                           </div>
                           <div v-if="entry.insuranceAgent" class="detail-row-display">
                             <span class="detail-label-display">Agent:</span>
                             <span class="detail-value-display">{{ entry.insuranceAgent }}</span>
                           </div>
-                          <div v-if="entry.insurancePhone" class="detail-row-display">
+                          <div v-if="entry.agentPhone" class="detail-row-display">
                             <span class="detail-label-display">Phone:</span>
-                            <span class="detail-value-display">{{ entry.insurancePhone }}</span>
+                            <span class="detail-value-display">{{ entry.agentPhone }}</span>
                           </div>
-                          <div v-if="entry.insuranceNotes" class="detail-row-display">
+                          <div v-if="entry.remark" class="detail-row-display">
                             <span class="detail-label-display">Notes:</span>
-                            <span class="detail-value-display">{{ entry.insuranceNotes }}</span>
+                            <span class="detail-value-display">{{ entry.remark }}</span>
                           </div>
                         </div>
                       </div>
@@ -962,27 +977,27 @@
                       </div>
                       <div class="info-item">
                         <div class="info-label">Certificate Number</div>
-                        <div class="info-value">{{ selectedVehicle?.safetyInspectionNumber || 'Not specified' }}</div>
+                        <div class="info-value">{{ selectedVehicle?.certeficateNumber || 'Not specified' }}</div>
                       </div>
                       <div class="info-item">
                         <div class="info-label">Last Inspection</div>
-                        <div class="info-value">{{ selectedVehicle?.safetyInspectionDate ? formatDate(selectedVehicle.safetyInspectionDate) : 'Not specified' }}</div>
+                        <div class="info-value">{{ selectedVehicle?.startDate ? formatDate(selectedVehicle.startDate) : 'Not specified' }}</div>
                       </div>
                       <div class="info-item">
                         <div class="info-label">Expiry Date</div>
-                        <div class="info-value">{{ selectedVehicle?.safetyInspectionExpiry ? formatDate(selectedVehicle.safetyInspectionExpiry) : 'Not specified' }}</div>
+                        <div class="info-value">{{ selectedVehicle?.endDate ? formatDate(selectedVehicle.endDate) : 'Not specified' }}</div>
                       </div>
                       <div class="info-item">
                         <div class="info-label">Inspection Center</div>
-                        <div class="info-value">{{ selectedVehicle?.safetyInspectionCenter || 'Not specified' }}</div>
+                        <div class="info-value">{{ selectedVehicle?.inspectionCenter || 'Not specified' }}</div>
                       </div>
                       <div class="info-item">
                         <div class="info-label">Cost</div>
-                        <div class="info-value">{{ selectedVehicle?.safetyInspectionCost ? `${selectedVehicle.safetyInspectionCost.toLocaleString()} ETB` : 'Not specified' }}</div>
+                        <div class="info-value">{{ selectedVehicle?.inspectionCost ? `${selectedVehicle.inspectionCost.toLocaleString()} ETB` : 'Not specified' }}</div>
                       </div>
-                      <div v-if="selectedVehicle?.safetyInspectionNotes" class="info-item">
+                      <div v-if="selectedVehicle?.remark" class="info-item">
                         <div class="info-label">Notes</div>
-                        <div class="info-value">{{ selectedVehicle.safetyInspectionNotes }}</div>
+                        <div class="info-value">{{ selectedVehicle.remark }}</div>
                       </div>
                     </div>
                   </v-card-text>
@@ -1016,11 +1031,11 @@
                       </div>
                       <div class="info-item">
                         <div class="info-label">Issue Date</div>
-                        <div class="info-value">{{ selectedVehicle?.roadFundIssueDate ? formatDate(selectedVehicle.roadFundIssueDate) : 'Not specified' }}</div>
+                        <div class="info-value">{{ selectedVehicle?.startDate ? formatDate(selectedVehicle.startDate) : 'Not specified' }}</div>
                       </div>
                       <div class="info-item">
                         <div class="info-label">Expiry Date</div>
-                        <div class="info-value">{{ selectedVehicle?.roadFundExpiryDate ? formatDate(selectedVehicle.roadFundExpiryDate) : 'Not specified' }}</div>
+                        <div class="info-value">{{ selectedVehicle?.endDate ? formatDate(selectedVehicle.endDate) : 'Not specified' }}</div>
                       </div>
                       <div class="info-item">
                         <div class="info-label">Amount</div>
@@ -1028,11 +1043,11 @@
                       </div>
                       <div class="info-item">
                         <div class="info-label">Issuing Office</div>
-                        <div class="info-value">{{ selectedVehicle?.roadFundIssuingOffice || 'Not specified' }}</div>
+                        <div class="info-value">{{ selectedVehicle?.issuingOffice || 'Not specified' }}</div>
                       </div>
-                      <div v-if="selectedVehicle?.roadFundNotes" class="info-item">
+                      <div v-if="selectedVehicle?.remark" class="info-item">
                         <div class="info-label">Notes</div>
-                        <div class="info-value">{{ selectedVehicle.roadFundNotes }}</div>
+                        <div class="info-value">{{ selectedVehicle.remark }}</div>
                       </div>
                     </div>
                   </v-card-text>
@@ -1327,6 +1342,7 @@ const formValid = ref(false);
 const activeTab = ref('overview'); // Add this for the new tabbed interface
 // const vehicles = ref([]);
 const vehicleForm = ref({
+  detail: {
   plateNo: "",
   vendorId: null as any,
   modelId: null as any,
@@ -1337,38 +1353,81 @@ const vehicleForm = ref({
   serviceInterval: 0,
   type: 1,
   status: 1,
+  },
   // Insurance entries array
-  insuranceEntries: [] as any[],
+  // insurance: [] as any[],
   // Safety inspection fields
   // safetyInspectionStatus: null as any,
-  safetyInspectionNumber: "",
-  safetyInspectionDate: "",
-  safetyInspectionExpiry: "",
-  safetyInspectionCenter: "",
-  safetyInspectionCost: "",
-  safetyInspectionNotes: "",
+  // certeficateNumber: "",
+  // startDate: "",
+  // endDate: "",
+  // inspectionCenter: "",
+  // inspectionCost: "",
+  // remark: "",
   // Road fund fields
   // roadFundStatus: null as any,
-  roadFundNumber: "",
-  roadFundIssueDate: "",
-  roadFundExpiryDate: "",
-  roadFundAmount: "",
-  roadFundIssuingOffice: "",
-  roadFundNotes: ""
+  // roadFundNumber: "",
+  // startDate: "",
+  // endDate: "",
+  // roadFundAmount: "",
+  // issuingOffice: "",
+  // remark: null,
+
+
+  // insurance: 
+  //   {
+  //     type: null as any,
+  //     provider: "",
+  //     policyNumber: "",
+  //     annualPremium: "",
+  //     coverageAmount: "",
+  //     startDate: "",
+  //     endDate: "",
+  //     insuranceAgent: "",
+  //     agentPhone: "",
+  //     remark: null
+  //   }
+  // ,  
+  safety: 
+    {
+      type: 3,
+      certeficateNumber: "",
+      startDate: "",
+      endDate: "",
+      inspectionCenter: "",
+      inspectionCost: "",
+      remark: null,
+    
+    }
+  ,
+  road: 
+    {
+      type: 4,
+      roadFundNumber: "",
+      startDate: "",
+      endDate: "",
+      roadFundAmount: "",
+      issuingOffice: "",
+      remark: null,
+     
+    
+    }
+  
 });
 
 // Current insurance entry for the form
 const currentInsuranceEntry = ref({
-  insuranceType: null as any,
-  insuranceProvider: "",
-  insurancePolicyNumber: "",
-  insurancePremium: "",
-  insuranceCoverage: "",
-  insuranceStartDate: "",
-  insuranceEndDate: "",
-  insuranceAgent: "",
-  insurancePhone: "",
-  insuranceNotes: ""
+      // type: null as any,
+
+      provider: "",
+      policyNumber: "",
+      annualPremium: "",
+      coverageAmount: "",
+      startDate: "",
+      endDate: "",
+      insuranceAgent: "",
+      agentPhone: "",
+      remark: null
 });
 const showSuccessSnackbar = ref(false)
 const showErrorSnackbar = ref(false)
@@ -1443,27 +1502,76 @@ const showSuccess = async (message: string) => {
     showErrorMessage(message)
   }
 }
+// const saveVehicle = async () => {
+//   try {  
+//     if (editingVehicle.value) {
+//       // Update existing vehicle
+//       await updateVehicle(editingVehicle.value.id, vehicleForm.value)
+//       showSuccessMessage('Vehicle updated successfully')
+//     } else {
+//       // Create new vehicle with default status (Active = 1)
+//       const newVehicleData = {
+//         ...vehicleForm.value,
+//         status: 1 // Default to Active status for new vehicles
+//       }
+//       await createVehicle(newVehicleData)
+//       showSuccessMessage('Vehicle created successfully')
+//     }
+//     showAddDialog.value = false;
+//     resetVehicleForm();
+//   } catch (error) {
+//     showErrorMessage(editingVehicle.value ? 'Failed to update vehicle' : 'Failed to create vehicle')
+//   } finally {
+//     saving.value = false;
+//   }
+// };
 const saveVehicle = async () => {
-  try {  
+  saving.value = true;
+  try {
     if (editingVehicle.value) {
-      // Update existing vehicle
-      await updateVehicle(editingVehicle.value.id, vehicleForm.value)
-      showSuccessMessage('Vehicle updated successfully')
+      // Update vehicle
+      await updateVehicle(editingVehicle.value.id, vehicleForm.value);
+      showSuccessMessage("Vehicle updated successfully");
     } else {
-      // Create new vehicle with default status (Active = 1)
-      const newVehicleData = {
+      // Create new vehicle
+      await createVehicle({
         ...vehicleForm.value,
-        status: 1 // Default to Active status for new vehicles
-      }
-      await createVehicle(newVehicleData)
-      showSuccessMessage('Vehicle created successfully')
+        status: 1, // Default Active
+      });
+      showSuccessMessage("Vehicle created successfully");
     }
+    
     showAddDialog.value = false;
     resetVehicleForm();
-  } catch (error) {
-    showErrorMessage(editingVehicle.value ? 'Failed to update vehicle' : 'Failed to create vehicle')
+  } catch (error: any) {
+    // Directly access the error data from Nuxt $fetch
+    const backendMessage = error.data?.error || 
+                          error.data?.message || 
+                          error.message || 
+                          (editingVehicle.value 
+                            ? "Failed to update vehicle" 
+                            : "Failed to create vehicle");
+    
+    showErrorMessage(backendMessage);
   } finally {
     saving.value = false;
+  }
+};
+// New helper function to handle responses
+const handleResponse = (res: any, action: "create" | "update") => {
+  if (res.data?.status === "OK") {
+    showSuccessMessage(`Vehicle ${action === "create" ? "created" : "updated"} successfully`);
+  } else {
+    // Handle business logic errors (status: "ERROR")
+    const errorMessage = res.data?.error || 
+                        res.data?.message || 
+                        `Failed to ${action} vehicle`;
+    showErrorMessage(errorMessage);
+    
+    // Prevent dialog close on error
+    if (action === "create") {
+      showAddDialog.value = true;
+    }
   }
 };
 
@@ -1508,12 +1616,12 @@ const getRoadFundStatusColor = (status: number) => {
 }
 
 // Insurance workflow functions
-const addInsuranceEntry = () => {
-  if (!currentInsuranceEntry.value.insuranceType) return
+const addInsuranceEntryy = () => {
+  if (!currentInsuranceEntry.value.type) return
   
   // Check if this insurance type is already added
-  const existingEntry = vehicleForm.value.insuranceEntries.find(
-    entry => entry.insuranceType === currentInsuranceEntry.value.insuranceType
+  const existingEntry = vehicleForm.value.insurance.find(
+    entry => entry.insurance.type === currentInsuranceEntry.value.insurance.type
   )
   
   if (existingEntry) {
@@ -1522,7 +1630,7 @@ const addInsuranceEntry = () => {
   }
   
   // Add the entry to the list
-  vehicleForm.value.insuranceEntries.push({
+  vehicleForm.value.insurance.push({
     ...currentInsuranceEntry.value,
     id: Date.now() // Temporary ID for tracking
   })
@@ -1530,23 +1638,54 @@ const addInsuranceEntry = () => {
   // Clear the form
   clearInsuranceEntry()
 }
+const addInsuranceEntry = () => {
+  if (!currentInsuranceEntry.value.type) return;
+  
+  // Check if this insurance type is already added
+  const existingEntry = vehicleForm.value.insurance.find(
+    entry => entry.type === currentInsuranceEntry.value.type
+  );
+  
+  if (existingEntry) {
+    showErrorMessage('This insurance type has already been added. Please select a different type.');
+    return;
+  }
+  
+  // Add the entry to the list
+  vehicleForm.value.insurance.push({ ...currentInsuranceEntry.value });
+  
+  // Clear the form
+  clearInsuranceEntry();
+};
 
 const removeInsuranceEntry = (index: number) => {
-  vehicleForm.value.insuranceEntries.splice(index, 1)
+  vehicleForm.value.insurance.splice(index, 1)
 }
 
 const clearInsuranceEntry = () => {
+  // currentInsuranceEntry.value = {
+  //   type: null as any,
+  //   provider: "",
+  //   policyNumber: "",
+  //  annualPremium: "",
+  //  coverageAmount: "",
+  //   startDate: "",
+  //   endDate: "",
+  //   insuranceAgent: "",
+  //   agentPhone: "",
+  //   remark: null
+  // }
   currentInsuranceEntry.value = {
-    insuranceType: null as any,
-    insuranceProvider: "",
-    insurancePolicyNumber: "",
-    insurancePremium: "",
-    insuranceCoverage: "",
-    insuranceStartDate: "",
-    insuranceEndDate: "",
+    type: null as any,
+    provider: "",
+    policyNumber: "",
+   annualPremium: "",
+   coverageAmount: "",
+    startDate: "",
+    endDate: "",
     insuranceAgent: "",
-    insurancePhone: "",
-    insuranceNotes: ""
+    agentPhone: "",
+    remark: null
   }
 }
 
@@ -1565,22 +1704,23 @@ const getInsuranceTypeColor = (type: number) => {
 
 // Computed property to check if required insurance types are present
 const hasRequiredInsurance = computed(() => {
-  const hasComprehensive = vehicleForm.value.insuranceEntries.some(
-    entry => entry.insuranceType === 1 // Comprehensive Insurance
+  const hasComprehensive = vehicleForm.value.insurance.some(
+    entry => entry.type === 1 // Comprehensive Insurance
   )
-  const hasThirdParty = vehicleForm.value.insuranceEntries.some(
-    entry => entry.insuranceType === 2 // Third Party Liability
+  const hasThirdParty = vehicleForm.value.insurance.some(
+    entry => entry.type === 2 // Third Party Liability
   )
-  const hasSaftyInspection = vehicleForm.value.insuranceEntries.some(
-    entry => entry.insuranceType === 3 // Safty Inspection
+  const hasSaftyInspection = vehicleForm.value.insurance.some(
+    entry => entry.type === 3 // Safty Inspection
   )
-   const hasRoadFund = vehicleForm.value.insuranceEntries.some(
-    entry => entry.insuranceType === 4 // TRoad Fund
+   const hasRoadFund = vehicleForm.value.insurance.some(
+    entry => entry.type === 4 // TRoad Fund
   )
   return hasComprehensive && hasThirdParty && hasSaftyInspection && hasRoadFund
 })
 const resetVehicleForm = () => {
   vehicleForm.value = {
+    detail: {
     plateNo: "",
     vendorId: null as any,
     modelId: null as any,
@@ -1591,24 +1731,67 @@ const resetVehicleForm = () => {
     serviceInterval: 0,
     type: 1,
     status: 1,
+    },
+    insurance: [], // Reset to empty array
+
+
+  //   insurance: 
+  //   {
+  //     type: null as any,
+  //     provider: "",
+  //     policyNumber: "",
+  //     annualPremium: "",
+  //     coverageAmount: "",
+  //     startDate: "",
+  //     endDate: "",
+  //     insuranceAgent: "",
+  //     agentPhone: "",
+  //     remark: null
+  //   }
+  // ,
+  safety: 
+    {
+      type: 3,
+      certeficateNumber: "",
+      startDate: "",
+      endDate: "",
+      inspectionCenter: "",
+      inspectionCost: "",
+      remark: null,
+    
+    } 
+  ,
+  road: 
+    {
+      type: 4,
+      roadFundNumber: "",
+      startDate: "",
+      endDate: "",
+      roadFundAmount: "",
+      issuingOffice: "",
+      remark: null,
+     
+    
+    }
+  
     // Insurance entries array
-    insuranceEntries: [] as any[],
+    // insuranceEntries: [] as any[],
     // Safety inspection fields
-    safetyInspectionStatus: null as any,
-    safetyInspectionNumber: "",
-    safetyInspectionDate: "",
-    safetyInspectionExpiry: "",
-    safetyInspectionCenter: "",
-    safetyInspectionCost: "",
-    safetyInspectionNotes: "",
-    // Road fund fields
-    roadFundStatus: null as any,
-    roadFundNumber: "",
-    roadFundIssueDate: "",
-    roadFundExpiryDate: "",
-    roadFundAmount: "",
-    roadFundIssuingOffice: "",
-    roadFundNotes: ""
+    // safetyInspectionStatus: null as any,
+    // certeficateNumber: "",
+    // startDate: "",
+    // endDate: "",
+    // inspectionCenter: "",
+    // inspectionCost: "",
+    // remark: "",
+    // // Road fund fields
+    // roadFundStatus: null as any,
+    // roadFundNumber: "",
+    // startDate: "",
+    // endDate: "",
+    // roadFundAmount: "",
+    // issuingOffice: "",
+    // remark: ""
   };
   clearInsuranceEntry();
   editingVehicle.value = null;
