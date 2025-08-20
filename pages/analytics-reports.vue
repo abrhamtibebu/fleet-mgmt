@@ -10,7 +10,30 @@
           </h1>
           <p class="page-subtitle">Comprehensive fleet performance analysis and operational insights</p>
         </div>
-        
+        <div>
+          <v-row>
+             <v-col cols="12" md="12" class="d-flex justify-end" >
+              <div class="  auto ">
+                <!-- <v-select
+                  v-model="fuelTimeframe"
+                  :items="['Last 6 Months', 'Last Year', 'Last 2 Years']"
+                  density="compact"
+                  variant="outlined"
+                  hide-details
+                  class="timeframe-select"
+                /> -->
+                 <v-select
+                  v-model="fuelTimeframe"
+                  :items="['Last 6 Months', 'Last Year', 'Last 2 Years']"
+                  density="compact"
+                  variant="outlined"
+                  hide-details
+                  class="timeframe-select"
+                />
+              </div>
+              </v-col>
+          </v-row>
+        </div>
         <!-- Advanced Filter Panel -->
   
       </div>
@@ -92,7 +115,7 @@
             <v-icon class="me-2" color="warning">mdi-gas-station</v-icon>
             Fuel Analytics
           </h2>
-          <div class="section-actions">
+          <div class="section-actions" v-if="false">
             <v-btn
               variant="text"
               size="small"
@@ -117,14 +140,14 @@
             <div class="chart-card">
               <div class="chart-header">
                 <h3>Fuel Consumption Trends</h3>
-                <v-select
+                <!-- <v-select
                   v-model="fuelTimeframe"
                   :items="['Last 6 Months', 'Last Year', 'Last 2 Years']"
                   density="compact"
                   variant="outlined"
                   hide-details
                   class="timeframe-select"
-                />
+                /> -->
               </div>
               <div class="chart-container">
                 <div ref="fuelConsumptionChart" class="chart-area"></div>
@@ -151,20 +174,20 @@
             <v-icon class="me-2" color="info">mdi-wrench</v-icon>
             Maintenance Analytics
           </h2>
-          <div class="section-actions">
+          <div class="section-actions" v-if="false">
+          @click="refreshMaintenanceData"
             <v-btn
               variant="text"
               size="small"
               prepend-icon="mdi-refresh"
-              @click="refreshMaintenanceData"
             >
               Refresh
             </v-btn>
+            @click="exportMaintenanceReport"
             <v-btn
               variant="text"
               size="small"
               prepend-icon="mdi-download"
-              @click="exportMaintenanceReport"
             >
               Export
             </v-btn>
@@ -201,70 +224,55 @@
                 <h3>Maintenance Schedule & Status</h3>
               </div>
               <div class="chart-container">
-                <v-data-table
-                  :headers="maintenanceHeaders"
-                  :items="maintenanceData"
-                  class="maintenance-table"
-                  density="comfortable"
-                  hover
-                >
-                  <template v-slot:item.vehicle="{ item }">
-                    <div class="vehicle-cell">
-                      <v-avatar size="32" color="primary" class="me-2">
-                        <v-icon size="16" color="white">mdi-truck</v-icon>
-                      </v-avatar>
-                      <div>
-                        <div class="vehicle-name">{{ item.vehicle }}</div>
-                        <div class="vehicle-plate">{{ item.plateNumber }}</div>
-                      </div>
-                    </div>
-                  </template>
-                  
-                  <template v-slot:item.lastService="{ item }">
-                    <span class="service-date">{{ formatDate(item.lastService) }}</span>
-                  </template>
-                  
-                  <template v-slot:item.nextService="{ item }">
-                    <span class="service-date">{{ formatDate(item.nextService) }}</span>
-                  </template>
-                  
-                  <template v-slot:item.status="{ item }">
-                    <v-chip
-                      :color="getMaintenanceStatusColor(item.status)"
-                      size="small"
-                      variant="tonal"
-                    >
-                      {{ item.status }}
-                    </v-chip>
-                  </template>
-                  
-                  <template v-slot:item.cost="{ item }">
-                    <span class="cost-value">{{ formatCurrency(item.cost) }}</span>
-                  </template>
-                  
-                  <template v-slot:item.mileage="{ item }">
-                    <div class="mileage-info">
-                      <span class="current-mileage">{{ item.currentMileage.toLocaleString() }} km</span>
-                      <v-progress-linear
-                        :model-value="(item.currentMileage / item.serviceInterval) * 100"
-                        :color="getMileageProgressColor(item.currentMileage, item.serviceInterval)"
-                        height="4"
-                        class="mileage-progress"
-                      />
-                    </div>
-                  </template>
-                  
-                  <template v-slot:item.actions="{ item }">
-                    <v-btn
-                      variant="text"
-                      size="small"
-                      prepend-icon="mdi-eye"
-                      @click="viewMaintenanceDetails(item)"
-                    >
-                      View
-                    </v-btn>
-                  </template>
-                </v-data-table>
+ <v-data-table
+  :headers="maintenanceHeaders"
+  :items="maintenanceData"
+  density="comfortable"
+  hover
+>
+  <!-- Vehicle column shows plate number -->
+  <template #item.plateNo="{ item }">
+    <span>{{ item.plateNo }}</span>
+  </template>
+ <template #item.nextService="{ item }">
+  <span>{{ item.nextService }} km</span>
+</template>
+
+<template #item.remainingKm="{ item }">
+  <span>{{ item.remainingKm }} km</span>
+</template>
+
+  <template #item.lastService="{ item }">
+    <span>{{ item.lastService }}</span>
+  </template>
+
+  <template #item.status="{ item }">
+    <v-chip size="small" variant="tonal"
+      :color="item.status === 'Overdue' ? 'red' : item.status === 'Due Soon' ? 'orange' : 'green'">
+      {{ item.status }}
+    </v-chip>
+  </template>
+
+  <template #item.totalCost="{ item }">
+    <span>{{ new Intl.NumberFormat().format(item.totalCost) }}</span>
+  </template>
+
+  <template #item.mileage="{ item }">
+    <div>
+      <div>{{ Number(item.mileage || 0).toLocaleString() }} km</div>
+      <v-progress-linear
+        :model-value="item.serviceInterval ? (item.currentMileage / item.serviceInterval) * 100 : 0"
+        :color="item.serviceInterval && (item.currentMileage / item.serviceInterval) * 100 >= 100 ? 'red'
+                : item.serviceInterval && (item.currentMileage / item.serviceInterval) * 100 >= 80 ? 'orange'
+                : 'green'"
+        height="4"
+        class="mt-1"
+      />
+    </div>
+  </template>
+</v-data-table>
+
+
               </div>
             </div>
           </v-col>
@@ -278,7 +286,7 @@
             <v-icon class="me-2" color="success">mdi-calculator</v-icon>
             Cost Analysis
           </h2>
-          <div class="section-actions">
+          <div class="section-actions" v-if="false">
             <v-btn
               variant="text"
               size="small"
@@ -328,71 +336,73 @@
                 <h3>Detailed Cost Breakdown</h3>
               </div>
               <div class="chart-container">
-                <v-data-table
-                  :headers="costHeaders"
-                  :items="costData"
-                  class="cost-table"
-                  density="comfortable"
-                  hover
-                >
-                  <template v-slot:item.vehicle="{ item }">
-                    <div class="vehicle-cell">
-                      <v-avatar size="32" color="primary" class="me-2">
-                        <v-icon size="16" color="white">mdi-truck</v-icon>
-                      </v-avatar>
-                      <div>
-                        <div class="vehicle-name">{{ item.vehicle }}</div>
-                        <div class="vehicle-plate">{{ item.plateNumber }}</div>
-                      </div>
-                    </div>
-                  </template>
-                  
-                  <template v-slot:item.fuelCost="{ item }">
-                    <span class="cost-value">{{ formatCurrency(item.fuelCost) }}</span>
-                  </template>
-                  
-                  <template v-slot:item.maintenanceCost="{ item }">
-                    <span class="cost-value">{{ formatCurrency(item.maintenanceCost) }}</span>
-                  </template>
-                  
-                  <template v-slot:item.insuranceCost="{ item }">
-                    <span class="cost-value">{{ formatCurrency(item.insuranceCost) }}</span>
-                  </template>
-                  
-                  <template v-slot:item.totalCost="{ item }">
-                    <span class="total-cost-value">{{ formatCurrency(item.totalCost) }}</span>
-                  </template>
-                  
-                  <template v-slot:item.costPerKm="{ item }">
-                    <div class="cost-per-km">
-                      <span class="cost-per-km-value">{{ item.costPerKm.toFixed(2) }}</span>
-                      <span class="cost-per-km-unit">ETB/km</span>
-                    </div>
-                  </template>
-                  
-                  <template v-slot:item.efficiency="{ item }">
-                    <div class="efficiency-cell">
-                      <span class="efficiency-value">{{ item.efficiency }}</span>
-                      <v-progress-linear
-                        :model-value="(item.efficiency / 20) * 100"
-                        :color="getEfficiencyColor(item.efficiency)"
-                        height="4"
-                        class="efficiency-bar"
-                      />
-                    </div>
-                  </template>
-                  
-                  <template v-slot:item.actions="{ item }">
-                    <v-btn
-                      variant="text"
-                      size="small"
-                      prepend-icon="mdi-chart-line"
-                      @click="viewCostDetails(item)"
-                    >
-                      Details
-                    </v-btn>
-                  </template>
-                </v-data-table>
+               <v-data-table
+  :headers="costHeaders"
+  :items="costData"
+  class="cost-table"
+  density="comfortable"
+  hover
+>
+  <!-- Vehicle column -->
+  <!-- <template #item.vehicle="{ item }">
+    <div class="vehicle-cell">
+      <v-avatar size="32" color="primary" class="me-2">
+        <v-icon size="16" color="white">mdi-truck</v-icon>
+      </v-avatar>
+       <div>
+        <div class="vehicle-name">{{ item.vehicle }}</div>
+        <div class="vehicle-plate">{{ item.plateNumber }}</div>
+      </div> 
+    </div>
+  </template> -->
+
+  <!-- <template #item.fuel="{ item }">
+    <span class="cost-value">{{ formatCurrency(item.fuel) }}</span>
+  </template> -->
+
+  <!-- <template #item.maintenance="{ item }">
+    <span class="cost-value">{{ formatCurrency(item.maintenance) }}</span>
+  </template> -->
+
+  <!-- <template #item.insuranceCost="{ item }">
+    <span class="cost-value">{{ formatCurrency(item.insuranceCost) }}</span>
+  </template> -->
+<!-- 
+  <template #item.totalCost="{ item }">
+    <span class="total-cost-value">{{ formatCurrency(item.totalCost) }}</span>
+  </template> -->
+
+  <template #item.costPerKm="{ item }">
+    <div class="cost-per-km">
+      <span class="cost-per-km-value">{{ item.costPerKm.toFixed(2) }}</span>
+      <span class="cost-per-km-unit">ETB/km</span>
+    </div>
+  </template>
+
+  <template #item.efficiency="{ item }">
+    <div class="efficiency-cell">
+      <span class="efficiency-value">{{ item.efficiency.toFixed(2) }}</span>
+      <v-progress-linear
+        :model-value="(item.efficiency / 20) * 100"
+        :color="getEfficiencyColor(item.efficiency)"
+        height="4"
+        class="efficiency-bar"
+      />
+    </div>
+  </template>
+
+  <template #item.actions="{ item }">
+    <v-btn
+      variant="text"
+      size="small"
+      prepend-icon="mdi-chart-line"
+      @click="viewCostDetails(item)"
+    >
+      Details
+    </v-btn>
+  </template>
+</v-data-table>
+
               </div>
             </div>
           </v-col>
@@ -493,6 +503,8 @@ import * as echarts from 'echarts'
 const { vehicleList, getVehicles, activeVehicles } = useVehicles()
 const { fuelRecords, fuelCards, getFuelRecords, getFuelCards } = useFuel()
 const { anomalies, getAnomalies } = useAnomalies()
+const { dashboardReport, getAnalyticsReport, error } = useReport()
+
 
 // Chart refs
 const fuelConsumptionChart = ref(null)
@@ -524,6 +536,49 @@ const filters = ref({
   minCost: null,
   maxCost: null
 })
+
+// Date range calculation
+const calculateDateRange = () => {
+  const endDate = new Date()
+  const startDate = new Date()
+  
+  switch (fuelTimeframe.value) {
+    case 'Last 6 Months':
+      startDate.setMonth(endDate.getMonth() - 6)
+      break
+    case 'Last Year':
+      startDate.setFullYear(endDate.getFullYear() - 1)
+      break
+    case 'Last 2 Years':
+      startDate.setFullYear(endDate.getFullYear() - 2)
+      break
+    default:
+      startDate.setMonth(endDate.getMonth() - 6)
+  }
+  
+  return {
+    start: startDate.toISOString().split('T')[0],
+    end: endDate.toISOString().split('T')[0]
+  }
+}
+
+// Fetch analytics data based on timeframe
+const fetchAnalyticsData = async () => {
+  loading.value = true
+  try {
+    const dateRange = calculateDateRange()
+    await getAnalyticsReport(dateRange.start, dateRange.end)
+    
+    // Reinitialize charts with new data
+    setTimeout(() => {
+      initializeCharts()
+    }, 100)
+  } catch (error) {
+    showErrorMessage('Failed to fetch analytics data: ' + error.message)
+  } finally {
+    loading.value = false
+  }
+}
 
 // Export state
 const exporting = ref({
@@ -590,195 +645,110 @@ const complianceHeaders = [
 
 // Maintenance headers
 const maintenanceHeaders = [
-  { title: 'Vehicle', key: 'vehicle', sortable: true },
+  { title: 'Vehicle', key: 'plateNo', sortable: true },
   { title: 'Last Service', key: 'lastService', sortable: true },
   { title: 'Next Service', key: 'nextService', sortable: true },
   { title: 'Status', key: 'status', sortable: true },
-  { title: 'Cost', key: 'cost', sortable: true },
-  { title: 'Mileage', key: 'mileage', sortable: true },
-  { title: 'Actions', key: 'actions', sortable: false }
+  { title: 'Cost', key: 'totalCost', sortable: true },
+  { title: 'Mileage', key: 'currentMileage', sortable: true },
+  // { title: 'Actions', key: 'actions', sortable: false }
 ]
 
 // Cost headers
 const costHeaders = [
-  { title: 'Vehicle', key: 'vehicle', sortable: true },
-  { title: 'Fuel Cost', key: 'fuelCost', sortable: true },
-  { title: 'Maintenance Cost', key: 'maintenanceCost', sortable: true },
-  { title: 'Insurance Cost', key: 'insuranceCost', sortable: true },
+  { title: 'Vehicle', key: 'plateNo', sortable: true },
+  { title: 'Fuel Cost', key: 'fuel', sortable: true },
+  { title: 'Maintenance Cost', key: 'maintenance', sortable: true },
+  { title: 'Insurance Cost', key: 'insurance', sortable: true },
   { title: 'Total Cost', key: 'totalCost', sortable: true },
   { title: 'Cost/km', key: 'costPerKm', sortable: true },
   { title: 'Efficiency (km/l)', key: 'efficiency', sortable: true },
-  { title: 'Actions', key: 'actions', sortable: false }
+  // { title: 'Actions', key: 'actions', sortable: false }
 ]
 
-// Compliance data
-const complianceData = ref([
-  {
-    id: 1,
-    vehicle: 'John Smith',
-    plateNumber: 'ABC-123',
-    type: 'Insurance',
-    dueDate: '2024-02-15',
-    status: 'Due Soon',
-    cost: 45000
-  },
-  {
-    id: 2,
-    vehicle: 'Mike Johnson',
-    plateNumber: 'DEF-456',
-    type: 'Registration',
-    dueDate: '2024-01-30',
-    status: 'Overdue',
-    cost: 15000
-  },
-  {
-    id: 3,
-    vehicle: 'Sarah Wilson',
-    plateNumber: 'GHI-789',
-    type: 'Insurance',
-    dueDate: '2024-03-01',
-    status: 'Active',
-    cost: 52000
-  },
-  {
-    id: 4,
-    vehicle: 'David Brown',
-    plateNumber: 'JKL-012',
-    type: 'Safety Inspection',
-    dueDate: '2024-02-10',
-    status: 'Due Soon',
-    cost: 8000
-  },
-  {
-    id: 5,
-    vehicle: 'Lisa Davis',
-    plateNumber: 'MNO-345',
-    type: 'Registration',
-    dueDate: '2024-01-25',
-    status: 'Overdue',
-    cost: 18000
-  }
-])
+// Computed properties using API data
+const totalFuelCost = computed(() => {
+  return dashboardReport.value?.costData?.fuel || 0
 
-// Maintenance data
-const maintenanceData = ref([
-  {
-    id: 1,
-    vehicle: 'John Smith',
-    plateNumber: 'ABC-123',
-    lastService: '2024-01-15',
-    nextService: '2024-02-15',
-    status: 'Due Soon',
-    cost: 25000,
-    currentMileage: 87500,
-    serviceInterval: 90000
-  },
-  {
-    id: 2,
-    vehicle: 'Mike Johnson',
-    plateNumber: 'DEF-456',
-    lastService: '2024-01-10',
-    nextService: '2024-01-30',
-    status: 'Overdue',
-    cost: 35000,
-    currentMileage: 152000,
-    serviceInterval: 150000
-  },
-  {
-    id: 3,
-    vehicle: 'Sarah Wilson',
-    plateNumber: 'GHI-789',
-    lastService: '2024-01-20',
-    nextService: '2024-03-01',
-    status: 'Active',
-    cost: 18000,
-    currentMileage: 45200,
-    serviceInterval: 50000
-  },
-  {
-    id: 4,
-    vehicle: 'David Brown',
-    plateNumber: 'JKL-012',
-    lastService: '2024-01-05',
-    nextService: '2024-02-10',
-    status: 'Due Soon',
-    cost: 22000,
-    currentMileage: 78000,
-    serviceInterval: 80000
-  },
-  {
-    id: 5,
-    vehicle: 'Lisa Davis',
-    plateNumber: 'MNO-345',
-    lastService: '2024-01-12',
-    nextService: '2024-01-25',
-    status: 'Overdue',
-    cost: 28000,
-    currentMileage: 125000,
-    serviceInterval: 120000
-  }
-])
+})
 
-// Cost data
-const costData = ref([
-  {
-    id: 1,
-    vehicle: 'John Smith',
-    plateNumber: 'ABC-123',
-    fuelCost: 45000,
-    maintenanceCost: 25000,
-    insuranceCost: 15000,
-    totalCost: 85000,
-    costPerKm: 2.8,
-    efficiency: 14.2
-  },
-  {
-    id: 2,
-    vehicle: 'Mike Johnson',
-    plateNumber: 'DEF-456',
-    fuelCost: 52000,
-    maintenanceCost: 35000,
-    insuranceCost: 18000,
-    totalCost: 105000,
-    costPerKm: 3.2,
-    efficiency: 12.8
-  },
-  {
-    id: 3,
-    vehicle: 'Sarah Wilson',
-    plateNumber: 'GHI-789',
-    fuelCost: 38000,
-    maintenanceCost: 18000,
-    insuranceCost: 12000,
-    totalCost: 68000,
-    costPerKm: 2.5,
-    efficiency: 13.5
-  },
-  {
-    id: 4,
-    vehicle: 'David Brown',
-    plateNumber: 'JKL-012',
-    fuelCost: 42000,
-    maintenanceCost: 22000,
-    insuranceCost: 14000,
-    totalCost: 78000,
-    costPerKm: 2.9,
-    efficiency: 11.9
-  },
-  {
-    id: 5,
-    vehicle: 'Lisa Davis',
-    plateNumber: 'MNO-345',
-    fuelCost: 48000,
-    maintenanceCost: 28000,
-    insuranceCost: 16000,
-    totalCost: 92000,
-    costPerKm: 3.1,
-    efficiency: 12.3
-  }
-])
+const totalMaintenanceCost = computed(() => {
+  return dashboardReport.value?.costData?.maintenance || 0
+})
 
-// Computed properties
+const totalInsuranceCost = computed(() => {
+  return dashboardReport.value?.costData?.insurance || 0
+})
+
+const totalOperatingCost = computed(() => {
+  return dashboardReport.value?.costData?.total || 
+         (totalFuelCost.value + totalMaintenanceCost.value + totalInsuranceCost.value)
+})
+
+
+// dashboardReport.value?.result?.maintSchedule is assumed to be available
+const maintenanceData = computed(() => {
+  const sched = dashboardReport.value?.maintSchedule
+  if (!Array.isArray(sched)) return []
+
+  return sched.map(v => {
+    let nextService = 0
+
+    if (v.lastMaintReading != null && v.serviceInterval != null) {
+      nextService = v.lastMaintReading + v.serviceInterval
+    } else if (v.lastMaintReading != null) {
+      nextService = v.lastMaintReading
+    } else if (v.serviceInterval != null) {
+      nextService = v.serviceInterval
+    }
+
+    // Remaining km until next service
+    let remainingKm = 0
+    if (nextService && v.currentMileage != null) {
+      remainingKm = nextService - v.currentMileage
+    }
+
+    let statusText = 'Active'
+    if (v.lastMaintReading != null && v.serviceInterval != null) {
+      const progress = ((v.currentMileage - v.lastMaintReading) / v.serviceInterval) * 100
+      if (progress >= 100) statusText = 'Overdue'
+      else if (progress >= 80) statusText = 'Due Soon'
+    } else if (v.status != null) {
+      statusText = v.status === 1 ? 'Active' : 'Inactive'
+    }
+
+    return {
+      plateNo: v.plateNo ?? '-',
+      lastService: v.lastService ?? 0,
+      nextService: nextService ?? 0,
+      remainingKm: remainingKm ?? 0,
+      status: statusText,
+      totalCost: v.totalCost ?? 0,
+      mileage: v.currentMileage ?? 0,
+      currentMileage: v.currentMileage ?? 0,
+      serviceInterval: v.serviceInterval ?? 0,
+      lastMaintReading: v.lastMaintReading ?? 0
+    }
+  })
+})
+
+const costData = computed(() => {
+  if (!dashboardReport.value) return []
+
+  const maint = dashboardReport.value.maintSchedule || []
+
+  return maint.map(v => ({
+    plateNo: v.plateNo || v.driver || '-',
+    fuel: v.fuel ?? 0,
+    maintenance: v.maintenance ?? 0,
+    insurance: v.insurance ?? 0,
+    totalCost: v.totalCost ?? 0,
+    costPerKm: v.vehicleEfficency?.cost_per_km ?? 0,
+    efficiency: v.vehicleEfficency?.km_per_liter ?? 0,
+  }))
+})
+
+
 const filteredVehicles = computed(() => {
   let filtered = vehicleList.value
 
@@ -801,35 +771,16 @@ const filteredVehicles = computed(() => {
   return filtered
 })
 
-const totalOperatingCost = computed(() => {
-  const fuelCost = fuelCards.value.reduce((sum, card) => sum + card.amountSpent, 0)
-  const maintenanceCost = 150000 // Mock data
-  return fuelCost + maintenanceCost
-})
-
 const maintenanceBacklogCount = computed(() => {
   return vehicleList.value.filter(v => v.currentMileage >= v.serviceInterval).length
 })
 
-// Enhanced computed properties for new stats
-const totalInsuranceCost = computed(() => {
-  return 850000 // Mock data - replace with actual insurance data
-})
-
 const overdueItemsCount = computed(() => {
-  return 23 // Mock data - count of overdue maintenance, insurance, registration, etc.
-})
-
-const totalFuelCost = computed(() => {
-  return fuelCards.value.reduce((sum, card) => sum + card.amountSpent, 0)
-})
-
-const totalMaintenanceCost = computed(() => {
-  return 150000 // Mock data - replace with actual maintenance data
+  return maintenanceData.value.filter(item => item.status === 'Overdue').length
 })
 
 const dueThisMonthCount = computed(() => {
-  return 8 // Mock data - items due this month
+  return maintenanceData.value.filter(item => item.status === 'Due Soon').length
 })
 
 const averageVehicleAge = computed(() => {
@@ -839,8 +790,9 @@ const averageVehicleAge = computed(() => {
 })
 
 const averageEfficiency = computed(() => {
-  return vehicleList.value.length > 0 ? 
-    (vehicleList.value.reduce((sum, v) => sum + (v.fuelEfficiency || 12), 0) / vehicleList.value.length).toFixed(1) : '12.0'
+  const efficiencies = costData.value.map(item => item.efficiency).filter(eff => eff > 0)
+  return efficiencies.length > 0 ? 
+    (efficiencies.reduce((sum, eff) => sum + eff, 0) / efficiencies.length).toFixed(1) : '0.0'
 })
 
 const criticalAlertsCount = computed(() => {
@@ -893,13 +845,15 @@ const getEfficiencyColor = (efficiency) => {
 }
 
 const calculateVehicleCost = (vehicle) => {
-  // Mock calculation
-  return Math.floor(Math.random() * 50000) + 10000
+  // Find matching vehicle in cost data
+  const vehicleCost = costData.value.find(item => item.plateNumber === vehicle.plateNo)
+  return vehicleCost ? vehicleCost.totalCost : 0
 }
 
 const calculateEfficiency = (vehicle) => {
-  // Mock calculation
-  return (Math.random() * 10 + 8).toFixed(1)
+  // Find matching vehicle in cost data
+  const vehicleCost = costData.value.find(item => item.plateNumber === vehicle.plateNo)
+  return vehicleCost ? vehicleCost.efficiency : 0
 }
 
 const getComplianceTypeColor = (type) => {
@@ -923,6 +877,7 @@ const getComplianceStatusColor = (status) => {
 }
 
 const formatDate = (dateString) => {
+  if (!dateString || dateString === 'N/A') return 'N/A'
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -941,6 +896,7 @@ const getMaintenanceStatusColor = (status) => {
 }
 
 const getMileageProgressColor = (currentMileage, serviceInterval) => {
+  if (!serviceInterval) return 'info'
   const percentage = (currentMileage / serviceInterval) * 100
   if (percentage >= 100) return 'error'
   if (percentage >= 80) return 'warning'
@@ -952,281 +908,193 @@ const initializeCharts = () => {
   // Fuel Consumption Chart
   if (fuelConsumptionChart.value) {
     const chart = echarts.init(fuelConsumptionChart.value)
-    chart.setOption({
-      tooltip: { 
-        trigger: 'axis',
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        borderColor: '#e2e8f0',
-        textStyle: { color: '#1e293b' }
-      },
-      legend: { 
-        data: ['Fuel Consumption (L)', 'Fuel Cost (ETB)'],
-        textStyle: { color: '#64748b' }
-      },
-      grid: {
-        left: '3%',
-        right: '4%',
-        bottom: '3%',
-        containLabel: true
-      },
-      xAxis: { 
-        type: 'category', 
-        data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-        axisLine: { lineStyle: { color: '#e2e8f0' } },
-        axisLabel: { color: '#64748b' }
-      },
-      yAxis: [
-        { 
-          type: 'value', 
-          name: 'Liters', 
-          position: 'left',
+    
+    // Check if we have valid fuel data from API
+    if (dashboardReport.value?.fuelTrend) {
+      const fuelData = dashboardReport.value.fuelTrend
+      const months = fuelData.map(item => item.month)
+      const liters = fuelData.map(item => item.liters)
+      const costs = fuelData.map(item => item.cost)
+            
+      chart.setOption({
+        tooltip: { 
+          trigger: 'axis',
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          borderColor: '#e2e8f0',
+          textStyle: { color: '#1e293b' }
+        },
+        legend: { 
+          data: ['Fuel Consumption (L)', 'Fuel Cost (ETB)'],
+          textStyle: { color: '#64748b' }
+        },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '3%',
+          containLabel: true
+        },
+        xAxis: { 
+          type: 'category', 
+          data: months, 
           axisLine: { lineStyle: { color: '#e2e8f0' } },
           axisLabel: { color: '#64748b' }
         },
-        { 
-          type: 'value', 
-          name: 'ETB', 
-          position: 'right',
-          axisLine: { lineStyle: { color: '#e2e8f0' } },
-          axisLabel: { color: '#64748b' }
-        }
-      ],
-      series: [
-        {
-          name: 'Fuel Consumption (L)',
-          type: 'line',
-          data: [1200, 1350, 1100, 1400, 1300, 1450],
-          color: '#f3d70e',
-          smooth: true,
-          lineStyle: { width: 3 },
-          areaStyle: {
-            color: {
-              type: 'linear',
-              x: 0, y: 0, x2: 0, y2: 1,
-              colorStops: [
-                { offset: 0, color: 'rgba(243, 215, 14, 0.3)' },
-                { offset: 1, color: 'rgba(243, 215, 14, 0.1)' }
-              ]
-            }
+        yAxis: [
+          { 
+            type: 'value', 
+            name: 'Liters', 
+            position: 'left',
+            axisLine: { lineStyle: { color: 'black' } },
+            axisLabel: { color: '#64748b' }
+          },
+          { 
+            type: 'value', 
+            name: 'ETB', 
+            position: 'right',
+            axisLine: { lineStyle: { color: '#e2e8f0' } },
+            axisLabel: { color: '#64748b' }
           }
-        },
-        {
-          name: 'Fuel Cost (ETB)',
-          type: 'line',
-          yAxisIndex: 1,
-          data: [24000, 27000, 22000, 28000, 26000, 29000],
-          color: '#fbb339',
-          smooth: true,
-          lineStyle: { width: 3 }
-        }
-      ]
-    })
+        ],
+        series: [
+          {
+            name: 'Fuel Consumption (L)',
+            type: 'line',
+            data: liters, 
+            color: '#f3d70e',
+            smooth: true,
+            lineStyle: { width: 3 },
+            areaStyle: {
+              color: {
+                type: 'linear',
+                x: 0, y: 0, x2: 0, y2: 1,
+                colorStops: [
+                  { offset: 0, color: 'rgba(243, 215, 14, 0.3)' },
+                  { offset: 1, color: 'rgba(243, 215, 14, 0.1)' }
+                ]
+              }
+            }
+          },
+          {
+            name: 'Fuel Cost (ETB)',
+            type: 'line',
+            yAxisIndex: 1,
+            data: costs, 
+            color: '#fbb339',
+            smooth: true,
+            lineStyle: { width: 3 }
+          }
+        ]
+      })
+    } else {
+      // Fallback to mock data if API data not available
+      console.log('Using mock data for chart')
+      chart.setOption({
+        // ... keep your mock data configuration as fallback
+      })
+    }
   }
 
-  // Initialize other charts similarly...
+  // Initialize other charts with API data
   initializeOtherCharts()
 }
 
 const initializeOtherCharts = () => {
-  // Fuel Efficiency Chart
-  if (fuelEfficiencyChart.value) {
-    const chart = echarts.init(fuelEfficiencyChart.value)
-    chart.setOption({
-      tooltip: { trigger: 'item' },
-      series: [{
-        name: 'Efficiency',
-        type: 'pie',
-        radius: ['40%', '70%'],
-        data: [
-          { value: 14.2, name: 'ABC-123' },
-          { value: 12.8, name: 'DEF-456' },
-          { value: 13.5, name: 'GHI-789' },
-          { value: 11.9, name: 'JKL-012' }
-        ],
-        itemStyle: {
-          color: function(params) {
-            const colors = ['#f3d70e', '#fbb339', '#f5e35e', '#040707']
-            return colors[params.dataIndex]
-          }
-        }
-      }]
-    })
-  }
-
   // Maintenance Cost Chart
   if (maintenanceCostChart.value) {
     const chart = echarts.init(maintenanceCostChart.value)
-    const maintenanceCosts = maintenanceData.value.map(item => item.cost)
-    const vehicleNames = maintenanceData.value.map(item => item.plateNumber)
     
-    chart.setOption({
-      tooltip: { 
-        trigger: 'axis',
-        formatter: function(params) {
-          return `${params[0].name}<br/>Maintenance Cost: ${formatCurrency(params[0].value)}`
-        }
-      },
-      xAxis: { 
-        type: 'category', 
-        data: vehicleNames,
-        axisLabel: { 
-          color: '#64748b',
-          fontSize: 10,
-          rotate: 45
-        }
-      },
-      yAxis: { 
-        type: 'value', 
-        name: 'ETB',
-        axisLabel: { color: '#64748b' }
-      },
-      series: [{
-        data: maintenanceCosts,
-        type: 'bar',
-        itemStyle: { 
-          color: function(params) {
-            const colors = ['#f3d70e', '#fbb339', '#10b981', '#3b82f6', '#8b5cf6']
-            return colors[params.dataIndex % colors.length]
-          },
-          borderRadius: [8, 8, 0, 0]
+    // Check if we have maintenance trend data from API
+    if (dashboardReport.value?.maintTrend) {
+      const maintData = dashboardReport.value.maintTrend
+      const vehicleNames = maintData.map(item => item.plateNo || 'Vehicle ' + item.vehicleId)
+      const costs = maintData.map(item => item.cost)
+      
+      chart.setOption({
+        tooltip: { 
+          trigger: 'axis',
+          formatter: function(params) {
+            return `${params[0].name}<br/>Maintenance Cost: ${formatCurrency(params[0].value)}`
+          }
         },
-        barWidth: 40
-      }]
-    })
-  }
-
-  // Maintenance Efficiency Metrics Chart
-  if (maintenanceEfficiencyChart.value) {
-    const chart = echarts.init(maintenanceEfficiencyChart.value)
-    
-    // Calculate efficiency metrics for each vehicle
-    const efficiencyData = maintenanceData.value.map(item => {
-      // Calculate service interval compliance (how close to scheduled interval)
-      const serviceIntervalCompliance = Math.max(0, 100 - Math.abs((item.currentMileage - item.serviceInterval) / item.serviceInterval * 100))
-      
-      // Calculate cost efficiency (lower cost per km is better)
-      const costPerKm = item.cost / (item.currentMileage / 1000) // Cost per 1000km
-      const costEfficiency = Math.max(0, 100 - (costPerKm / 50 * 100)) // Assuming 50 ETB per 1000km is baseline
-      
-      // Calculate status efficiency (on-time services get higher score)
-      let statusEfficiency = 100
-      if (item.status === 'Overdue') statusEfficiency = 30
-      else if (item.status === 'Due Soon') statusEfficiency = 70
-      
-      // Overall efficiency score (weighted average)
-      const overallEfficiency = (serviceIntervalCompliance * 0.4 + costEfficiency * 0.3 + statusEfficiency * 0.3)
-      
-      return {
-        name: item.plateNumber,
-        vehicle: item.vehicle,
-        serviceCompliance: serviceIntervalCompliance,
-        costEfficiency: costEfficiency,
-        statusEfficiency: statusEfficiency,
-        overallEfficiency: overallEfficiency,
-        currentMileage: item.currentMileage,
-        serviceInterval: item.serviceInterval,
-        cost: item.cost
-      }
-    })
-    
-    // Sort by overall efficiency (descending)
-    efficiencyData.sort((a, b) => b.overallEfficiency - a.overallEfficiency)
-    
-    chart.setOption({
-      tooltip: { 
-        trigger: 'axis',
-        formatter: function(params) {
-          const data = efficiencyData[params[0].dataIndex]
-          return `
-            <div style="padding: 8px;">
-              <strong>${data.vehicle}</strong><br/>
-              ${data.name}<br/>
-              <br/>
-              <strong>Efficiency Metrics:</strong><br/>
-              • Overall Efficiency: ${data.overallEfficiency.toFixed(1)}%<br/>
-              • Service Compliance: ${data.serviceCompliance.toFixed(1)}%<br/>
-              • Cost Efficiency: ${data.costEfficiency.toFixed(1)}%<br/>
-              • Status Efficiency: ${data.statusEfficiency.toFixed(1)}%<br/>
-              <br/>
-              <strong>Details:</strong><br/>
-              • Mileage: ${data.currentMileage.toLocaleString()} km<br/>
-              • Service Interval: ${data.serviceInterval.toLocaleString()} km<br/>
-              • Maintenance Cost: ${formatCurrency(data.cost)}
-            </div>
-          `
-        }
-      },
-      legend: {
-        data: ['Overall Efficiency', 'Service Compliance', 'Cost Efficiency', 'Status Efficiency'],
-        textStyle: { color: '#64748b' },
-        top: 10
-      },
-      xAxis: { 
-        type: 'category', 
-        data: efficiencyData.map(item => item.name),
-        axisLabel: { 
-          color: '#64748b',
-          fontSize: 10,
-          rotate: 45
-        }
-      },
-      yAxis: { 
-        type: 'value', 
-        name: 'Efficiency Score (%)',
-        min: 0,
-        max: 100,
-        axisLabel: { color: '#64748b' }
-      },
-      series: [
-        {
-          name: 'Overall Efficiency',
+        xAxis: { 
+          type: 'category', 
+          data: vehicleNames,
+          axisLabel: { 
+            color: '#64748b',
+            fontSize: 10,
+            rotate: 45
+          }
+        },
+        yAxis: { 
+          type: 'value', 
+          name: 'ETB',
+          axisLabel: { color: '#64748b' }
+        },
+        series: [{
+          data: costs,
           type: 'bar',
-          data: efficiencyData.map(item => ({
-            value: item.overallEfficiency,
-            itemStyle: {
-              color: item.overallEfficiency >= 80 ? '#10b981' : 
-                     item.overallEfficiency >= 60 ? '#f59e0b' : '#ef4444'
-            }
-          })),
-          itemStyle: { borderRadius: [8, 8, 0, 0] },
-          barWidth: 30
+          itemStyle: { 
+            color: function(params) {
+              const colors = ['#f3d70e', '#fbb339', '#10b981', '#3b82f6', '#8b5cf6']
+              return colors[params.dataIndex % colors.length]
+            },
+            borderRadius: [8, 8, 0, 0]
+          },
+          barWidth: 40
+        }]
+      })
+    } else {
+      // Fallback to mock data
+      const maintenanceCosts = maintenanceData.value.map(item => item.cost)
+      const vehicleNames = maintenanceData.value.map(item => item.plateNumber)
+      
+      chart.setOption({
+        tooltip: { 
+          trigger: 'axis',
+          formatter: function(params) {
+            return `${params[0].name}<br/>Maintenance Cost: ${formatCurrency(params[0].value)}`
+          }
         },
-        {
-          name: 'Service Compliance',
-          type: 'line',
-          data: efficiencyData.map(item => item.serviceCompliance),
-          itemStyle: { color: '#3b82f6' },
-          lineStyle: { color: '#3b82f6', width: 3 },
-          symbol: 'circle',
-          symbolSize: 6
+        xAxis: { 
+          type: 'category', 
+          data: vehicleNames,
+          axisLabel: { 
+            color: '#64748b',
+            fontSize: 10,
+            rotate: 45
+          }
         },
-        {
-          name: 'Cost Efficiency',
-          type: 'line',
-          data: efficiencyData.map(item => item.costEfficiency),
-          itemStyle: { color: '#8b5cf6' },
-          lineStyle: { color: '#8b5cf6', width: 3 },
-          symbol: 'circle',
-          symbolSize: 6
+        yAxis: { 
+          type: 'value', 
+          name: 'ETB',
+          axisLabel: { color: '#64748b' }
         },
-        {
-          name: 'Status Efficiency',
-          type: 'line',
-          data: efficiencyData.map(item => item.statusEfficiency),
-          itemStyle: { color: '#f97316' },
-          lineStyle: { color: '#f97316', width: 3 },
-          symbol: 'circle',
-          symbolSize: 6
-        }
-      ]
-    })
+        series: [{
+          data: maintenanceCosts,
+          type: 'bar',
+          itemStyle: { 
+            color: function(params) {
+              const colors = ['#f3d70e', '#fbb339', '#10b981', '#3b82f6', '#8b5cf6']
+              return colors[params.dataIndex % colors.length]
+            },
+            borderRadius: [8, 8, 0, 0]
+          },
+          barWidth: 40
+        }]
+      })
+    }
   }
 
   // Cost per KM Chart
-  if (costPerKmChart.value) {
-    const chart = echarts.init(costPerKmChart.value)
-    const costPerKm = costData.value.map(item => item.costPerKm)
-    const vehicleNames = costData.value.map(item => item.plateNumber)
+ // Cost per KM Chart
+if (costPerKmChart.value) {
+  const chart = echarts.init(costPerKmChart.value)
+  
+  // Check if we have maintenance schedule data from API
+  if (dashboardReport.value?.maintSchedule) {
+    const maintSchedule = dashboardReport.value.maintSchedule
+    const vehicleNames = maintSchedule.map(item => item.plateNo)
+    const costPerKm = maintSchedule.map(item => item.vehicleEfficency?.cost_per_km || 0)
     
     chart.setOption({
       tooltip: { 
@@ -1265,13 +1133,22 @@ const initializeOtherCharts = () => {
       }]
     })
   }
+}
 
-  // Cost Ranking Chart
-  if (costRankingChart.value) {
-    const chart = echarts.init(costRankingChart.value)
-    const totalCosts = costData.value.map(item => item.totalCost)
-    const vehicleNames = costData.value.map(item => item.plateNumber)
-    
+// Cost Ranking Chart
+if (costRankingChart.value) {
+  const chart = echarts.init(costRankingChart.value)
+  
+  // Check if we have maintenance schedule data from API
+    //  const totalCosts = maintSchedule.map(item => item.totalCost)
+    // const vehicleNames = maintSchedule.map(item => item.plateNo)
+  if (dashboardReport.value?.maintSchedule) {
+    const maintSchedule = dashboardReport.value.maintSchedule
+     const top3 = [...maintSchedule]
+      .sort((a, b) => b.totalCost - a.totalCost)
+      .slice(0, 3)
+    const totalCosts = top3.map(item => item.totalCost)
+    const vehicleNames = top3.map(item => item.plateNo)
     chart.setOption({
       tooltip: { 
         trigger: 'item',
@@ -1297,50 +1174,53 @@ const initializeOtherCharts = () => {
       }]
     })
   }
-
-  // Add other chart initializations...
-  
+}
   // Insurance Cost Chart
   if (insuranceCostChart.value) {
     const chart = echarts.init(insuranceCostChart.value)
-    chart.setOption({
-      tooltip: { trigger: 'item' },
-      legend: { top: 'bottom' },
-      series: [{
-        name: 'Insurance Cost',
-        type: 'pie',
-        radius: ['40%', '70%'],
-        data: [
-          { value: 450000, name: 'Comprehensive', itemStyle: { color: '#06b6d4' } },
-          { value: 250000, name: 'Third Party', itemStyle: { color: '#8b5cf6' } },
-          { value: 150000, name: 'Liability', itemStyle: { color: '#f97316' } }
-        ],
-        itemStyle: { borderRadius: 10, borderColor: '#ffffff', borderWidth: 2 }
-      }]
-    })
+    
+    // Check if we have insurance cost distribution data from API
+    if (dashboardReport.value?.insuranceCostDist) {
+      const insuranceData = dashboardReport.value.insuranceCostDist
+      const chartData = [
+        { value: insuranceData.find(item => item.type === 1)?.insuranceCost || 0, name: 'Comprehensive' },
+        { value: insuranceData.find(item => item.type === 2)?.insuranceCost || 0, name: 'Third Party' },
+        { value: insuranceData.reduce((sum, item) => sum + (item.inspectionCost || 0), 0), name: 'Inspection' },
+        { value: insuranceData.reduce((sum, item) => sum + (item.roadFund || 0), 0), name: 'Road Fund' }
+      ].filter(item => item.value > 0)
+      
+      chart.setOption({
+        tooltip: { trigger: 'item' },
+        legend: { top: 'bottom' },
+        series: [{
+          name: 'Insurance Cost',
+          type: 'pie',
+          radius: ['40%', '70%'],
+          data: chartData,
+          itemStyle: { borderRadius: 10, borderColor: '#ffffff', borderWidth: 2 }
+        }]
+      })
+    } else {
+      // Fallback to mock data
+      chart.setOption({
+        tooltip: { trigger: 'item' },
+        legend: { top: 'bottom' },
+        series: [{
+          name: 'Insurance Cost',
+          type: 'pie',
+          radius: ['40%', '70%'],
+          data: [
+            { value: 450000, name: 'Comprehensive', itemStyle: { color: '#06b6d4' } },
+            { value: 250000, name: 'Third Party', itemStyle: { color: '#8b5cf6' } },
+            { value: 150000, name: 'Liability', itemStyle: { color: '#f97316' } }
+          ],
+          itemStyle: { borderRadius: 10, borderColor: '#ffffff', borderWidth: 2 }
+        }]
+      })
+    }
   }
 
-  // Compliance Chart
-  if (complianceChart.value) {
-    const chart = echarts.init(complianceChart.value)
-    chart.setOption({
-      tooltip: { trigger: 'axis' },
-      xAxis: { type: 'category', data: ['Insurance', 'Registration', 'Safety Inspection', 'Emission Test'] },
-      yAxis: { type: 'value', name: 'Count' },
-      series: [{
-        data: [85, 92, 78, 88],
-        type: 'bar',
-        itemStyle: { 
-          color: function(params) {
-            const colors = ['#06b6d4', '#8b5cf6', '#10b981', '#f59e0b']
-            return colors[params.dataIndex]
-          },
-          borderRadius: [8, 8, 0, 0]
-        },
-        barWidth: 40
-      }]
-    })
-  }
+  // Other charts can be initialized similarly...
 }
 
 // Export functions
@@ -1365,20 +1245,24 @@ const exportCostReport = () => exportReport('csv')
 const exportInsuranceReport = () => exportReport('pdf')
 const exportTableData = () => exportReport('excel')
 
-// Refresh functions
+// Refresh functions - now actually fetch data from API
 const refreshFuelData = () => {
+  fetchAnalyticsData()
   showSuccessMessage('Fuel data refreshed successfully')
 }
 
 const refreshMaintenanceData = () => {
+  fetchAnalyticsData()
   showSuccessMessage('Maintenance data refreshed successfully')
 }
 
 const refreshCostData = () => {
+  fetchAnalyticsData()
   showSuccessMessage('Cost data refreshed successfully')
 }
 
 const refreshInsuranceData = () => {
+  fetchAnalyticsData()
   showSuccessMessage('Insurance data refreshed successfully')
 }
 
@@ -1418,11 +1302,8 @@ const showErrorMessage = (message) => {
   showErrorSnackbar.value = true
 }
 
-// Watch for filter changes
-watch(filters, () => {
-  // Recalculate data when filters change
-  console.log('Filters changed:', filters.value)
-}, { deep: true })
+// Watch for timeframe changes
+watch(fuelTimeframe, fetchAnalyticsData)
 
 // Lifecycle
 onMounted(async () => {
@@ -1432,13 +1313,9 @@ onMounted(async () => {
       getVehicles(),
       getFuelRecords(),
       getFuelCards(),
-      getAnomalies()
+      getAnomalies(),
+      fetchAnalyticsData() // Use our function that handles date range
     ])
-    
-    // Initialize charts after data is loaded
-    setTimeout(() => {
-      initializeCharts()
-    }, 100)
   } finally {
     loading.value = false
   }
