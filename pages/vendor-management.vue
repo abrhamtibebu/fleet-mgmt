@@ -1343,8 +1343,14 @@ const handleRefillProcessed = async (cardId, amount, recharge) => {
     
     successMessage.value = result.message
     showSuccessSnackbar.value = true
+    showSuccessMessage("Refill Card successfully");
+
+  } catch (error: any) {
+    const backendMessage = error.data?.error || 
+                          error.data?.message || 
+                          error.message;
     
-  } catch (error) {
+    showErrorMessage(backendMessage);
     errorMessage.value = 'Failed to process refill'
     showErrorSnackbar.value = true
     console.error('Error processing refill:', error)
@@ -1376,8 +1382,16 @@ const saveBrand = async () => {
     showBrandDialog.value = false
     resetBrandForm()
     showSuccessMessage(editingBrand.value ? 'Brand updated successfully' : 'Brand added successfully')
-  } catch (error) {
+  } catch (error: any) {
     showErrorMessage('Failed to save brand')
+    const backendMessage = error.data?.error || 
+                          error.data?.message || 
+                          error.message || 
+                          (editingBrand.value 
+                            ? "Failed to update vehicle" 
+                            : "Failed to create vehicle");
+    
+    showErrorMessage(backendMessage);
   } finally {
     savingBrand.value = false
     editingBrand.value = null
@@ -1392,20 +1406,28 @@ const saveModel = async () => {
     
     if (editingModel.value) {
       // Update existing model
-      updateModel(editingModel.value.id, modelForm.value)
+     await  updateModel(editingModel.value.id, modelForm.value)
     } else {
       // Add new model
       // addModel(modelForm.value)
       createModel(modelForm.value)
     }
     
-
-    
     showModelDialog.value = false
     resetModelForm()
     showSuccessMessage(editingModel.value ? 'Model updated successfully' : 'Model added successfully')
-  } catch (error) {
-    showErrorMessage('Failed to save model')
+  } catch (error: any) {
+     const backendMessage = error.data?.error || 
+                          error.data?.message || 
+                          error.message ||
+                          (editingModel.value 
+                            ? "Failed to update Model" 
+                            : "Failed to create Model");
+    
+                      
+  
+    showErrorMessage(backendMessage);
+    // showErrorMessage('Failed to save model')
   } finally {
     savingModel.value = false
     editingModel.value = null
@@ -1420,7 +1442,7 @@ const saveCard = async () => {
     
     if (editingCard.value) {
       // Update existing card
-      updateCard(editingCard.value.id, {
+    await   updateCard(editingCard.value.id, {
         ...cardForm.value,
         balance: parseFloat(cardForm.value.balance)
       })
@@ -1432,8 +1454,18 @@ const saveCard = async () => {
     showCardDialog.value = false
     resetCardForm()
     showSuccessMessage(editingCard.value ? 'Card updated successfully' : 'Card added successfully')
-  } catch (error) {
-    showErrorMessage('Failed to save card')
+  } catch (error: any) {
+    const backendMessage = error.data?.error || 
+                          error.data?.message || 
+                          error.message ||
+                          (editingCard.value 
+                            ? "Failed to update card" 
+                            : "Failed to create card");
+    
+                      
+  
+    showErrorMessage(backendMessage);
+    // showErrorMessage('Failed to save card')
   } finally {
     savingCard.value = false
     editingCard.value = null
