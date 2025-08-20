@@ -38,11 +38,52 @@ export const useReport = () => {
       loading.value = false
     }
   }
+  const getAnalyticsReportt= async (from: string, to: string) => {
+    loading.value = true
+    try {
+      const data = await $apiFetch(`/report/analytics/${from}/${to}`, {
+        method: "GET"
+      });
+      dashboardReport.value = data.result
+    } catch (e) {
+      dashboardReport.value = null
+      error.value = 'Failed to fetch dashboard report'
+      console.error(e)
+    } finally {
+      loading.value = false
+    }
+  }
+  // In your useReport composable
+const getAnalyticsReport = async (from: string, to: string) => {
+  loading.value = true
+  try {
+    console.log('Making API call to:', `/report/analytics/${from}/${to}`)
+    const data = await $apiFetch(`/report/analytics/${from}/${to}`, {
+      method: "GET"
+    });
+    
+    console.log('API Response:', data)
+    dashboardReport.value = data
+    
+    // If the API returns {status: "OK", result: {...}}, we need to access data.result
+    if (data.status === "OK" && data.result) {
+      dashboardReport.value = data.result
+      console.log('Set dashboardReport to result:', dashboardReport.value)
+    }
+  } catch (e) {
+    console.error('API Error:', e)
+    dashboardReport.value = null
+    error.value = 'Failed to fetch dashboard report'
+  } finally {
+    loading.value = false
+  }
+}
 
   return {
     dashboardReport,
     loading,
     error,
     getAllReport,
+    getAnalyticsReport,
   }
 }
