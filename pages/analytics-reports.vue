@@ -416,7 +416,7 @@
             <v-icon class="me-2" color="info">mdi-shield-check</v-icon>
             Insurance & Compliance Analytics
           </h2>
-          <div class="section-actions">
+          <div class="section-actions" v-if="false">
             <v-btn
               variant="text"
               size="small"
