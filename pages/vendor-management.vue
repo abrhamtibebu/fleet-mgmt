@@ -1482,7 +1482,7 @@ const resetBrandForm = () => {
 
 const resetModelForm = () => {
   modelForm.value = {
-    brandId: '',
+    vendorId: '',
     name: '',
     year: '',
     engineSize: '',
