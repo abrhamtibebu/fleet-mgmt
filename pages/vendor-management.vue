@@ -274,14 +274,14 @@
                         ></v-btn>
                         <v-tooltip location="top">
     <template v-slot:activator="{ props }">
-                        <v-btn
+         <!-- :title="model.status === 1 ? 'Active (click to deactivate)' : 'Inactive (click to activate)'" -->
+      <v-btn
      v-bind="props"
       icon
       size="small"
       variant="text"
       :color="model.status === 1 ? 'error' : 'success'"
       @click.stop="toggleModelStatus(model)"
-      :title="model.status === 1 ? 'Active (click to deactivate)' : 'Inactive (click to activate)'"
     >
       <v-icon>{{ model.status === 1 ? 'mdi-close' : ' mdi-check' }}</v-icon>
     </v-btn>
