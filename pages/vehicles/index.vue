@@ -889,81 +889,225 @@
                 </v-card>
               </v-col>
 
-              <!-- Insurance Information Card -->
+              <!--===== 1 Comprehensive Insurance card-->
               <v-col cols="12" md="6">
-                <v-card class="info-card" elevation="0">
-                  <v-card-title class="info-card-title">
-                    <v-icon class="me-2" color="info">mdi-shield-check</v-icon>
-                    Insurance Information
-                  </v-card-title>
-                  <v-card-text>
-                    <div v-if="selectedVehicle?.insurance && selectedVehicle.insurance.length > 0">
-                      <div
-                        v-for="(entry, index) in selectedVehicle.insurance"
-                        :key="index"
-                        class="insurance-entry-display mb-3"
-                      >
-                        <div class="insurance-entry-header-display">
-                          <v-chip
-                            :color="getInsuranceTypeColor(entry.type)"
-                            size="small"
-                            variant="tonal"
-                            class="me-2"
-                          >
-                            {{ insuranceTypeOptions.find(t => t.id === entry.type)?.name }}
-                          </v-chip>
-                          <span class="insurance-provider-display">{{ entry.provider }}</span>
-                        </div>
-                        
-                        <div class="insurance-entry-details-display mt-2">
-                          <div class="detail-row-display">
-                            <span class="detail-label-display">Policy:</span>
-                            <span class="detail-value-display">{{ entry.policyNumber || 'Not specified' }}</span>
-                          </div>
-                          <div class="detail-row-display">
-                            <span class="detail-label-display">Premium:</span>
-                            <span class="detail-value-display">{{ entry.annualPremium ? `${entry.annualPremium.toLocaleString()} ETB` : 'Not specified' }}</span>
-                          </div>
-                          <div class="detail-row-display">
-                            <span class="detail-label-display">Coverage:</span>
-                            <span class="detail-value-display">{{ entry.coverageAmount ? `${entry.coverageAmount.toLocaleString()} ETB` : 'Not specified' }}</span>
-                          </div>
-                          <div class="detail-row-display">
-                            <span class="detail-label-display">Period:</span>
-                            <span class="detail-value-display">
-                              {{ entry.startDate ? formatDate(entry.startDate) : 'Not specified' }} - 
-                              {{ entry.endDate ? formatDate(entry.endDate) : 'Not specified' }}
-                            </span>
-                          </div>
-                          <div v-if="entry.insuranceAgent" class="detail-row-display">
-                            <span class="detail-label-display">Agent:</span>
-                            <span class="detail-value-display">{{ entry.insuranceAgent }}</span>
-                          </div>
-                          <div v-if="entry.agentPhone" class="detail-row-display">
-                            <span class="detail-label-display">Phone:</span>
-                            <span class="detail-value-display">{{ entry.agentPhone }}</span>
-                          </div>
-                          <div v-if="entry.remark" class="detail-row-display">
-                            <span class="detail-label-display">Notes:</span>
-                            <span class="detail-value-display">{{ entry.remark }}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div v-else class="no-insurance-message">
-                      <v-icon size="24" color="grey-lighten-1" class="mb-2">mdi-shield-off</v-icon>
-                      <span class="text-muted">No insurance information available</span>
-                    </div>
-                  </v-card-text>
-                </v-card>
+                <v-card class="info-card" elevation="0" v-if="
+  selectedVehicle?.vehicleInsurance &&
+  selectedVehicle.vehicleInsurance.some(item => item.type === 1)
+">
+  <v-card-title class="info-card-title">
+    <v-icon class="me-2" color="info">mdi-shield-check</v-icon>
+    Comprehensive Insurance
+  </v-card-title>
+
+  <v-card-text>
+    <div 
+      v-for="(entry, index) in selectedVehicle.vehicleInsurance.filter(i => i.type === 1 )" 
+      :key="index" 
+      class="insurance-entry-display mb-3"
+    >
+      <div class="insurance-entry-header-display">
+        <v-chip
+          :color="getInsuranceTypeColor(entry.type)"
+          size="small"
+          variant="tonal"
+          class="me-2"
+        >
+          {{ insuranceTypeOptions.find(t => t.id === entry.type)?.name }}
+        </v-chip>
+        <span class="insurance-provider-display">{{ entry.provider }}</span>
+      </div>
+
+      <div class="insurance-entry-details-display mt-2">
+        <div class="detail-row-display">
+          <span class="detail-label-display">Policy:</span>
+          <span class="detail-value-display">{{ entry.policyNumber || 'Not specified' }}</span>
+        </div>
+        <div class="detail-row-display">
+          <span class="detail-label-display">Premium:</span>
+          <span class="detail-value-display">{{ entry.annualPremium ? `${entry.annualPremium.toLocaleString()} ETB` : 'Not specified' }}</span>
+        </div>
+        <div class="detail-row-display">
+          <span class="detail-label-display">Coverage:</span>
+          <span class="detail-value-display">{{ entry.coverageAmount ? `${entry.coverageAmount.toLocaleString()} ETB` : 'Not specified' }}</span>
+        </div>
+        <div class="detail-row-display">
+          <span class="detail-label-display">Period:</span>
+          <span class="detail-value-display">
+            {{ entry.startDate ? formatDate(entry.startDate) : 'Not specified' }} - 
+            {{ entry.endDate ? formatDate(entry.endDate) : 'Not specified' }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </v-card-text>
+</v-card>
+</v-col>
+<!---========  2 Third Party Liability card =====-->
+<v-col cols="12" md="6">
+                <v-card class="info-card" elevation="0" v-if="
+  selectedVehicle?.vehicleInsurance &&
+  selectedVehicle.vehicleInsurance.some(item =>item.type === 2)
+">
+  <v-card-title class="info-card-title">
+    <v-icon class="me-2" color="info">mdi-account-group</v-icon>
+ Third Party Liability  </v-card-title>
+
+  <v-card-text>
+    <div 
+      v-for="(entry, index) in selectedVehicle.vehicleInsurance.filter(i => i.type === 2)" 
+      :key="index" 
+      class="insurance-entry-display mb-3"
+    >
+      <div class="insurance-entry-header-display">
+        <v-chip
+          :color="getInsuranceTypeColor(entry.type)"
+          size="small"
+          variant="tonal"
+          class="me-2"
+        >
+          {{ insuranceTypeOptions.find(t => t.id === entry.type)?.name }}
+        </v-chip>
+        <span class="insurance-provider-display">{{ entry.provider }}</span>
+      </div>
+
+      <div class="insurance-entry-details-display mt-2">
+        <div class="detail-row-display">
+          <span class="detail-label-display">Policy:</span>
+          <span class="detail-value-display">{{ entry.policyNumber || 'Not specified' }}</span>
+        </div>
+        <div class="detail-row-display">
+          <span class="detail-label-display">Premium:</span>
+          <span class="detail-value-display">{{ entry.annualPremium ? `${entry.annualPremium.toLocaleString()} ETB` : 'Not specified' }}</span>
+        </div>
+        <div class="detail-row-display">
+          <span class="detail-label-display">Coverage:</span>
+          <span class="detail-value-display">{{ entry.coverageAmount ? `${entry.coverageAmount.toLocaleString()} ETB` : 'Not specified' }}</span>
+        </div>
+        <div class="detail-row-display">
+          <span class="detail-label-display">Period:</span>
+          <span class="detail-value-display">
+            {{ entry.startDate ? formatDate(entry.startDate) : 'Not specified' }} - 
+            {{ entry.endDate ? formatDate(entry.endDate) : 'Not specified' }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </v-card-text>
+</v-card>
+</v-col>
+<v-col cols="12" md="6">
+<!-- ================== 3 Safty Inspection card ================== -->
+<v-card class="info-card" elevation="0" v-if="
+  selectedVehicle?.vehicleInsurance &&
+  selectedVehicle.vehicleInsurance.some(item => item.type === 3)
+">
+  <v-card-title class="info-card-title">
+    <v-icon class="me-2" color="warning">mdi-car-wrench</v-icon>
+     Safety Inspection
+
+  </v-card-title>
+
+  <v-card-text>
+    <div 
+      v-for="(entry, index) in selectedVehicle.vehicleInsurance.filter(i => i.type === 3 )" 
+      :key="index" 
+      class="insurance-entry-display mb-3"
+    >
+      <div class="insurance-entry-header-display">
+        <v-chip
+          :color="getInsuranceTypeColor(entry.type)"
+          size="small"
+          variant="tonal"
+          class="me-2"
+        >
+          {{ insuranceTypeOptionsforcard.find(t => t.id === entry.type)?.name }}
+        </v-chip>
+      </div>
+
+      <!-- Only display limited info -->
+      <div class="insurance-entry-details-display mt-2">
+        <div class="detail-row-display">
+          <span class="detail-label-display">Inspection Center :</span>
+          <span class="detail-value-display">{{ entry.inspectionCenter || 'Not specified' }}</span>
+        </div>
+        <div class="detail-row-display">
+          <span class="detail-label-display">Inspection Cost :</span>
+          <span class="detail-value-display">{{ entry.inspectionCost || 'Not specified' }}</span>
+        </div>
+        <div class="detail-row-display">
+          <span class="detail-label-display">Period:</span>
+          <span class="detail-value-display">
+            {{ entry.startDate ? formatDate(entry.startDate) : 'Not specified' }} - 
+            {{ entry.endDate ? formatDate(entry.endDate) : 'Not specified' }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </v-card-text>
+</v-card>
+</v-col cols="12" md="6">
+<!-- ============ 4 Road Fund card========-->
+ <v-col>
+<v-card class="info-card" elevation="0" v-if="
+  selectedVehicle?.vehicleInsurance &&
+  selectedVehicle.vehicleInsurance.some(item => item.type === 4)
+">
+  <v-card-title class="info-card-title">
+    <v-icon class="me-2" color="warning">mdi-road</v-icon>
+    Road Fund 
+  </v-card-title>
+
+  <v-card-text>
+    <div 
+      v-for="(entry, index) in selectedVehicle.vehicleInsurance.filter(i => i.type === 4)" 
+      :key="index" 
+      class="insurance-entry-display mb-3"
+    >
+      <div class="insurance-entry-header-display">
+        <v-chip
+          :color="getInsuranceTypeColor(entry.type)"
+          size="small"
+          variant="tonal"
+          class="me-2"
+        >
+          {{ insuranceTypeOptionsforcard.find(t => t.id === entry.type)?.name }}
+        </v-chip>
+      </div>
+
+      <!-- Only display limited info -->
+      <div class="insurance-entry-details-display mt-2">
+        <div class="detail-row-display">
+          <span class="detail-label-display">Issuing Office :</span>
+          <span class="detail-value-display">{{ entry.issuingOffice || 'Not specified' }}</span>
+        </div>
+         <div class="detail-row-display">
+          <span class="detail-label-display">RoadFund Amount  :</span>
+          <span class="detail-value-display">{{ entry.roadFundAmount || 'Not specified' }}</span>
+        </div>
+         <div class="detail-row-display">
+          <span class="detail-label-display">RoadFund Number   :</span>
+          <span class="detail-value-display">{{ entry.roadFundNumber || 'Not specified' }}</span>
+        </div>
+        <div class="detail-row-display">
+          <span class="detail-label-display">Period:</span>
+          <span class="detail-value-display">
+            {{ entry.startDate ? formatDate(entry.startDate) : 'Not specified' }} - 
+            {{ entry.endDate ? formatDate(entry.endDate) : 'Not specified' }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </v-card-text>
+</v-card>
               </v-col>
 
               <!-- Safety Inspection Card -->
-              <v-col cols="12" md="6">
+              <!-- <v-col cols="12" md="6">
                 <v-card class="info-card" elevation="0">
                   <v-card-title class="info-card-title">
                     <v-icon class="me-2" color="success">mdi-car-wrench</v-icon>
-                    Safety Inspection
+                    Safety Inspection gvhbjnklm,
                   </v-card-title>
                   <v-card-text>
                     <div class="info-grid">
@@ -1006,10 +1150,10 @@
                     </div>
                   </v-card-text>
                 </v-card>
-              </v-col>
+              </v-col> -->
 
               <!-- Road Fund Card -->
-              <v-col cols="12" md="6">
+              <!-- <v-col cols="12" md="6">
                 <v-card class="info-card" elevation="0">
                   <v-card-title class="info-card-title">
                     <v-icon class="me-2" color="info">mdi-road</v-icon>
@@ -1021,7 +1165,7 @@
                         <div class="info-label">Status</div>
                         <div class="info-value">
                           <v-chip
-                            :color="getRoadFundStatusColor(selectedVehicle?.roadFundStatus)"
+                            :color="getRoadFundStatusColor(selectedVehicle?.roadFundStatus )"
                             size="small"
                             variant="tonal"
                           >
@@ -1056,7 +1200,7 @@
                     </div>
                   </v-card-text>
                 </v-card>
-              </v-col>
+              </v-col> -->
             </v-row>
           </div>
         </v-window-item>
@@ -1303,6 +1447,15 @@ const insuranceTypeOptions = [
   { id: 2, name: 'Third Party Liability' },
   // { id: 3, name: 'Third Party Fire & Theft' },
   // { id: 4, name: 'Commercial Vehicle Insurance' },
+  // { id: 5, name: 'Fleet Insurance' },
+  // { id: 6, name: 'Self Insurance' },
+  // { id: 7, name: 'Other' }
+]
+const insuranceTypeOptionsforcard = [
+  { id: 1, name: 'Comprehensive Insurance' },
+  { id: 2, name: 'Third Party Liability' },
+  { id: 3, name: 'Third Party Fire & Theft' },
+  { id: 4, name: 'Commercial Vehicle Insurance' },
   // { id: 5, name: 'Fleet Insurance' },
   // { id: 6, name: 'Self Insurance' },
   // { id: 7, name: 'Other' }
