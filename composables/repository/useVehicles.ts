@@ -35,6 +35,7 @@ interface Vehicle {
 export const useVehicles = () => {
   const { $apiFetch } = useNuxtApp();
   const vehicleList = ref<Vehicle[]>([])
+  const department = ref<Vehicle[]>([])
   const insuranceRepList = ref<{}>({})
   const loading = ref(false)
   const error = ref<string | null>(null)
@@ -92,6 +93,25 @@ const createVehicle = async (body: any) => {
     error.value = e.data?.error || 'Failed to create vehicle';
     console.error(e);
     throw e; // Rethrow the original error
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Add Department 
+const addDepartment = async (vehicleId: number, departmentId: number) => {
+  loading.value = true;
+  try {
+    const data = await $apiFetch<Vehicle>(`/vehicle/${vehicleId}/department/${departmentId}`, {
+      method: "PUT",
+    });
+    // Assuming department.value is an array
+    department.value.push(data);
+    return data; // return for confirmation if needed
+  } catch (e: any) {
+    error.value = e.data?.error || 'Failed to add department';
+    console.error(e);
+    throw e;
   } finally {
     loading.value = false;
   }
@@ -263,6 +283,7 @@ loading.value = false
     getVehicleByLicensePlate,
     getVehiclesByFuelCard,
     calculateServiceDue,
-    updateInsurance
+    updateInsurance,
+    addDepartment
   }
 } 

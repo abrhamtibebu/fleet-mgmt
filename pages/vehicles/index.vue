@@ -83,6 +83,10 @@
           <v-icon size="small" class="me-1">mdi-account</v-icon>
           <span>{{ usersList.find(x => x.id == vehicle.driver)?.name || 'Unassigned' }}</span>
         </div>
+      <div class="vehicle-detail-item">
+          <v-icon size="small" class="me-1">mdi-account-group</v-icon>
+          <span v-if="vehicle.department">{{ groups.find(x => x.id == vehicle.department.departmentId)?.name || 'Unassigned' }}</span>
+        </div>
         <div class="vehicle-detail-item">
           <v-icon size="small" class="me-1">mdi-speedometer</v-icon>
           <span>{{ vehicle.currentMileage.toLocaleString() }} km</span>
@@ -142,6 +146,14 @@
       @click="vehicleDetail(vehicle)"
     >
       Detail
+    </v-btn>
+     <v-btn
+      variant="outlined"
+      size="small"
+      class="vehicle-btn"
+  @click="openDepartmentDialog(vehicle.id)"
+    >
+      Department 
     </v-btn>
   </v-card-actions>
 </v-card>
@@ -1382,6 +1394,103 @@
     </v-card-actions>
   </v-card>
 </v-dialog>
+         <!---Department dialog---->
+ <v-dialog v-model="vehicleDepartmentDialog" max-width="600px">
+      <v-card class="dialog-card">
+        <v-card-title class="dialog-title">
+          <span class="title-icon-badge"><v-icon size="20" color="warning">mdi-account-group</v-icon></span>
+          Assign Department 
+        </v-card-title>
+        <v-card-text class="pa-4">
+          <v-form ref="fuelForm" v-model="DepartmentFormValid">
+            <v-row>
+              <!-- <v-col cols="12">
+                <v-select
+                  v-model="departmentEntryForm.vehicleId"
+                  :items="vehicles"
+                  item-title="licensePlate"
+                  item-value="id"
+                  label="Vehicle"
+                  variant="outlined"
+                  :rules="[v => !!v || 'Vehicle is required']"
+                  required
+                ></v-select>
+              </v-col> -->
+              <v-col >
+            <!-- :items="groups.filter(group => group.id !== 7)" -->
+          <v-select
+            :rules="[(v) => !!v || 'Department is required']"
+            v-model="departmentEntryForm.department"
+            placeholder="Department"
+            :items="groups"
+            item-title="name" 
+            item-value="id"   
+            label="Assign Department"
+            class="rounded-lg"
+            style="width: 300px"
+          ></v-select>
+        </v-col>
+              <!-- <v-col cols="12" sm="6">
+                <v-text-field
+                  v-model="departmentEntryForm.quantity"
+                  label="Quantity (Liters)"
+                  type="number"
+                  variant="outlined"
+                  :rules="[v => !!v || 'Quantity is required']"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  v-model="departmentEntryForm.amount"
+                  label="Amount (ETB)"
+                  type="number"
+                  variant="outlined"
+                  :rules="[v => !!v || 'Amount is required']"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  v-model="departmentEntryForm.odometerReading"
+                  label="Odometer Reading (km)"
+                  type="number"
+                  variant="outlined"
+                  :rules="[v => !!v || 'Odometer reading is required']"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  v-model="departmentEntryForm.station"
+                  label="Fuel Station"
+                  variant="outlined"
+                  :rules="[v => !!v || 'Station is required']"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-select
+                  v-model="departmentEntryForm.fuelCardId"
+                  :items="fuelCards"
+                  item-title="cardNumber"
+                  item-value="id"
+                  label="Fuel Card"
+                  variant="outlined"
+                  :rules="[v => !!v || 'Fuel card is required']"
+                  required
+                ></v-select>
+              </v-col> -->
+            </v-row>
+          </v-form>
+        </v-card-text>
+        <v-card-actions class="dialog-actions">
+          <v-spacer></v-spacer>
+          <v-btn variant="outlined" @click="vehicleDepartmentDialog = false">Cancel</v-btn>
+          <v-btn color="warning" :loading="saving" :disabled="!DepartmentFormValid" @click="saveDepartmentEntry" prepend-icon="mdi-content-save">Add Department</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
         <!-- Success Snackbar -->
     <v-snackbar
@@ -1426,12 +1535,14 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
+// import { groups } from "~/plugins/department";
+
 // import vehicles from "~/server/api/vehicles";
 const { $apiFetch } = useNuxtApp();
 const vehicleFormRef = ref();
-
+const DepartmentFormValid = ref(false)
 // Composables
-const { vehicleList, loading, getVehicles, createVehicle, updateVehicle, vehicleTypes, statusMap,getVehicleById } = useVehicles();
+const { vehicleList, loading, getVehicles, createVehicle, updateVehicle, vehicleTypes, statusMap,getVehicleById, addDepartment} = useVehicles();
 
 // Vehicle status options for the form
 const vehicleStatusOptions = computed(() => {
@@ -1440,7 +1551,38 @@ const vehicleStatusOptions = computed(() => {
     name: status.label
   }));
 });
-
+// Department 
+const groups = [
+  
+  {
+    id: 1,
+    name: "Service",
+  },
+  {
+    id: 2,
+    name: "Finance",
+  },
+  {
+    id: 3,
+    name: "Sales and Marketing",
+  },
+  {
+    id: 4,
+    name: "Development",
+  },
+  {
+    id: 5,
+    name: "Engineering",
+  },
+  {
+    id: 6,
+    name: "ERM",
+  },
+  {
+    id: 7,
+    name: "Human Resource",
+  },
+];
 // Insurance type options
 const insuranceTypeOptions = [
   { id: 1, name: 'Comprehensive Insurance' },
@@ -1490,12 +1632,14 @@ const currItem = ref(null)
 const searchQuery = ref("");
 const showAddDialog = ref(false);
 const vehicleDetailDialog = ref(false);
+const vehicleDepartmentDialog = ref(false);
 const selectedVehicle = ref<any>(null);
 const editingVehicle = ref(null);
 const addFuelModal = ref(false)
 const addMainModal = ref(false)
 const saving = ref(false);
 const formValid = ref(false);
+const selectedVehicleId = ref<number | null>(null); 
 const activeTab = ref('overview'); // Add this for the new tabbed interface
 // const vehicles = ref([]);
 const vehicleForm = ref({
@@ -1571,6 +1715,79 @@ const vehicleForm = ref({
     }
   
 });
+// Save Department 
+const saveDepartmentEntryy = async () => {
+  saving.value = true
+  try {
+    // TODO: Implement save logic
+    console.log('Saving fuel entry:', departmentEntryForm.value)
+    vehicleDepartmentDialog.value = false
+    resetDepartmentForm()
+  } catch (error) {
+    console.error('Error saving fuel entry:', error)
+  } finally {
+    saving.value = false
+  }
+}
+// department 
+// const saveDepartmentEntry = async () => {
+//   saving.value = true;
+//   try {
+//     if (!selectedVehicleId.value || !departmentEntryForm.value.department) {
+//       throw new Error('Vehicle or Department not selected');
+//     }
+
+//     await addDepartment(selectedVehicleId.value, departmentEntryForm.value.department);
+
+//     vehicleDepartmentDialog.value = false;
+//     resetDepartmentForm();
+//   } catch (error) {
+//     console.error('Error saving department entry:', error);
+//   } finally {
+//     saving.value = false;
+//   }
+// };
+
+const saveDepartmentEntry = async () => {
+  saving.value = true;
+  try {
+    if (!selectedVehicleId.value || !departmentEntryForm.value.department) {
+      throw new Error('Vehicle or Department not selected');
+    }
+
+    await addDepartment(selectedVehicleId.value, departmentEntryForm.value.department);
+
+    vehicleDepartmentDialog.value = false;
+    resetDepartmentForm();
+
+    showSuccessMessage("Department Assigned Successfully"); 
+  } catch (error: any) {
+    console.error('Error While  Department Assigned:', error);
+
+    // If it's an API error, show the backend message if available
+    const backendMessage = error.data?.error || 
+                          error.data?.message || 
+                          error.message 
+                         
+    
+    showErrorMessage(backendMessage);
+  } finally {
+    saving.value = false;
+  }
+};
+
+
+
+const resetDepartmentForm = () => {
+  departmentEntryForm.value = {
+    department: '',
+    
+  }
+}
+const openDepartmentDialog = (vehicleId: number) => {
+  selectedVehicleId.value = vehicleId;
+  vehicleDepartmentDialog.value = true;
+};
 
 // Current insurance entry for the form
 const currentInsuranceEntry = ref({
@@ -1602,6 +1819,11 @@ const filteredVehicles = computed(() => {
       (usersList.value.find(x => x.id == vehicle.driver)?.name || '').toLowerCase().includes(query)
   );
 });
+//department 
+const departmentEntryForm = ref({
+  department: '',
+  
+})
 
 // const vendorCardOptions = computed(() => {
 
@@ -1959,6 +2181,16 @@ const resetVehicleForm = () => {
 
 // When clicking Detail
 async function vehicleDetail(vehicle: any) {
+  try {
+    const detail = getVehicleById(vehicle.id)
+    selectedVehicle.value = detail || null
+    activeTab.value = 'overview' // Reset to overview tab
+    vehicleDetailDialog.value = true
+  } catch (error) {
+    console.error('Failed to load vehicle detail', error)
+  }
+}
+async function vehicleDepartment(vehicle: any) {
   try {
     const detail = getVehicleById(vehicle.id)
     selectedVehicle.value = detail || null
