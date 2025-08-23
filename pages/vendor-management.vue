@@ -391,6 +391,7 @@
   
     <v-tooltip location="top">
     <template v-slot:activator="{ props }">
+    <!-- :title="item.status === 1 ? 'Active (click to deactivate)' : 'Inactive (click to activate)'" -->
     <v-btn
       v-bind="props"
       icon
@@ -398,7 +399,6 @@
       variant="text"
       :color="item.status === 1 ? 'error' : 'success'"
       @click.stop="toggleCardStatus(item)"
-      :title="item.status === 1 ? 'Active (click to deactivate)' : 'Inactive (click to activate)'"
 >
       <v-icon>{{ item.status === 1 ? 'mdi-close' : ' mdi-check' }}</v-icon>
     </v-btn>
