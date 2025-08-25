@@ -75,7 +75,9 @@
     <div class="vehicle-info">
       <div class="vehicle-model">
         <v-icon class="vehicle-main-icon me-2">mdi-truck</v-icon>
-        {{ vendorList.find(v => v.id === vehicle.vendorId)?.name || 'Unknown' }} {{ modelList.find(m => m.id === vehicle.modelId)?.name || 'Unknown' }} ({{ vehicle.year }})
+        <!-- {{ vendorList.find(v => v.id === vehicle.vendorId)?.name || 'Unknown' }} {{ vendorList.find(m => m.id === vehicle.modelId)?.name || 'Unknown' }} ({{ vehicle.year }}) -->
+                  {{ vendorList.find(v => v.id === vehicle.vendorId)?.name || 'Unknown' }} {{ vehicle.model?.name || 'Unknown' }} ({{ vehicle.year }})
+
       </div>
 
       <div class="vehicle-details">
