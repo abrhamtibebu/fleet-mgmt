@@ -253,8 +253,8 @@
     </v-chip>
   </template>
 
-  <template #item.totalCost="{ item }">
-    <span>{{ new Intl.NumberFormat().format(item.totalCost) }}</span>
+  <template #item.maintenance="{ item }">
+    <span>{{ new Intl.NumberFormat().format(item.maintenance) }}</span>
   </template>
 
   <template #item.mileage="{ item }">
@@ -649,7 +649,7 @@ const maintenanceHeaders = [
   { title: 'Last Service', key: 'lastService', sortable: true },
   { title: 'Next Service', key: 'nextService', sortable: true },
   { title: 'Status', key: 'status', sortable: true },
-  { title: 'Cost', key: 'totalCost', sortable: true },
+  { title: 'Cost', key: 'maintenance', sortable: true },
   { title: 'Mileage', key: 'currentMileage', sortable: true },
   // { title: 'Actions', key: 'actions', sortable: false }
 ]
@@ -694,14 +694,19 @@ const maintenanceData = computed(() => {
   return sched.map(v => {
     let nextService = 0
 
-    if (v.lastMaintReading != null && v.serviceInterval != null) {
-      nextService = v.lastMaintReading + v.serviceInterval
-    } else if (v.lastMaintReading != null) {
-      nextService = v.lastMaintReading
-    } else if (v.serviceInterval != null) {
-      nextService = v.serviceInterval
-    }
+    // if (v.lastMaintReading != null && v.serviceInterval != null) {
+    //   nextService = v.lastMaintReading + v.serviceInterval
+    // } else if (v.lastMaintReading != null) {
+    //   nextService = v.lastMaintReading
+    // } else if (v.serviceInterval != null) {
+    //   nextService = v.serviceInterval
+    // }
 
+     if (v.lastService == 0) {
+      nextService = 0
+    } else if (v.lastService != null) {
+      nextService = v.lastService + v.serviceInterval
+    }
     // Remaining km until next service
     let remainingKm = 0
     if (nextService && v.currentMileage != null) {
@@ -723,7 +728,7 @@ const maintenanceData = computed(() => {
       nextService: nextService ?? 0,
       remainingKm: remainingKm ?? 0,
       status: statusText,
-      totalCost: v.totalCost ?? 0,
+      maintenance: v.maintenance ?? 0,
       mileage: v.currentMileage ?? 0,
       currentMileage: v.currentMileage ?? 0,
       serviceInterval: v.serviceInterval ?? 0,
