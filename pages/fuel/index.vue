@@ -537,25 +537,51 @@ const cardOptions = [
 // Table headers
 const fuelRecordHeaders = [
   { title: 'Vehicle', key: 'vehicleId', sortable: true },
+  { title: 'Card', key: 'cardNumber', sortable: true },
   { title: 'Date', key: 'createdAt', sortable: true },
   { title: 'Quantity', key: 'quantity', sortable: true },
   { title: 'Amount', key: 'amount', sortable: true },
   { title: 'Station', key: 'fuelStation', sortable: true },
   { title: 'created By', key: 'createdBy', sortable: true },
 
+
   // { title: 'Efficiency', key: 'fuelEfficiency', sortable: true },
   //{ title: 'Actions', key: 'actions', sortable: false }
 ]
 
+//map the card id in the fuel record to the number in the cardlist  which means dictionary for cardId -> cardNumber
+const cardMap = computed(() => {
+  const map = {}
+  if (cardList.value) {
+    cardList.value.forEach(card => {
+      // use `number` or `cardNumber` depending on your API
+      map[String(card.id)] = card.number || card.cardNumber
+    })
+  }
+  return map
+})
+// 🔹 Merge cardNumber into each fuelRecord
+const fuelRecordsWithCard = computed(() => {
+  return fuelRecords.value.map(record => ({
+    ...record,
+    cardNumber: cardMap.value[String(record.cardId)] || 'Unknown'
+  }))
+})
 // Computed properties
 const filteredFuelRecords = computed(() => {
-  if (!searchQuery.value) return fuelRecords.value
+  // if (!searchQuery.value) return fuelRecords.value
+  if (!searchQuery.value) return fuelRecordsWithCard.value
+
   
   const query = searchQuery.value.toLowerCase()
-  return fuelRecords.value.filter(record => 
-    (record.licensePlate && record.licensePlate.toLowerCase().includes(query)) ||
-    (record.station && record.station.toLowerCase().includes(query))
-  )
+  // return fuelRecords.value.filter(record => 
+  //   (record.licensePlate && record.licensePlate.toLowerCase().includes(query)) ||
+  //   (record.station && record.station.toLowerCase().includes(query))
+  return fuelRecordsWithCard.value.filter(record => 
+  (record.vehicle?.plateNo && record.vehicle.plateNo.toLowerCase().includes(query)) ||
+  (record.fuelStation && record.fuelStation.toLowerCase().includes(query)) ||
+  (record.cardNumber && record.cardNumber.toLowerCase().includes(query)) // allow searching by card number
+)
 })
 
 const totalFuelSpent = computed(() => {
