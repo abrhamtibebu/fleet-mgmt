@@ -982,10 +982,10 @@ const loading = ref(false)
 const savingBrand = ref(false)
 const savingModel = ref(false)
 const savingCard = ref(false)
-const cardVendors = ref([{
-  id: 1,
-  name: "NOC"
-}])
+const cardVendors = ref([
+  { id: 1, name: "NOC"},
+  { id: 2, name: "telebirr" }
+])
 
 // Dialog states
 const showBrandDialog = ref(false)
