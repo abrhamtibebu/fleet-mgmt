@@ -150,6 +150,16 @@
               <v-progress-circular indeterminate color="primary"></v-progress-circular>
             </div>
             <div v-else>
+              <div  class="d-flex justify-end" >
+              <v-btn
+  color="success"
+  prepend-icon="mdi-download"
+  class=" mb-3"
+  @click="exportTableData"
+>
+  Export
+</v-btn>
+</div>
               <v-data-table
                 :headers="fuelRecordHeaders"
                 :items="filteredFuelRecords"
@@ -499,6 +509,8 @@ const fuelFormValid = ref(false)
 const fuelRecord = ref([])
 const users = ref([])
 const loadingg= ref(true)
+const dateFrom = ref(null)
+const dateTo = ref(null)
 
 
 
@@ -560,6 +572,37 @@ const cardMap = computed(() => {
   }
   return map
 })
+//newwwwwwww eport the data 
+const exportTableData = () => {
+  // Use the filtered records so the user gets exactly what's displayed
+  const data = filteredFuelRecords.value
+
+  // Convert to CSV
+  const headers = fuelRecordHeaders.map(h => h.title).join(',')
+  const rows = data.map(record => {
+    return [
+      vehicleList.value.find(v => v.id === record.vehicleId)?.plateNo || '',
+      record.cardNumber || '',
+      formatDate(record.createdAt),
+      record.quantity + ' L',
+      record.amount.toLocaleString() + ' ETB',
+      record.fuelStation || '',
+      getUserName(record.createdBy) || ''
+    ].join(',')
+  })
+
+  const csvContent = [headers, ...rows].join('\n')
+
+  // Create blob and trigger download
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.setAttribute('href', url)
+  link.setAttribute('download', `fuel-records-${Date.now()}.csv`)
+  link.click()
+}
+
+
 // 🔹 Merge cardNumber into each fuelRecord
 const fuelRecordsWithCard = computed(() => {
   return fuelRecords.value.map(record => ({
