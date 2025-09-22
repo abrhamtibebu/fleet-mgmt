@@ -151,15 +151,10 @@
             </div>
             <div v-else>
               <div  class="d-flex justify-end" >
-              <v-btn
-  color="success"
-  prepend-icon="mdi-download"
-  class=" mb-3"
-  @click="exportTableData"
->
-  Export
-</v-btn>
-</div>
+              <v-btn color="success" prepend-icon="mdi-download" class=" mb-3" @click="exportTableData">
+                 Export
+              </v-btn>
+              </div>
               <v-data-table
                 :headers="fuelRecordHeaders"
                 :items="filteredFuelRecords"
@@ -168,8 +163,8 @@
                 density="comfortable"
               >
              <template v-slot:item.createdBy="{ item }">
-    {{ getUserName(item.createdBy) }}
-  </template>
+              {{ getUserName(item.createdBy) }}
+            </template>
                 <template v-slot:item.vehicleId="{ item }">
                   <div class="d-flex align-center">
                     <v-icon size="small" class="me-2">mdi-truck</v-icon>
