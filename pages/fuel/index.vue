@@ -150,10 +150,43 @@
               <v-progress-circular indeterminate color="primary"></v-progress-circular>
             </div>
             <div v-else>
+              <div >
+                <v-row class="d-flex justify-end">
+                <v-col cols="12" md="2">
+                  <v-text-field
+                     v-model="dateFrom"
+                     label="From Date"
+                     type="date"
+                     variant="outlined"
+                     density="compact"
+                     hide-details
+                     @input="filterFuelData"
+                    />
+                  </v-col>
+                   <v-col cols="12" md="2">
+                <v-text-field
+                  v-model="dateTo"
+                  label="To Date"
+                  type="date"
+                  variant="outlined"
+                  density="compact"
+                  hide-details
+                 @input="filterFuelData"
+                  />
+                </v-col>
+                <!-- <v-col>  
+                  <v-btn color="yellow" prepend-icon="mdi-filter" class=" mb-3" @click="filtersTableData">
+                 Filter
+              </v-btn>
+            </v-col> -->
+                </v-row>
+                <v-row class="d-flex justify-end mt-4 mb-5">
               <div  class="d-flex justify-end" >
               <v-btn color="success" prepend-icon="mdi-download" class=" mb-3" @click="exportTableData">
                  Export
               </v-btn>
+              </div>
+              </v-row>
               </div>
               <v-data-table
                 :headers="fuelRecordHeaders"
@@ -504,8 +537,8 @@ const fuelFormValid = ref(false)
 const fuelRecord = ref([])
 const users = ref([])
 const loadingg= ref(true)
-const dateFrom = ref(null)
-const dateTo = ref(null)
+// const dateFrom = ref(null)
+// const dateTo = ref(null)
 
 
 
@@ -555,6 +588,9 @@ const fuelRecordHeaders = [
   // { title: 'Efficiency', key: 'fuelEfficiency', sortable: true },
   //{ title: 'Actions', key: 'actions', sortable: false }
 ]
+//date startof date and endof date
+const dateFrom = ref(moment().startOf("month").format("YYYY-MM-DD"));
+const dateTo = ref(moment().endOf("month").format("YYYY-MM-DD"));
 
 //map the card id in the fuel record to the number in the cardlist  which means dictionary for cardId -> cardNumber
 const cardMap = computed(() => {
@@ -567,35 +603,55 @@ const cardMap = computed(() => {
   }
   return map
 })
-//newwwwwwww eport the data 
+//export fuel data based on date 
 const exportTableData = () => {
-  // Use the filtered records so the user gets exactly what's displayed
-  const data = filteredFuelRecords.value
+  // Default: current month
+  const from = dateFrom.value || moment().startOf("month").format("YYYY-MM-DD");
+  const to = dateTo.value || moment().endOf("month").format("YYYY-MM-DD");
 
-  // Convert to CSV
-  const headers = fuelRecordHeaders.map(h => h.title).join(',')
+  // Filter only for export
+  const data = filteredFuelRecords.value.filter(record => {
+    const createdAt = moment(record.createdAt).format("YYYY-MM-DD");
+    return createdAt >= from && createdAt <= to;
+  });
+
+  if (!data.length) {
+    alert("No records found for the selected date range.");
+    return;
+  }
+
+  // CSV headers
+  const headers = fuelRecordHeaders.map(h => h.title).join(",");
+
+  // CSV rows
   const rows = data.map(record => {
     return [
-      vehicleList.value.find(v => v.id === record.vehicleId)?.plateNo || '',
-      record.cardNumber || '',
+      vehicleList.value.find(v => v.id === record.vehicleId)?.plateNo || "",
+      record.cardNumber || "",
       formatDate(record.createdAt),
-      record.quantity + ' L',
-      record.amount.toLocaleString() + ' ETB',
-      record.fuelStation || '',
-      getUserName(record.createdBy) || ''
-    ].join(',')
-  })
+      record.quantity + " L",
+      record.amount.toLocaleString() + " ETB",
+      record.fuelStation || "",
+      getUserName(record.createdBy) || ""
+    ].join(",");
+  });
 
-  const csvContent = [headers, ...rows].join('\n')
+  const csvContent = [headers, ...rows].join("\n");
 
-  // Create blob and trigger download
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.setAttribute('href', url)
-  link.setAttribute('download', `fuel-records-${Date.now()}.csv`)
-  link.click()
-}
+  // Trigger download
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute(
+    "download",
+    `fuel-records-${from}_to_${to}.csv`
+  );
+  link.click();
+};
+
+
+
 
 
 // 🔹 Merge cardNumber into each fuelRecord
