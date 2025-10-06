@@ -1439,14 +1439,28 @@ const saveCard = async () => {
   try {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000))
-    
+        let payload
+
     if (editingCard.value) {
+       payload = {
+        vendorId: cardForm.value.vendorId,
+        number: cardForm.value.number,
+        holder: cardForm.value.holder,
+        expiryDate: cardForm.value.expiryDate
+
+      }
       // Update existing card
-    await   updateCard(editingCard.value.id, {
+    // await   updateCard(editingCard.value.id, {
+    //     ...cardForm.value,
+    //     balance: parseFloat(cardForm.value.balance)
+    //   })
+          await updateCard(editingCard.value.id, payload)
+
+    } else {
+       payload = {
         ...cardForm.value,
         balance: parseFloat(cardForm.value.balance)
-      })
-    } else {
+      }
       // Add new card
       await createCard(cardForm.value)
     }
