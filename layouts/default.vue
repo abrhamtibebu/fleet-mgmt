@@ -472,6 +472,7 @@ const drawerWidth = computed(() => {
 const mainNav = [
   { title: 'Dashboard', icon: 'mdi-view-dashboard-outline', to: '/' },
   { title: 'Fleet Overview', icon: 'mdi-car-multiple', to: '/vehicles' },
+  { title: 'Request', icon: 'mdi-send', to: '/request' },//mdi-steering
   { title: 'Renewals', icon: 'mdi-calendar-clock', to: '/vehicles/renewals' },
   { title: 'Fuel Management', icon: 'mdi-fuel', to: '/fuel' },
   { title: 'Maintenance', icon: 'mdi-wrench-outline', to: '/maintenance' },

@@ -11,7 +11,10 @@
     </div>
 
     <!-- Unauthenticated State -->
-    <div v-else-if="status === AuthState.unauthenticated" class="text-center py-8">
+    <div
+      v-else-if="status === AuthState.unauthenticated"
+      class="text-center py-8"
+    >
       <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-lock</v-icon>
       <h3 class="text-h6 text-muted mb-2">Authentication Required</h3>
       <p class="text-muted">Please log in to access the dashboard</p>
@@ -22,7 +25,14 @@
 
     <!-- KPI Cards Row -->
     <div v-else class="kpi-section">
-      <v-row justify="end"> 
+      <!-- <v-row>
+        <v-col cols="12" md="3">
+          <v-btn color="primary" @click="openTravelDialog"
+            >Request Travel</v-btn
+          >
+        </v-col>
+      </v-row> -->
+      <v-row justify="end">
         <v-col md="2" cols="auto">
           <v-menu
             v-model="fromMenu"
@@ -44,12 +54,14 @@
             <v-date-picker v-model="fromRaw">
               <template v-slot:actions>
                 <v-btn variant="text" @click="fromMenu = false">Cancel</v-btn>
-                <v-btn variant="text" color="primary" @click="applyFromDate">OK</v-btn>
+                <v-btn variant="text" color="primary" @click="applyFromDate"
+                  >OK</v-btn
+                >
               </template>
             </v-date-picker>
           </v-menu>
         </v-col>
-        
+
         <v-col md="2" cols="auto">
           <v-menu
             v-model="toMenu"
@@ -71,18 +83,20 @@
             <v-date-picker v-model="toRaw">
               <template v-slot:actions>
                 <v-btn variant="text" @click="toMenu = false">Cancel</v-btn>
-                <v-btn variant="text" color="primary" @click="applyToDate">OK</v-btn>
+                <v-btn variant="text" color="primary" @click="applyToDate"
+                  >OK</v-btn
+                >
               </template>
             </v-date-picker>
           </v-menu>
         </v-col>
-        
+
         <v-col cols="auto">
           <v-btn color="primary" @click="reloadReports">Apply</v-btn>
         </v-col>
       </v-row>
-      
-      <v-row justify="end"> 
+
+      <v-row justify="end">
         <v-col cols="auto">
           <v-select
             v-model="selectedPeriod"
@@ -95,7 +109,7 @@
           ></v-select>
         </v-col>
       </v-row>
-      
+
       <v-row>
         <v-col cols="12" sm="6" md="3">
           <div class="kpi-card">
@@ -103,7 +117,7 @@
               <v-icon>mdi-truck</v-icon>
             </div>
             <div class="kpi-content">
-              <h3 class="kpi-value">{{ loading ? '...' : totalVehicles }}</h3>
+              <h3 class="kpi-value">{{ loading ? "..." : totalVehicles }}</h3>
               <p class="kpi-label">Total Vehicles</p>
             </div>
           </div>
@@ -114,7 +128,7 @@
               <v-icon>mdi-check-circle</v-icon>
             </div>
             <div class="kpi-content">
-              <h3 class="kpi-value">{{ loading ? '...' : activeVehicles }}</h3>
+              <h3 class="kpi-value">{{ loading ? "..." : activeVehicles }}</h3>
               <p class="kpi-label">Active Vehicles</p>
             </div>
           </div>
@@ -125,7 +139,9 @@
               <v-icon>mdi-wrench</v-icon>
             </div>
             <div class="kpi-content">
-              <h3 class="kpi-value">{{ loading ? '...' : serviceDueVehicles }}</h3>
+              <h3 class="kpi-value">
+                {{ loading ? "..." : serviceDueVehicles }}
+              </h3>
               <p class="kpi-label">Service Due</p>
             </div>
           </div>
@@ -136,7 +152,7 @@
               <v-icon>mdi-alert</v-icon>
             </div>
             <div class="kpi-content">
-              <h3 class="kpi-value">{{ loading ? '...' : openAnomalies }}</h3>
+              <h3 class="kpi-value">{{ loading ? "..." : openAnomalies }}</h3>
               <p class="kpi-label">Open Alerts</p>
             </div>
           </div>
@@ -216,274 +232,542 @@
       </v-row>
 
       <!-- Success Snackbar -->
-      <v-snackbar v-model="showSuccessSnackbar" color="success" timeout="3000">
+      <v-snackbar
+        v-model="showSuccessSnackbar"
+        color="success"
+        timeout="5000"
+        location="top"
+      >
         {{ successMessage }}
         <template v-slot:actions>
-          <v-btn color="white" variant="text" @click="showSuccessSnackbar = false">Close</v-btn>
+          <v-btn
+            color="white"
+            variant="text"
+            @click="showSuccessSnackbar = false"
+            >Close</v-btn
+          >
         </template>
       </v-snackbar>
+      <v-snackbar
+        v-model="showErrorSnackbar"
+        color="error"
+        timeout="5000"
+        location="top "
+      >
+        {{ errorMessage }}
+        <template v-slot:actions>
+          <v-btn
+            color="white"
+            variant="text"
+            @click="showErrorSnackbar = false"
+          >
+            Close
+          </v-btn>
+        </template>
+      </v-snackbar>
+      <v-dialog v-model="travelDialog" max-width="800px">
+        <v-card>
+          <v-card-title>Request Travel</v-card-title>
+
+          <v-card-text>
+            <v-row>
+              <!-- traveler Department  -->
+             
+              <!-- <v-col cols="12" md="6">
+                <v-menu
+                  v-model="menu"
+                  :close-on-content-click="false"
+                  transition="scale-transition"
+                  offset-y
+                  min-width="auto"
+                >
+                  <template #activator="{ props }">
+                    <v-text-field
+                      v-model="travelForm.date"
+                      label="Request Date"
+                      readonly
+                      v-bind="props"
+                      prepend-inner-icon="mdi-calendar"
+                      variant="outlined"
+                      hide-details
+                    ></v-text-field>
+                  </template>
+
+                  <v-date-picker
+                    v-model="travelForm.date"
+                    @update:model-value="menu = false"
+                    show-adjacent-months
+                    hide-header
+                  ></v-date-picker>
+                </v-menu>
+              </v-col> -->
+               <v-col cols="12" md="6">
+                <v-select
+                  v-model="travelForm.traveler"
+                  label="Traveler"
+                  variant="outlined"
+                  :rules="[(v) => !!v || 'Traveler is required']"
+                  required
+                  item-title="name"
+                  item-value="id"
+                  :items="usersList"
+                  style="width: 350px"
+                  class="mt-3"
+                ></v-select>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-select
+                  :rules="[(v) => !!v || 'Department is required']"
+                  v-model="travelForm.department"
+                  placeholder="Department"
+                  :items="groups"
+                  item-title="name"
+                  item-value="id"
+                  label="Select Department"
+                  class="rounded-lg mt-3"
+                  style="width: 300px"
+                  clearable
+                                  
+
+                ></v-select>
+              </v-col>
+
+            </v-row>
+            <!-- Dynamic Destinations -->
+            <v-row>
+             
+               <v-col cols="12" sm="6">
+                  <v-text-field
+                     class="mt-3"
+                    v-model="travelForm.date"
+                    label=" Request Date"
+                    placeholder="Select  Date"
+                    type="date"
+                    style="font-size: 20px;"
+                    variant="outlined"
+                    
+                  ></v-text-field>
+                </v-col>
+              <v-col cols="12" md="6">
+                <div
+                  v-for="(destination, index) in travelForm.destinations"
+                  :key="index"
+                  class="d-flex align-center mt-3"
+                  style="width: 350px"
+                >
+                  <v-text-field
+                    v-model="travelForm.destinations[index]"
+                    label="Enter Destination"
+                  />
+                  <v-btn
+                    icon
+                    @click="removeDestination(index)"
+                    v-if="travelForm.destinations.length > 1"
+                  >
+                    <v-icon color="red">mdi-minus</v-icon>
+                  </v-btn>
+                  <v-btn
+                    icon
+                    @click="addDestination"
+                    v-if="index === travelForm.destinations.length - 1"
+                  >
+                    <v-icon color="green">mdi-plus</v-icon>
+                  </v-btn>
+                </div>
+              </v-col>
+            </v-row>
+          </v-card-text>
+
+          <v-card-actions>
+            <v-spacer />
+            <v-btn text @click="travelDialog = false">Cancel</v-btn>
+            <v-btn color="primary" @click="submitTravel">Submit</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, computed, ref, watch } from 'vue'
-import * as echarts from 'echarts'
-import moment from 'moment'
+import { onMounted, computed, ref, watch } from "vue";
+import * as echarts from "echarts";
+import moment from "moment";
 
 // Auth composables
-const { logout } = useAuth()
-const { currentUser, status } = useAuthState()
-const { AuthState } = await import('~/types/auth')
-const { dashboardReport, loading, getAllReport } = useReport()
+const { logout } = useAuth();
+const { currentUser, status } = useAuthState();
+const { AuthState } = await import("~/types/auth");
+const {
+  dashboardReport,
+  loading,
+  getAllReport,
+  useRequestTravel,
+  getUsers,
+  usersList,
+} = useReport();
 
 // Chart refs
-const fleetUtilizationChart = ref(null)
-const costPieChart = ref(null)
-const statusDonutChart = ref(null)
-const topVehiclesBarChart = ref(null)
+const fleetUtilizationChart = ref(null);
+const costPieChart = ref(null);
+const statusDonutChart = ref(null);
+const topVehiclesBarChart = ref(null);
+const showSuccessSnackbar = ref(false);
+const showErrorSnackbar = ref(false);
+const successMessage = ref("");
+const errorMessage = ref("");
+const menu = ref(false);
+
+// const { requestTravel } = useRequestTravel() //  correct usage
+
+// Request Travel
+const travelDialog = ref(false);
+const travelForm = ref({
+  department: null,
+  destinations: [""], // start with one destination
+  traveler: null,
+  date: null,
+  // for example, replace with real logged-in user ID
+});
+// open request travel dialog
+const openTravelDialog = () => {
+  travelDialog.value = true;
+};
+const addDestination = () => {
+  travelForm.value.destinations.push("");
+};
+const getUsersHandler = async () => {
+  await getUsers();
+};
+const removeDestination = (index) => {
+  travelForm.value.destinations.splice(index, 1);
+};
+//snackBar messages
+const showSuccessMessage = (message) => {
+  successMessage.value = message;
+  showSuccessSnackbar.value = true;
+};
+
+const showErrorMessage = (message) => {
+  errorMessage.value = message;
+  showErrorSnackbar.value = true;
+};
+// submit travel request
+const submitTravel = async () => {
+  try {
+    // destructure inside the function (client-side)
+    const { requestTravel } = useRequestTravel();
+    await requestTravel(travelForm.value);
+    travelDialog.value = false;
+    showSuccessMessage("Travel request submitted successfully!");
+  } catch (error) {
+    console.error(error);
+    showErrorMessage(
+      "Error submitting travel request: " + (error.message || "Unknown")
+    );
+  }
+};
 
 // Period selector
-const selectedPeriod = ref('6 months')
-const fromMenu = ref(false)
-const toMenu = ref(false)
+const selectedPeriod = ref("6 months");
+const fromMenu = ref(false);
+const toMenu = ref(false);
 
 // Initialize dates to current month range
-const today = new Date()
-const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
-const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0)
+const today = new Date();
+const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
 // Initialize date refs
-const fromRaw = ref(new Date(startOfMonth))
-const toRaw = ref(new Date(endOfMonth))
+const fromRaw = ref(new Date(startOfMonth));
+const toRaw = ref(new Date(endOfMonth));
 
 // Date formatting function
 const formatDate = (dateInput, type) => {
-  if (!dateInput) return ''
-  return moment(dateInput).format('YYYY-MM-DD')
-}
-
+  if (!dateInput) return "";
+  return moment(dateInput).format("YYYY-MM-DD");
+};
+//Department
+const groups = [
+  {
+    id: 1,
+    name: "Service",
+  },
+  {
+    id: 2,
+    name: "Finance",
+  },
+  {
+    id: 3,
+    name: "Sales and Marketing",
+  },
+  {
+    id: 4,
+    name: "Development",
+  },
+  {
+    id: 5,
+    name: "Engineering",
+  },
+  {
+    id: 6,
+    name: "ERM",
+  },
+  {
+    id: 7,
+    name: "Human Resource",
+  },
+];
 // Apply date selections
 const applyFromDate = () => {
-  fromMenu.value = false
-}
+  fromMenu.value = false;
+};
 
 const applyToDate = () => {
-  toMenu.value = false
-}
+  toMenu.value = false;
+};
 
 // Handle period selection
 const handlePeriodChange = () => {
-  const today = new Date()
-  
-  switch(selectedPeriod.value) {
-    case '6 months':
-      fromRaw.value = new Date(today.getFullYear(), today.getMonth() - 6, 1)
-      toRaw.value = new Date(today.getFullYear(), today.getMonth() + 1, 0)
-      break
-    case '1 year':
-      fromRaw.value = new Date(today.getFullYear() - 1, today.getMonth(), 1)
-      toRaw.value = new Date(today.getFullYear(), today.getMonth() + 1, 0)
-      break
-    case '2 years':
-      fromRaw.value = new Date(today.getFullYear() - 2, today.getMonth(), 1)
-      toRaw.value = new Date(today.getFullYear(), today.getMonth() + 1, 0)
-      break
+  const today = new Date();
+
+  switch (selectedPeriod.value) {
+    case "6 months":
+      fromRaw.value = new Date(today.getFullYear(), today.getMonth() - 6, 1);
+      toRaw.value = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      break;
+    case "1 year":
+      fromRaw.value = new Date(today.getFullYear() - 1, today.getMonth(), 1);
+      toRaw.value = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      break;
+    case "2 years":
+      fromRaw.value = new Date(today.getFullYear() - 2, today.getMonth(), 1);
+      toRaw.value = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      break;
   }
-  
-  reloadReports()
-}
+
+  reloadReports();
+};
 
 // Reload reports with current dates
 const reloadReports = async () => {
-  const formattedFrom = formatDate(fromRaw.value)
-  const formattedTo = formatDate(toRaw.value)
+  const formattedFrom = formatDate(fromRaw.value);
+  const formattedTo = formatDate(toRaw.value);
 
   try {
-    loading.value = true
-    await getAllReport(formattedFrom, formattedTo)
-    initializeCharts()
+    loading.value = true;
+    await getAllReport(formattedFrom, formattedTo);
+    initializeCharts();
   } catch (error) {
-    console.error('Error loading reports:', error)
+    console.error("Error loading reports:", error);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // Computed properties from report data
 const totalVehicles = computed(() => {
-  if (!dashboardReport.value?.vehicleStatus) return 0
-  return dashboardReport.value.vehicleStatus.reduce((sum, status) => sum + status.total, 0)
-})
+  if (!dashboardReport.value?.vehicleStatus) return 0;
+  return dashboardReport.value.vehicleStatus.reduce(
+    (sum, status) => sum + status.total,
+    0
+  );
+});
 
 const activeVehicles = computed(() => {
-  if (!dashboardReport.value?.vehicleStatus) return 0
-  const activeStatus = dashboardReport.value.vehicleStatus.find(s => s.status === 1)
-  return activeStatus ? activeStatus.total : 0
-})
+  if (!dashboardReport.value?.vehicleStatus) return 0;
+  const activeStatus = dashboardReport.value.vehicleStatus.find(
+    (s) => s.status === 1
+  );
+  return activeStatus ? activeStatus.total : 0;
+});
 
 const serviceDueVehicles = computed(() => {
-  return dashboardReport.value?.serviceDue || 0
-})
+  return dashboardReport.value?.serviceDue || 0;
+});
 
 const openAnomalies = computed(() => {
-  return dashboardReport.value?.openNotifications || 0
-})
+  return dashboardReport.value?.openNotifications || 0;
+});
 
 // Initialize charts
 const initializeCharts = () => {
   // Fleet Utilization Chart
   if (fleetUtilizationChart.value && dashboardReport.value?.fuelTrends) {
-    const chart = echarts.init(fleetUtilizationChart.value)
-    
+    const chart = echarts.init(fleetUtilizationChart.value);
+
     chart.setOption({
-      tooltip: { 
-        trigger: 'axis',
+      tooltip: {
+        trigger: "axis",
         formatter: (params) => {
-          return `${params[0].name}<br/>Fuel Consumption: ${params[0].value} liters`
-        }
-      },
-      xAxis: { 
-        type: 'category', 
-        data: dashboardReport.value.fuelTrends.map(t => t.ym) 
-      },
-      yAxis: { 
-        type: 'value', 
-        name: 'Liters',
-        axisLabel: { formatter: '{value} L' }
-      },
-      series: [{
-        name: 'Fuel Consumption',
-        data: dashboardReport.value.fuelTrends.map(t => t.total),
-        type: 'line',
-        smooth: true,
-        areaStyle: {
-          color: {
-            type: 'linear',
-            x: 0,
-            y: 0,
-            x2: 0,
-            y2: 1,
-            colorStops: [
-              { offset: 0, color: 'rgba(243, 215, 14, 0.3)' },
-              { offset: 1, color: 'rgba(243, 215, 14, 0.1)' }
-            ]
-          }
+          return `${params[0].name}<br/>Fuel Consumption: ${params[0].value} liters`;
         },
-        color: '#f3d70e',
-        symbol: 'circle',
-        symbolSize: 10,
-        lineStyle: { width: 3 }
-      }]
-    })
+      },
+      xAxis: {
+        type: "category",
+        data: dashboardReport.value.fuelTrends.map((t) => t.ym),
+      },
+      yAxis: {
+        type: "value",
+        name: "Liters",
+        axisLabel: { formatter: "{value} L" },
+      },
+      series: [
+        {
+          name: "Fuel Consumption",
+          data: dashboardReport.value.fuelTrends.map((t) => t.total),
+          type: "line",
+          smooth: true,
+          areaStyle: {
+            color: {
+              type: "linear",
+              x: 0,
+              y: 0,
+              x2: 0,
+              y2: 1,
+              colorStops: [
+                { offset: 0, color: "rgba(243, 215, 14, 0.3)" },
+                { offset: 1, color: "rgba(243, 215, 14, 0.1)" },
+              ],
+            },
+          },
+          color: "#f3d70e",
+          symbol: "circle",
+          symbolSize: 10,
+          lineStyle: { width: 3 },
+        },
+      ],
+    });
   }
 
   // Cost Pie Chart
   if (costPieChart.value && dashboardReport.value?.costBreakdown) {
-    const chart = echarts.init(costPieChart.value)
-    const { fuel, maintenance, other } = dashboardReport.value.costBreakdown
-    
+    const chart = echarts.init(costPieChart.value);
+    const { fuel, maintenance, other } = dashboardReport.value.costBreakdown;
+
     chart.setOption({
-      tooltip: { trigger: 'item' },
-      legend: { top: 'bottom' },
-      series: [{
-        name: 'Cost',
-        type: 'pie',
-        radius: ['40%', '70%'],
-        avoidLabelOverlap: false,
-        itemStyle: { borderRadius: 10, borderColor: '#ffffff', borderWidth: 2 },
-        label: { show: true, formatter: '{b}: {d}%' },
-        data: [
-          { value: fuel, name: 'Fuel', itemStyle: { color: '#f3d70e' } },
-          { value: maintenance, name: 'Maintenance', itemStyle: { color: '#fbb339' } },
-          { value: other, name: 'Other', itemStyle: { color: '#f5e35e' } }
-        ]
-      }]
-    })
+      tooltip: { trigger: "item" },
+      legend: { top: "bottom" },
+      series: [
+        {
+          name: "Cost",
+          type: "pie",
+          radius: ["40%", "70%"],
+          avoidLabelOverlap: false,
+          itemStyle: {
+            borderRadius: 10,
+            borderColor: "#ffffff",
+            borderWidth: 2,
+          },
+          label: { show: true, formatter: "{b}: {d}%" },
+          data: [
+            { value: fuel, name: "Fuel", itemStyle: { color: "#f3d70e" } },
+            {
+              value: maintenance,
+              name: "Maintenance",
+              itemStyle: { color: "#fbb339" },
+            },
+            { value: other, name: "Other", itemStyle: { color: "#f5e35e" } },
+          ],
+        },
+      ],
+    });
   }
 
   // Status Donut Chart
   if (statusDonutChart.value && dashboardReport.value?.vehicleStatus) {
-    const chart = echarts.init(statusDonutChart.value)
-    
+    const chart = echarts.init(statusDonutChart.value);
+
     chart.setOption({
-      tooltip: { trigger: 'item' },
-      legend: { top: 'bottom' },
-      series: [{
-        name: 'Status',
-        type: 'pie',
-        radius: ['50%', '70%'],
-        avoidLabelOverlap: false,
-        itemStyle: { borderRadius: 10, borderColor: '#ffffff', borderWidth: 2 },
-        label: { show: true, formatter: '{b}: {d}%' },
-        data: dashboardReport.value.vehicleStatus.map(status => ({
-          value: status.total,
-          name: getStatusName(status.status),
-          itemStyle: { color: getStatusColor(status.status) }
-        }))
-      }]
-    })
+      tooltip: { trigger: "item" },
+      legend: { top: "bottom" },
+      series: [
+        {
+          name: "Status",
+          type: "pie",
+          radius: ["50%", "70%"],
+          avoidLabelOverlap: false,
+          itemStyle: {
+            borderRadius: 10,
+            borderColor: "#ffffff",
+            borderWidth: 2,
+          },
+          label: { show: true, formatter: "{b}: {d}%" },
+          data: dashboardReport.value.vehicleStatus.map((status) => ({
+            value: status.total,
+            name: getStatusName(status.status),
+            itemStyle: { color: getStatusColor(status.status) },
+          })),
+        },
+      ],
+    });
   }
 
   // Top Vehicles Bar Chart
   if (topVehiclesBarChart.value && dashboardReport.value?.vehiclePerformance) {
-    const chart = echarts.init(topVehiclesBarChart.value)
+    const chart = echarts.init(topVehiclesBarChart.value);
     const top = [...dashboardReport.value.vehiclePerformance]
       .sort((a, b) => b.avg_km_per_l - a.avg_km_per_l)
-      .slice(0, 5)
-    
+      .slice(0, 5);
+
     chart.setOption({
-      tooltip: { trigger: 'axis' },
-      xAxis: { 
-        type: 'category', 
-        data: top.map(v => v.vehicleData.plateNo) 
+      tooltip: { trigger: "axis" },
+      xAxis: {
+        type: "category",
+        data: top.map((v) => v.vehicleData.plateNo),
       },
-      yAxis: { 
-        type: 'value', 
-        name: 'km/l' 
+      yAxis: {
+        type: "value",
+        name: "km/l",
       },
-      series: [{
-        data: top.map(v => v.avg_km_per_l),
-        type: 'bar',
-        itemStyle: { color: '#f3d70e', borderRadius: [8, 8, 0, 0] },
-        barWidth: 32
-      }]
-    })
+      series: [
+        {
+          data: top.map((v) => v.avg_km_per_l),
+          type: "bar",
+          itemStyle: { color: "#f3d70e", borderRadius: [8, 8, 0, 0] },
+          barWidth: 32,
+        },
+      ],
+    });
   }
-}
+};
 
 // Helper functions for status
 const getStatusName = (statusCode) => {
   const statusMap = {
-    1: 'Active',
-    2: 'Maintenance',
-    3: 'Inactive'
-  }
-  return statusMap[statusCode] || 'Unknown'
-}
+    1: "Active",
+    2: "Maintenance",
+    3: "Inactive",
+  };
+  return statusMap[statusCode] || "Unknown";
+};
 
 const getStatusColor = (statusCode) => {
   const colorMap = {
-    1: '#f3d70e',    // Active
-    2: '#fbb339',    // Maintenance
-    3: '#f5e35e'     // Inactive
-  }
-  return colorMap[statusCode] || '#cccccc'
-}
+    1: "#f3d70e", // Active
+    2: "#fbb339", // Maintenance
+    3: "#f5e35e", // Inactive
+  };
+  return colorMap[statusCode] || "#cccccc";
+};
 
 // Watch for authentication state changes
-watch(() => status.value, async (newStatus) => {
-  if (newStatus === AuthState.authenticated) {
-    await reloadReports()
+watch(
+  () => status.value,
+  async (newStatus) => {
+    if (newStatus === AuthState.authenticated) {
+      await reloadReports();
+    }
   }
-})
+);
 
 onMounted(async () => {
-  await nextTick()
+  await getUsersHandler();
+  await nextTick();
   if (status.value === AuthState.authenticated) {
-    await reloadReports()
+    await reloadReports();
   }
-})
+});
 </script>
 
 <style scoped>
@@ -499,8 +783,6 @@ onMounted(async () => {
   color: #2c3e50;
   margin: 0 0 8px 0;
 }
-
-
 
 .kpi-section {
   margin-bottom: 32px;
@@ -739,7 +1021,8 @@ onMounted(async () => {
   font-weight: 500;
 }
 
-.mileage-info, .next-service {
+.mileage-info,
+.next-service {
   font-size: 12px;
   color: #6c757d;
 }
@@ -783,20 +1066,18 @@ onMounted(async () => {
   .modern-dashboard {
     padding: 16px;
   }
-  
 
-  
   .chart-header {
     flex-direction: column;
     gap: 16px;
   }
-  
+
   .fuel-cards-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .quick-actions-grid {
     grid-template-columns: 1fr;
   }
 }
-</style> 
+</style>

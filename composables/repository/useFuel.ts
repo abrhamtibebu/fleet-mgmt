@@ -104,9 +104,13 @@ export const useFuel = () => {
       });
       fuelRecords.value.push(data?.result)
       return data
-    } catch (e) {
-      error.value = e
+    } catch (e: any) {
+      // error.value = e
+     error.value = e.data?.error || 'Failed to create fuel';
+
       console.error(e)
+     throw e; 
+
     } finally {
       loading.value = false
     }
@@ -136,9 +140,12 @@ export const useFuel = () => {
         body: fuelCard
       });
       fuelCards.value.push(data)
-    } catch (e) {
-      error.value = 'Failed to add fuel card'
+    } catch (e: any) {
+      // error.value = 'Failed to add fuel card'
+      error.value = e.data?.error || 'Failed to create card';
+
       console.error(e)
+     throw e; 
     } finally {
       loading.value = false
     }

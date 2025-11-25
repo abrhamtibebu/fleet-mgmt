@@ -5,6 +5,7 @@
       <p class="vehicles-subtitle">
         Manage your fleet vehicles, track maintenance, and monitor performance
       </p>
+
     </div>
 
     <!-- Action Bar -->
@@ -156,6 +157,14 @@
   @click="openDepartmentDialog(vehicle.id)"
     >
       Department 
+    </v-btn>
+     <v-btn
+      variant="outlined"
+      size="small"
+      class="vehicle-btn"
+  @click="openTravelsDialog(vehicle.id)"
+    >
+    Travels
     </v-btn>
   </v-card-actions>
 </v-card>
@@ -551,7 +560,7 @@
                 ></v-select>
               </v-col> -->
                           </v-row>
-                <v-row class="grid-gap-sm">
+                <v-row claTravelss="grid-gap-sm">
 
               <v-col cols="12" sm="6">
                 <v-text-field
@@ -819,6 +828,10 @@
           <v-icon class="me-2">mdi-chart-line</v-icon>
           Analytics
         </v-tab>
+         <v-tab value="travel" class="vehicle-tab">
+          <v-icon class="me-2">mdi-train-car</v-icon>
+          Travles
+        </v-tab>
       </v-tabs>
 
       <v-window v-model="activeTab" class="vehicle-details-window">
@@ -1060,9 +1073,9 @@
     </div>
   </v-card-text>
 </v-card>
-</v-col cols="12" md="6">
+</v-col >
 <!-- ============ 4 Road Fund card========-->
- <v-col>
+ <v-col cols="12" md="6">
 <v-card class="info-card" elevation="0" v-if="
   selectedVehicle?.vehicleInsurance &&
   selectedVehicle.vehicleInsurance.some(item => item.type === 4)
@@ -1382,6 +1395,71 @@
       </v-row>
           </div>
         </v-window-item>
+        <!--Travel Tab-->
+          <!-- Fuel Records Tab -->
+        <v-window-item value="travel">
+          <div class="fuel-content pa-6">
+            <div class="d-flex align-center justify-space-between mb-4">
+              <h3 class="section-title">Travels </h3>
+               <!-- @click="addTravelEntry(selectedVehicle)" -->
+              <v-btn
+                color="primary"
+                prepend-icon="mdi-plus"
+                @click="openTravelsDialog(selectedVehicle.id)"
+              >
+                Add Travel
+              </v-btn>
+            </div>
+            
+            <div v-if="selectedVehicle?.fuelRecord?.length" class="fuel-records-grid">
+              <v-card
+              v-for="(travel, index) in selectedVehicle.fuelRecord"
+              :key="'travel-' + index"
+                class="fuel-record-card"
+                elevation="0"
+              >
+                <v-card-text class="fuel-record-content">
+                  <div class="fuel-record-header">
+                    <div class="fuel-record-date">
+                      <v-icon class="me-2" color="primary">mdi-calendar</v-icon>
+                      {{ formatDate(travel.createdAt) }}
+            </div>
+                    <v-chip
+                      :color="travel.quantity > 50 ? 'success' : 'warning'"
+                      size="small"
+                      variant="tonal"
+                    >
+                      {{ travel.quantity }}
+                    </v-chip>
+          </div>
+                  <div class="fuel-record-details">
+                    <div class="fuel-detail-item">
+                      <v-icon size="small" class="me-2">mdi-currency-usd</v-icon>
+                      <span class="fuel-label">Amount:</span>
+                      <span class="fuel-value">{{ travel.amount?.toLocaleString() }} ETB</span>
+                    </div>
+                    <div class="fuel-detail-item">
+                      <v-icon size="small" class="me-2">mdi-speedometer</v-icon>
+                      <span class="fuel-label">Odometer:</span>
+                      <span class="fuel-value">{{ travel.odometerReading?.toLocaleString() }} km</span>
+                    </div>
+                    <div class="fuel-detail-item">
+                      <v-icon size="small" class="me-2">mdi-gas-station</v-icon>
+                      <span class="fuel-label">Station:</span>
+                      <span class="fuel-value">{{ travel.fuelStation || 'N/A' }}</span>
+                    </div>
+                  </div>
+                </v-card-text>
+              </v-card>
+            </div>
+            <div v-else class="empty-state">
+              <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-car-off</v-icon>
+              <h3 class="text-h6 text-muted mb-2">No Travel records</h3>
+              <p class="text-muted">Add your first travel record to get started</p>
+            </div>
+          </div>
+        </v-window-item>
+
       </v-window>
     </v-card-text>
 
@@ -1494,6 +1572,87 @@
       </v-card>
     </v-dialog>
 
+    <!--Travels dialog -->
+     <v-dialog v-model="vehicleTravelsDialog" max-width="600px">
+      <v-card class="dialog-card">
+        <v-card-title class="dialog-title">
+          <span class="title-icon-badge"><v-icon size="20" color="warning">mdi-train-car</v-icon></span>
+           Travels 
+        </v-card-title>
+        <v-card-text class="pa-4">
+          <v-form ref="fuelForm" v-model="DepartmentFormValid">
+            <v-row>
+              <v-col cols="12" sm="6">
+                  <v-text-field
+                    density="compact"
+                    v-model="travelEntryForm.date"
+                    label=" travel Date"
+                    placeholder="Select  Date"
+                    type="date"
+                    variant="outlined"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                <v-text-field
+                  type="number"
+                  v-model="travelEntryForm.startKm"
+                  label= "Start Kilometer"
+                  variant="outlined"
+                  :rules="[v => !!v || 'Start kilo metre is required']"
+                  required
+                  readonly
+                ></v-text-field>
+              </v-col>
+               <v-col cols="12" sm="6">
+                <v-text-field
+                  type="number"
+                  v-model="travelEntryForm.endKm"
+                  label="End kilo metre"
+                  variant="outlined"
+                  :rules="[v => !!v || 'End kilo metre is required']"
+                  required
+                ></v-text-field>
+              </v-col>
+               <v-col cols="12" sm="6">
+                <v-text-field
+                  v-model="travelEntryForm.travelkm"
+                  label="Travel kilo metre "
+                  variant="outlined"
+                  :rules="[v => !!v || 'travel kilo meter is required']"
+                  required
+                  readonly
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  v-model="travelEntryForm.travelRoute"
+                  label="Travel Route "
+                  variant="outlined"
+                  :rules="[v => !!v || 'Travel Route is required']"
+                  required
+                ></v-text-field>
+              </v-col>
+               <v-col cols="12" sm="6">
+                <v-textarea
+                  v-model="travelEntryForm.purposeOfTravel"
+                  label="Purpose Of Travel"
+                  variant="outlined"
+                  :rules="[v => !!v || 'Purpose Of Travel is required']"
+                  required
+                ></v-textarea>
+              </v-col>
+                
+            </v-row>
+          </v-form>
+        </v-card-text>
+        <v-card-actions class="dialog-actions">
+          <v-spacer></v-spacer>
+          <v-btn variant="outlined" @click="vehicleTravelsDialog = false">Cancel</v-btn>
+          <!-- :disabled="!DepartmentFormValid" -->
+          <v-btn color="warning" :loading="saving"  @click="savetravelEntry" prepend-icon="mdi-content-save">Add Travels</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
         <!-- Success Snackbar -->
     <v-snackbar
       v-model="showSuccessSnackbar"
@@ -1532,11 +1691,13 @@
 
     <LazyAddFuel v-if="addFuelModal" :vehicle="currItem" @close="addFuelModal = false" @showSuccess="showSuccess"/>
     <LazyAddMaintenance v-if="addMainModal" :vehicle="currItem" @close="addMainModal = false" @showSuccess="showSuccess"/>
+    <LazyAddTravel v-if="addTravelModel" :vehicle="currItem" @close="addTravelModel = false" @showSuccess="showSuccess"/>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
+import AddTravel from "~/components/AddTravel.vue";
 // import { groups } from "~/plugins/department";
 
 // import vehicles from "~/server/api/vehicles";
@@ -1635,10 +1796,12 @@ const searchQuery = ref("");
 const showAddDialog = ref(false);
 const vehicleDetailDialog = ref(false);
 const vehicleDepartmentDialog = ref(false);
+const vehicleTravelsDialog = ref(false);
 const selectedVehicle = ref<any>(null);
 const editingVehicle = ref(null);
 const addFuelModal = ref(false)
 const addMainModal = ref(false)
+const addTravelModel = ref(false)
 const saving = ref(false);
 const formValid = ref(false);
 const selectedVehicleId = ref<number | null>(null); 
@@ -1778,6 +1941,35 @@ const saveDepartmentEntry = async () => {
   }
 };
 
+const savetravelEntry = async () => {
+      console.log('FFFFFF:', travelEntryForm)
+
+  saving.value = true;
+  try {
+    // if (!selectedVehicleId.value || !travelEntryForm.value.startKm) {
+    //   throw new Error('Vehicle or Department not selected');
+    // }
+
+    // await addDepartment(selectedVehicleId.value, departmentEntryForm.value.department);
+
+    vehicleTravelsDialog.value = false;
+    // resetDepartmentForm();
+
+    showSuccessMessage("Travles Register Successfully"); 
+  } catch (error: any) {
+    console.error('Error While  Travles  Register :', error);
+
+    // If it's an API error, show the backend message if available
+    const backendMessage = error.data?.error || 
+                          error.data?.message || 
+                          error.message 
+                         
+    
+    showErrorMessage(backendMessage);
+  } finally {
+    saving.value = false;
+  }
+};
 
 
 const resetDepartmentForm = () => {
@@ -1790,6 +1982,51 @@ const openDepartmentDialog = (vehicleId: number) => {
   selectedVehicleId.value = vehicleId;
   vehicleDepartmentDialog.value = true;
 };
+// const openTravelsDialog = (vehicleId: number) => {
+//   selectedVehicleId.value = vehicleId;
+//   vehicleTravelsDialog.value = true;
+//   travelEntryForm.startKm = vehicleList.value.currentMileage;
+
+// };
+// const openTravelsDialog = (vehicleId: number) => {
+//   selectedVehicleId.value = vehicleId;
+//   vehicleTravelsDialog.value = true;
+
+//   const selectedVehicle = vehicleList.value.find(v => v.id === vehicleId);
+//    console.log('1111111111111:', selectedVehicle);
+//   console.log('22222222222222:', vehicleId);
+//   console.log('333333333333:', vehicleList.value);
+
+//   if (selectedVehicle) {
+// travelEntryForm.value.startKm = selectedVehicle.currentMileage
+
+// // travelEntryForm.value.travelkm  = travelEntryForm.value.endKm - travelEntryForm.value.startKm
+//   } else {
+//     travelEntryForm.startKm = 0;
+//   }
+//     travelEntryForm.value.endKm = 0
+//   // travelEntryForm.value.travelkm = 0
+// };
+const openTravelsDialog = (vehicleId) => {
+  selectedVehicleId.value = vehicleId;
+  vehicleTravelsDialog.value = true;
+
+  const selectedVehicle = vehicleList.value.find(v => v.id === vehicleId);
+
+  travelEntryForm.value = {
+    startKm: selectedVehicle ? selectedVehicle.currentMileage : 0,
+    endKm: 0,
+    travelkm: 0
+  };
+};
+
+
+//  openTravelsDialog(vehicle) {
+//     selectedVehicle = vehicle;
+//     vehicleTravelsDialog = true;
+//     // Autofill startKm with current mileage
+//     travelEntryForm.startKm = vehicle.currentMileage;
+//   };
 
 // Current insurance entry for the form
 const currentInsuranceEntry = ref({
@@ -1826,6 +2063,16 @@ const departmentEntryForm = ref({
   department: '',
   
 })
+const travelEntryForm = ref({
+  date: '',
+  startKm: '',
+  endKm: '',
+  travelkm: '',
+  purposeOfTravel: '',
+  travelRoute: '',
+  
+})
+
 
 // const vendorCardOptions = computed(() => {
 
@@ -1874,6 +2121,12 @@ const addMileageEntry = (vehicle: any) => {
   currItem.value = vehicle
   addFuelModal.value = true
   console.log("Add mileage entry for:", vehicle);
+};
+const addTravelEntry = (vehicle: any) => {
+  // Navigate to mileage entry page
+  currItem.value = vehicle
+  addTravelModel.value = true
+  console.log("Add travel entry for:", vehicle);
 };
 
 const showSuccess = async (message: string) => {
@@ -2177,6 +2430,19 @@ const resetVehicleForm = () => {
   clearInsuranceEntry();
   editingVehicle.value = null;
 };
+// watch(
+//   () => travelEntryForm.value.endKm,
+//   (newEndKm) => {
+//     const startKm = travelEntryForm.value.startKm || 0
+//     travelEntryForm.value.travelkm = newEndKm - startKm
+//   }
+// )
+watch(
+  () => [travelEntryForm.value.startKm, travelEntryForm.value.endKm],
+  ([startKm, endKm]) => {
+    travelEntryForm.value.travelkm = (endKm || 0) - (startKm || 0);
+  }
+);
 // async function loadVehicles() {
 //   vehicles.value = await getVehicles()
 // }
@@ -2213,6 +2479,7 @@ onMounted(async () => {
     // initializeData()
   ]);
 });
+
 </script>
 
 <style scoped>
