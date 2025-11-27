@@ -31,6 +31,7 @@
     <v-col cols="12">
       <h2>Travel Requests</h2>
 </v-col>
+ 
    <v-col cols="12" md="2" sm="12" class="ml-4">
         <v-select
           :items="statuses"
@@ -44,9 +45,20 @@
           hide-details
         ></v-select>
       </v-col>
+      
       <v-col>
-        <v-btn @click="filterData()" color="yellow">filter</v-btn>
+        <v-btn @click="filterData()" color="yellow" class="mt-2">filter</v-btn>
       </v-col>
+      <v-col cols="12" md="6"><v-btn
+  v-if="travelRequests.length"
+  @click="$JSONToCSVConvertor(filterexportData(), 'TravelRequests', true)"
+  dense
+  small
+  class=" mx-3 float-right "
+>
+  <v-icon color="yellow" small class="mr-2" >mdi-export</v-icon>
+  Export
+</v-btn></v-col>
      <!-- :items="travelRequests" -->
       <v-data-table
         :headers="headers"
@@ -365,6 +377,8 @@ import { onMounted, computed, ref, watch } from "vue";
 import { nextTick } from "vue";
 import * as echarts from "echarts";
 import moment from "moment";
+const { $JSONToCSVConvertor } = useNuxtApp();
+
 
 const showSuccessSnackbar = ref(false);
 const showErrorSnackbar = ref(false);
@@ -609,14 +623,14 @@ const performAction = async () => {
   let statusNumber = action === "Reject" ? 3 : 4;
 
   try {
-    const dataPayload = {
-      vehicleId: Number(travelApproveForm.value.vehicleId),
-    };
+    // const dataPayload = {
+    //   vehicleId: Number(travelApproveForm.value.vehicleId),
+    // };
 
     if (action === "Reject") {
-      await rejectTravelRequest(requestId, statusNumber, dataPayload);
+      await rejectTravelRequest(requestId, statusNumber);
     } else if (action === "Cancel") {
-      await cancelTravelRequest(requestId, statusNumber, dataPayload);
+      await cancelTravelRequest(requestId, statusNumber);
     }
 
     closeConfirmDialog();
@@ -671,7 +685,7 @@ const handleVehicleSelect = async (vehicleId) => {
   const selectedVehicle = vehicleList.value.find(v => v.id === vehicleId);
   travelApproveForm.value.startKm = selectedVehicle?.currentMileage ?? 0;
 
-  // 🔥 Use today's date instead of request date
+  //  Use today's date instead of request date
   const todayDate = getTodayDate();
 
   try {
@@ -872,6 +886,28 @@ const filterData = () => {
     filteredRequests.value = travelRequests.value; // show all
   }
 };
+// export value get a real data 
+
+const getVehiclePlate = (vehicle) => {
+  return vehicle?.plateNo || "-";
+};
+
+const getStatusName = (statusId) => {
+  const status = statuses.find((s) => s.id === statusId);
+  return status ? status.name : "-";
+};
+const filterexportData = () =>
+  travelRequests.value.map((item) => ({
+    ID: item.id,
+    Department: getDepartmentName(item.department),
+    Vehicle: getVehiclePlate(item.vehicle),
+    Route: item.route,
+    Travelers: getTravelerNames(item.travelers),
+    Status: getStatusName(item.status),
+    TravelDate: item.travelDate,
+    CreatedAt: item.createdAt,
+  }));
+
 
 
 onMounted(async () => {

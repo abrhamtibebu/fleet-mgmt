@@ -256,18 +256,18 @@ const getTravelRequests = async () => {
     })
   }
 
-  const rejectTravelRequest = async ( reqId: any, status: any , payload: any ) => {
+  const rejectTravelRequest = async ( reqId: any, status: any  ) => {
     return await $apiFetch(`/vehicle/${reqId}/travelreq/${status}`, {
       method: 'PUT',
-          body: payload,
+         
 
 
     })
   }
-   const cancelTravelRequest = async (  reqId: any , status: any , payload: any ) => {
+   const cancelTravelRequest = async (  reqId: any , status: any  ) => {
     return await $apiFetch(`/vehicle/${reqId}/travelreq/${status}`, {
       method: 'PUT',
-     body: payload,
+    
 
     })
   }
