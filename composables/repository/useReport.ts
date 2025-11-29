@@ -248,8 +248,16 @@ const getTravelRequests = async () => {
       method: 'GET'
     })
   }
-
+  // approve request
   const approveTravelRequest = async ( reqId: any,status: any ,  payload: any) => {
+    return await $apiFetch(`/vehicle/${reqId}/travelreq/${status}`, {
+      method: 'PUT',
+      body: payload,
+    })
+  }
+
+  // close travel
+    const closeTravelRequest = async ( reqId: any,status: any ,  payload: any) => {
     return await $apiFetch(`/vehicle/${reqId}/travelreq/${status}`, {
       method: 'PUT',
       body: payload,
@@ -358,6 +366,7 @@ const getAnalyticsReport = async (from: string, to: string) => {
      requestTravel,
     getTravelRequests,
     approveTravelRequest,
+    closeTravelRequest,
     rejectTravelRequest,
     updateTravelStatus,
     getVehicles,

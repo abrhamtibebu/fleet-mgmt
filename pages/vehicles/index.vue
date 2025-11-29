@@ -1411,7 +1411,7 @@
               </v-btn>
             </div>
             
-            <div v-if="selectedVehicle?.fuelRecord?.length" class="fuel-records-grid">
+            <!-- <div v-if="selectedVehicle?.fuelRecord?.length" class="fuel-records-grid">
               <v-card
               v-for="(travel, index) in selectedVehicle.fuelRecord"
               :key="'travel-' + index"
@@ -1456,7 +1456,74 @@
               <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-car-off</v-icon>
               <h3 class="text-h6 text-muted mb-2">No Travel records</h3>
               <p class="text-muted">Add your first travel record to get started</p>
+            </div> -->
+             <div v-if="selectedVehicle?.requests?.length" class="fuel-records-grid">
+      <v-card
+        v-for="(travel, index) in selectedVehicle.requests"
+        :key="'travel-' + index"
+        class="fuel-record-card"
+        elevation="0"
+      >
+        <v-card-text class="fuel-record-content">
+          
+          <!-- Header row -->
+          <div class="fuel-record-header">
+            <div class="fuel-record-date">
+              <v-icon class="me-2" color="primary">mdi-calendar</v-icon>
+              {{ formatDate(travel.createdAt) }}
             </div>
+
+            <v-chip
+              :color="travel.distance > 50 ? 'success' : 'warning'"
+              size="small"
+              variant="tonal"
+            >
+              {{ travel.distance }} km
+            </v-chip>
+          </div>
+
+          <!-- Travel details 
+          department: null,
+  route: [""], // start with one destination
+  travelers: [],
+  travelDate:-->
+          <div class="fuel-record-details">
+
+            <div class="fuel-detail-item">
+              <v-icon size="small" class="me-2">mdi-map-marker</v-icon>
+              <span class="fuel-label">City:</span>
+              <span class="fuel-value">{{ travel.travelers || 'N/A' }}</span>
+            </div>
+
+            <div class="fuel-detail-item">
+              <v-icon size="small" class="me-2">mdi-speedometer</v-icon>
+              <span class="fuel-label">Start KM:</span>
+              <span class="fuel-value">{{ travel.department?.toLocaleString() }}</span>
+            </div>
+
+            <div class="fuel-detail-item">
+              <v-icon size="small" class="me-2">mdi-speedometer-medium</v-icon>
+              <span class="fuel-label">End KM:</span>
+              <span class="fuel-value">{{ travel.route?.toLocaleString() }}</span>
+            </div>
+
+            <div class="fuel-detail-item">
+              <v-icon size="small" class="me-2">mdi-tape-measure</v-icon>
+              <span class="fuel-label">Distance:</span>
+              <span class="fuel-value">{{ travel.travelDate }} </span>
+            </div>
+
+          </div>
+        </v-card-text>
+      </v-card>
+    </div>
+
+    <!-- Empty state -->
+    <div v-else class="empty-state">
+      <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-car-off</v-icon>
+      <h3 class="text-h6 text-muted mb-2">No Travel records</h3>
+      <p class="text-muted">Add your first travel record to get started</p>
+    </div>
           </div>
         </v-window-item>
 

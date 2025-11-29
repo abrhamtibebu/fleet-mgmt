@@ -76,10 +76,15 @@
         <template #item.travelers="{ item }">
           {{ getTravelerNames(item.travelers) }}
         </template>
-        <template #item.department="{ item }">
+        <!-- selected department for the travel request-->
+        
+        <!-- <template #item.department="{ item }">
           {{ getDepartmentName(item.department) }}
-        </template>
+        </template> -->
 
+        <template #item.department="{ item }">
+      {{ getDepartmentName(item.department, item.purpose) }}
+     </template>
         <!-- Actions column -->
          <!-- @click="openApproveTravelDialog(item.id, 'approve')"  -->
        <template #item.actions="{ item }">
@@ -119,6 +124,7 @@
   </template>
 </v-tooltip>
 
+
 <!-- Cancel -->
    <!-- @click="openConfirmDialog(item.vehicleId, 'Cancel')"  2 appro   3 rejuct 4 cancle-->
 
@@ -137,6 +143,35 @@
     </v-btn>
   </template>
 </v-tooltip>
+
+<!-- close travel by entering end kilometer-->
+
+  <v-tooltip text="Close Travel Request" location="top" >
+    <template #activator="{ props }" v-if="item.status ===2 ">
+      <v-btn
+        v-bind="props"
+        icon
+        variant="text"
+        size="small"
+        color="green"
+        @click="openCloseTravelDialog(item)"
+      >
+        <v-icon size="18"> mdi-file-chart-check-outline</v-icon>
+      </v-btn>
+      
+    </template>
+  </v-tooltip>
+
+   <template v-if="item.status ===5">
+    <p>closed</p>
+  </template>
+
+   <!-- <template v-if="item.status ===4">
+    <p>canceled</p>
+  </template>
+   <template v-if="item.status ===3">
+    <p>Rejected</p>
+  </template> -->
 </template>
       </v-data-table>
       <!-- Confirmation Dialog -->
@@ -161,9 +196,23 @@
 
   <v-dialog v-model="travelDialog" max-width="800px">
     <v-card>
-      <v-card-title>Request Travel</v-card-title>
+      <v-card-title class="mt-3">Request Travel</v-card-title>
 
       <v-card-text>
+        <v-row justify="end">
+            <v-col cols="12" md="3" class="mt-n8">
+            <v-select
+              v-model="travelForm.purpose"
+              label="purpose"
+              variant="outlined"
+              :rules="[(v) => !!v || 'select  is purpose']"
+              required
+              item-title="name"
+              item-value="id"
+              :items="purposes"
+            ></v-select>
+          </v-col>
+        </v-row>
         <v-row>
           <!-- traveler Department  -->
 
@@ -206,11 +255,10 @@
               item-value="id"
               :items="usersList"
               style="width: 350px"
-              class="mt-3"
               multiple
             ></v-select>
           </v-col>
-          <v-col cols="12" md="6">
+          <v-col cols="12" md="6" v-if="travelForm.purpose == 1">
             <v-select
               :rules="[(v) => !!v || 'Department is required']"
               v-model="travelForm.department"
@@ -218,10 +266,26 @@
               :items="groups"
               item-title="name"
               item-value="id"
-              label="Select Department"
-              class="rounded-lg mt-3"
+              label="Select Department"  
+              class="rounded-lg "
               style="width: 300px"
               clearable
+               multiple
+            ></v-select>
+          </v-col>
+           <v-col cols="12" md="6"  v-if="travelForm.purpose == 2">
+            <v-select
+              :rules="[(v) => !!v || 'For other use Use  is required']"
+              v-model="travelForm.department"
+              placeholder="other Use"
+              :items="otheruses"
+              item-title="name"
+              item-value="id"
+              label="Select For Other Use"
+              class="rounded-lg "
+              style="width: 300px"
+              clearable
+              multiple
             ></v-select>
           </v-col>
         </v-row>
@@ -335,6 +399,66 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+
+  <!-- close dialog-->
+     <v-dialog v-model="closeTravelDialog" max-width="600px">
+    <v-card>
+      <v-card-title> close Travel  </v-card-title>
+
+      <v-card-text>
+        <v-row>
+          <!-- Vehicle Selection -->
+          <!-- <v-col cols="12" md="6">
+            <v-autocomplete
+              v-model="travelApproveForm.vehicleId"
+              :items="vehicleList"
+              item-title="plateNo"
+              item-value="id"
+              label="Select Vehicle*"
+              placeholder="Choose vehicle"
+              variant="outlined"
+              density="compact"
+              :rules="[(v) => !!v || 'Vehicle is required']"
+              required
+              @update:model-value="handleVehicleSelect"
+            ></v-autocomplete>
+             @change="handleVehicleSelect" 
+          </v-col> -->
+          <!-- Start Kilometer -->
+          <v-col cols="12" md="6">
+            <v-text-field
+              type="number"
+              v-model="travelcloseForm.endKm"
+              label="End Kilometer"
+              variant="outlined"
+              :rules="[(v) => !!v || 'End kilometer is required']"
+              required
+              density="compact"
+            ></v-text-field>
+          </v-col>
+
+          <!-- Remarks -->
+          <!-- <v-col cols="12" md="6">
+            <v-textarea
+              v-model="travelApproveForm.remarks"
+              label="Remarks"
+              variant="outlined"
+              rows="3"
+              auto-grow
+            ></v-textarea>
+          </v-col> -->
+        </v-row>
+      </v-card-text>
+<p v-if="assignedCountMessage" style="color:#ff9800;font-weight:500;">
+  {{ assignedCountMessage }}
+</p>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn text @click="closeTravelDialog = false">Cancel</v-btn>
+        <v-btn color="primary" @click="closeTravel">Close</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
   <v-snackbar
     v-model="showSuccessSnackbar"
     color="success"
@@ -385,6 +509,7 @@ const showErrorSnackbar = ref(false);
 const successMessage = ref("");
 const errorMessage = ref("");
 const approveTravelDialog = ref(false);
+const closeTravelDialog = ref(false);
 const selectedVehicleId = ref<number | null>(null);
 const travelDialog = ref(false);
 const selectedReqId = ref(null);
@@ -398,7 +523,8 @@ const {
   useRequestTravel,
   requestTravel,
   getTravelRequests,
-   approveTravelRequest,
+  approveTravelRequest,
+  closeTravelRequest,
   rejectTravelRequest,
   cancelTravelRequest,
   updateTravelStatus,
@@ -411,7 +537,14 @@ const {
 } = useReport();
 const selectedStatus = ref(null);
 const filteredRequests = ref([]);
-
+const purposes= [
+ { id: 1, name: "Internal Use"},
+ { id: 2, name: "Other Use"}
+];
+const otheruses = [
+  {id: 1, name: "Garage"},
+  {id: 2, name: "Insurance"},
+];
 // Travel requests table
 // const travelRequests = ref<Array<any>>([])
 const travelRequests = ref([]); // must be an empty array initially
@@ -422,6 +555,7 @@ const  statuses =[
         { id: 2, name: "Approved" },
         { id: 3, name: "Rejected" },
         { id: 4, name: "Canceled" },
+        { id: 5, name: "closed" },
       ];
 //approve from
 const travelApproveForm = ref({
@@ -429,6 +563,11 @@ const travelApproveForm = ref({
   vehicleId: null,
   remarks: null,
 });
+// close travel form
+const travelcloseForm = ref({
+endKm: null,
+});
+
 const showAssignedSnackbar = ref(false);
 const assignedCount = ref(0);
 const selectedReqItem = ref(null);
@@ -492,6 +631,24 @@ const openApproveTravelDialog = async (item) => {
     vehicleId: item.vehicleId ?? null,
     startKm: selectedVehicle?.currentMileage ?? 0,
     remarks: "",
+  };
+
+  // ⬇ CHECK vehicle assignment
+  assignedCountMessage.value = "";
+
+};
+//clase travel
+const openCloseTravelDialog = async (item) => {
+  selectedReqId.value = item.id;
+  selectedReqItem.value = item;    // save the full item (NEEDED!)
+  closeTravelDialog.value = true;
+
+  // const selectedVehicle = vehicleList.value.find(v => v.id === item.vehicleId);
+
+  travelcloseForm.value = {
+    // vehicleId: item.vehicleId ?? null,
+    endKm:  " ",
+    // remarks: "",
   };
 
   // ⬇ CHECK vehicle assignment
@@ -709,7 +866,9 @@ const handleVehicleSelect = async (vehicleId) => {
 
 // Request Travel
 const travelForm = ref({
-  department: null,
+  department: [],
+  purpose: 1,
+  // otheruse: [],
   route: [""], // start with one destination
   travelers: [],
   travelDate: null,
@@ -790,6 +949,7 @@ const submitTravel = async () => {
       ...travelForm.value,
       route: travelForm.value.route.join(","),
       travelers: travelForm.value.travelers.join(","),
+      // otheruse: travelForm.value.otheruse.join(","),
     };
 
     const res = await requestTravel(payload);
@@ -799,10 +959,14 @@ const submitTravel = async () => {
       travelDialog.value = false;
 
       // Reset form after closing dialog
-      travelForm.value.department = null;
       travelForm.value.travelDate = null;
+      // travelForm.value.otheruse= [],
+      travelForm.value.travelDate = null,
       travelForm.value.travelers = [];
+      travelForm.value.purpose = "";
       travelForm.value.route = [""];
+       travelForm.value.department = [];
+
 
       // Refresh table
       await fetchTravelRequests();
@@ -863,14 +1027,104 @@ const approveRequest = async () => {
   }
 };
 
+//close travel by entering end kilometer
+
+const closeTravel = async () => {
+  if (!selectedReqId.value) return;
+
+  const status = 5; // close travel
+
+  const payload = {
+    // vehicleId: travelApproveForm.value.vehicleId,
+    endKm: travelcloseForm.value.endKm,
+    // remarks: travelApproveForm.value.remarks,
+  };
+
+  try {
+    await closeTravelRequest(selectedReqId.value, status, payload);
+
+    showSuccessSnackbar.value = true;
+    successMessage.value = "Travel request Closed successfully!";
+    approveTravelDialog.value = false;
+
+    // await fetchTravelRequests();
+  } catch (err) {
+    console.error(err);
+    showErrorSnackbar.value = true;
+    errorMessage.value = "Failed to Close travel request";
+  }
+};
 
 
 
+//get department 
 
-const getDepartmentName = (id) => {
-  const dep = groups.find((g) => g.id === id);
+// const getDepartmentName = (id) => {
+//   const dep = groups.find((g) => g.id === id);
+//   return dep ? dep.name : "Unknown Department";
+// };
+
+
+// const getDepartmentName = (value) => {
+//   let ids = value;
+
+//   // If it's a string like "[1, 2]"
+//   if (typeof value === "string") {
+//     try {
+//       ids = JSON.parse(value);  // convert to real array
+//     } catch (e) {
+//       return "Unknown Department";
+//     }
+//   }
+
+//   // If it's now an array, map names
+//   if (Array.isArray(ids)) {
+//     return ids
+//       .map((id) => {
+//         const dep = groups.find((g) => g.id === Number(id));
+//         return dep ? dep.name : null;
+//       })
+//       .filter(Boolean)
+//       .join(", ") || "Unknown Department";
+//   }
+
+//   // Single ID
+//   const dep = groups.find((g) => g.id === Number(ids));
+//   return dep ? dep.name : "Unknown Department";
+// };
+
+const getDepartmentName = (departmentValue, purpose) => {
+  let ids = departmentValue;
+
+  // Convert string to array if needed
+  if (typeof departmentValue === "string") {
+    try {
+      ids = JSON.parse(departmentValue);
+    } catch (e) {
+      return "Unknown Department";
+    }
+  }
+
+  // Determine which lookup to use based on purpose
+  const lookup = purpose === 2 ? otheruses : groups;
+
+  // Handle array of IDs
+  if (Array.isArray(ids)) {
+    return ids
+      .map((id) => {
+        const dep = lookup.find((d) => d.id === Number(id));
+        return dep ? dep.name : null;
+      })
+      .filter(Boolean)
+      .join(", ") || "Unknown Department";
+  }
+
+  // Single ID
+  const dep = lookup.find((d) => d.id === Number(ids));
   return dep ? dep.name : "Unknown Department";
 };
+
+
 
 // const approveTravelRequest
 const openTravelDialog = () => {
