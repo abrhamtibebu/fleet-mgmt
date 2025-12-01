@@ -158,14 +158,14 @@
     >
       Department 
     </v-btn>
-     <v-btn
+     <!-- <v-btn
       variant="outlined"
       size="small"
       class="vehicle-btn"
   @click="openTravelsDialog(vehicle.id)"
     >
     Travels
-    </v-btn>
+    </v-btn> -->
   </v-card-actions>
 </v-card>
 
