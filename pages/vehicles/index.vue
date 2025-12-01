@@ -1402,13 +1402,13 @@
             <div class="d-flex align-center justify-space-between mb-4">
               <h3 class="section-title">Travels </h3>
                <!-- @click="addTravelEntry(selectedVehicle)" -->
-              <v-btn
+              <!-- <v-btn
                 color="primary"
                 prepend-icon="mdi-plus"
                 @click="openTravelsDialog(selectedVehicle.id)"
               >
                 Add Travel
-              </v-btn>
+              </v-btn> -->
             </div>
             
             <!-- <div v-if="selectedVehicle?.fuelRecord?.length" class="fuel-records-grid">
@@ -1490,26 +1490,28 @@
           <div class="fuel-record-details">
 
             <div class="fuel-detail-item">
-              <v-icon size="small" class="me-2">mdi-map-marker</v-icon>
-              <span class="fuel-label">City:</span>
-              <span class="fuel-value">{{ travel.travelers || 'N/A' }}</span>
+              <v-icon size="small" class="me-2">mdi-account</v-icon>
+              <span class="fuel-label">travelers:</span>
+              <span class="fuel-value">{{getTravelerNames(travel.travelers) || '' }}</span>
             </div>
 
             <div class="fuel-detail-item">
-              <v-icon size="small" class="me-2">mdi-speedometer</v-icon>
-              <span class="fuel-label">Start KM:</span>
-              <span class="fuel-value">{{ travel.department?.toLocaleString() }}</span>
+              <v-icon size="small" class="me-2">mdi-office-building</v-icon>
+              <span class="fuel-label">Department:</span>
+              <!-- <span class="fuel-value">{{ travel.department?.toLocaleString() }}</span> -->
+                   <span >{{ getDepartmentName(travel.department, travel.purpose) }}</span>
+
             </div>
 
             <div class="fuel-detail-item">
               <v-icon size="small" class="me-2">mdi-speedometer-medium</v-icon>
-              <span class="fuel-label">End KM:</span>
+              <span class="fuel-label">Travel Route:</span>
               <span class="fuel-value">{{ travel.route?.toLocaleString() }}</span>
             </div>
 
             <div class="fuel-detail-item">
-              <v-icon size="small" class="me-2">mdi-tape-measure</v-icon>
-              <span class="fuel-label">Distance:</span>
+              <v-icon size="small" class="me-2">mdi-calendar</v-icon>
+              <span class="fuel-label"> Request Date:</span>
               <span class="fuel-value">{{ travel.travelDate }} </span>
             </div>
 
@@ -2038,6 +2040,31 @@ const savetravelEntry = async () => {
   }
 };
 
+const getTravelerNames = (ids) => {
+  if (!ids) return "N/A";
+
+  // Parse if backend sent a string
+  if (typeof ids === "string") {
+    ids = ids
+      .replace(/[\[\]]/g, "")  // remove [ and ]
+      .split(",")              // split into array
+      .map(v => v.trim());     // trim spaces
+  }
+
+  // Single value case
+  if (!Array.isArray(ids)) {
+    ids = [ids];
+  }
+
+  // Map to names
+  return ids
+    .map((id) => {
+      const user = usersList.value.find(u => String(u.id) === String(id));
+      return user ? user.name : "Unknown";
+    })
+    .join(", ");
+};
+
 
 const resetDepartmentForm = () => {
   departmentEntryForm.value = {
@@ -2149,6 +2176,41 @@ const travelEntryForm = ref({
 //   }))
 // })
 
+
+
+
+// get department
+
+const getDepartmentName = (departmentValue, purpose) => {
+  let ids = departmentValue;
+
+  // Convert string to array if needed
+  if (typeof departmentValue === "string") {
+    try {
+      ids = JSON.parse(departmentValue);
+    } catch (e) {
+      return "Unknown Department";
+    }
+  }
+
+  // Determine which lookup to use based on purpose
+  const lookup = purpose === 2 ? otheruses : groups;
+
+  // Handle array of IDs
+  if (Array.isArray(ids)) {
+    return ids
+      .map((id) => {
+        const dep = lookup.find((d) => d.id === Number(id));
+        return dep ? dep.name : null;
+      })
+      .filter(Boolean)
+      .join(", ") || "Unknown Department";
+  }
+
+  // Single ID
+  const dep = lookup.find((d) => d.id === Number(ids));
+  return dep ? dep.name : "Unknown Department";
+};
 // Methods
 const getServiceProgress = (vehicle: any) => {
   const progress =
@@ -2419,6 +2481,11 @@ const hasRequiredInsurance = computed(() => {
   )
   return hasComprehensive && hasThirdParty && hasSaftyInspection && hasRoadFund
 })
+
+const otheruses = [
+  {id: 1, name: "Garage"},
+  {id: 2, name: "Insurance"},
+];
 const resetVehicleForm = () => {
   vehicleForm.value = {
     detail: {
@@ -2436,6 +2503,8 @@ const resetVehicleForm = () => {
     insurance: [], // Reset to empty array
 
 
+
+    
   //   insurance: 
   //   {
   //     type: null as any,

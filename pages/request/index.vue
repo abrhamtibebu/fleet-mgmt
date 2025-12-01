@@ -33,17 +33,17 @@
 </v-col>
  
    <v-col cols="12" md="2" sm="12" class="ml-4">
-        <v-select
+       <v-autocomplete
           :items="statuses"
           item-title="name"
           item-value="id"
-          rounded
           label="status"
           v-model="selectedStatus"
           dense
           color="black"
           hide-details
-        ></v-select>
+          variant="outlined"
+        ></v-autocomplete>
       </v-col>
       
       <v-col>
@@ -201,7 +201,7 @@
       <v-card-text>
         <v-row justify="end">
             <v-col cols="12" md="3" class="mt-n8">
-            <v-select
+            <v-autocomplete
               v-model="travelForm.purpose"
               label="purpose"
               variant="outlined"
@@ -210,7 +210,7 @@
               item-title="name"
               item-value="id"
               :items="purposes"
-            ></v-select>
+            ></v-autocomplete>
           </v-col>
         </v-row>
         <v-row>
@@ -245,21 +245,41 @@
                 </v-menu>
               </v-col> -->
           <v-col cols="12" md="6">
-            <v-select
+             <!-- <v-autocomplete
+    v-model="travelForm.travelers"
+    label="Traveler"
+    variant="outlined"
+    :rules="[(v) => !!v || 'Traveler is required']"
+    required
+    item-title="name"
+    item-value="id"
+    :items="usersList"
+    style="width: 350px"
+    multiple
+  ></v-autocomplete> -->
+          <v-autocomplete
+              :items="usersList"
               v-model="travelForm.travelers"
-              label="Traveler"
-              variant="outlined"
+              label=" Traveler"
               :rules="[(v) => !!v || 'Traveler is required']"
               required
               item-title="name"
               item-value="id"
-              :items="usersList"
+              chips
+              closable-chips
+              hide-selected
+              clear-on-select
+              persistent-placeholder
+              density="comfortable"
               style="width: 350px"
               multiple
-            ></v-select>
+              variant="outlined"
+              placeholder="Select Traveler"
+            ></v-autocomplete>
           </v-col>
+
           <v-col cols="12" md="6" v-if="travelForm.purpose == 1">
-            <v-select
+           <v-autocomplete
               :rules="[(v) => !!v || 'Department is required']"
               v-model="travelForm.department"
               placeholder="Department"
@@ -270,11 +290,14 @@
               class="rounded-lg "
               style="width: 300px"
               clearable
-               multiple
-            ></v-select>
+              multiple
+              density="comfortable"
+               variant="outlined"
+
+            ></v-autocomplete>
           </v-col>
            <v-col cols="12" md="6"  v-if="travelForm.purpose == 2">
-            <v-select
+            <v-autocomplete
               :rules="[(v) => !!v || 'For other use Use  is required']"
               v-model="travelForm.department"
               placeholder="other Use"
@@ -286,7 +309,10 @@
               style="width: 300px"
               clearable
               multiple
-            ></v-select>
+              dense
+              variant="outlined"
+
+            ></v-autocomplete>
           </v-col>
         </v-row>
         <!-- Dynamic Routes -->
