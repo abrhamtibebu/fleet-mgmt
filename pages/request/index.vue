@@ -1153,7 +1153,7 @@ const getStatusName = (statusId) => {
 const filterexportData = () =>
   travelRequests.value.map((item) => ({
     ID: item.id,
-    Department: getDepartmentName(item.department),
+    Department: getDepartmentName(item.department , item.purpose),
     Vehicle: getVehiclePlate(item.vehicle),
     Route: item.route,
     Travelers: getTravelerNames(item.travelers),
