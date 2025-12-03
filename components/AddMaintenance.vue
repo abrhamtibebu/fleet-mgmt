@@ -2,9 +2,12 @@
     <div>
             <v-dialog @click:outside="emit('close')" v-model="showMaintenanceDialog" max-width="700px" persistent>
       <v-card class="dialog-card">
-        <v-card-title class="dialog-title">
+        <v-card-title class="dialog-title d-flex align-center">
           <v-icon class="me-2" color="success">mdi-wrench</v-icon>
-          Add Maintenance Record
+          Add Maintenance Record  
+           <span class="ml-auto">
+    <v-icon   @click="showMaintenanceDialog = false" color="red">mdi-window-close</v-icon>
+  </span>
         </v-card-title>
         <v-card-text>
           <v-form ref="maintenanceFormRef" v-model="maintenanceFormValid">
