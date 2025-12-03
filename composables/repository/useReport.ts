@@ -351,6 +351,20 @@ const getAnalyticsReport = async (from: string, to: string) => {
     loading.value = false
   }
 }
+// repositories/travelRequestRepository.js
+
+ const updateTravelRequestRoutes = async (reqId :any, routes: any) => {
+  try {
+    return await  $apiFetch(`/vehicle/${reqId}/route`, {
+      method: "PUT",
+      body: { route: routes },
+    });
+  } catch (err) {
+    console.error("Failed to update travel request routes", err);
+    throw err; // re-throw to handle in component
+  }
+};
+
 
   return {
     dashboardReport,
@@ -374,7 +388,7 @@ const getAnalyticsReport = async (from: string, to: string) => {
     travelList,
     cancelTravelRequest,
     vehicleAssignedPerDay,
-    
+    updateTravelRequestRoutes,
 
   
   }

@@ -69,7 +69,17 @@
         <!-- Display multiple Route as comma-separated -->
         <!-- Route Display -->
         <template #item.route="{ item }">
-          {{ item.route.join(", ") }}
+              <v-btn
+    icon
+    size="small"
+    variant="text"
+    color="blue"
+    @click="openEditRouteDialog(item)"
+  >
+    <v-icon>mdi-pencil</v-icon>
+  </v-btn>
+          {{ item.route.join(", ") }} 
+       
         </template>
 
         <!-- Travelers Display (names) -->
@@ -162,6 +172,22 @@
     </template>
   </v-tooltip>
 
+  <!--add route after approve the request after approve it -->
+   <!-- <v-tooltip text="Close Travel Request" location="top" >
+    <template #activator="{ props }" v-if="item.status ===2 ">
+      <v-btn
+        v-bind="props"
+        icon
+        variant="text"
+        size="small"
+        color="green"
+        @click="openAddRouteDialog(item)"
+      >
+        <v-icon size="18"> mdi-plus</v-icon>
+      </v-btn>
+      
+    </template>
+  </v-tooltip> -->
    <template v-if="item.status ===5">
     <p>closed</p>
   </template>
@@ -177,7 +203,11 @@
       <!-- Confirmation Dialog -->
       <v-dialog v-model="confirmDialog.show" max-width="600px">
         <v-card>
-          <v-card-title><h4>Confirm Action</h4></v-card-title>
+          <v-card-title class="d-flex align-center"><h4>Confirm Action</h4>
+            <span class="ml-auto">
+    <v-icon   @click="closeConfirmDialog" color="red">mdi-window-close</v-icon> </span>
+          </v-card-title>
+         
           <v-card-text>
            <p>Are you Sure you Want to
             <strong>{{
@@ -196,7 +226,9 @@
 
   <v-dialog v-model="travelDialog" max-width="800px">
     <v-card>
-      <v-card-title class="mt-3">Request Travel</v-card-title>
+      <v-card-title  class="d-flex align-center mb-8">Request Travel  <span class="ml-auto" >
+    <v-icon   @click="travelDialog = false" color="red">mdi-window-close</v-icon>
+  </span></v-card-title>
 
       <v-card-text>
         <v-row justify="end">
@@ -368,8 +400,10 @@
   <!--approve dialog-->
   <v-dialog v-model="approveTravelDialog" max-width="600px">
     <v-card>
-      <v-card-title> Approve Travel Request </v-card-title>
-
+      <v-card-title  class="d-flex align-center"> Approve Travel Request <span class="ml-auto">
+    <v-icon  @click="approveTravelDialog = false" color="red">mdi-window-close</v-icon>
+  </span>
+</v-card-title>
       <v-card-text>
         <v-row>
           <!-- Vehicle Selection -->
@@ -429,8 +463,12 @@
   <!-- close dialog-->
      <v-dialog v-model="closeTravelDialog" max-width="600px">
     <v-card>
-      <v-card-title> close Travel  </v-card-title>
-
+     <v-card-title class="d-flex align-center">
+  Close Travel
+  <span class="ml-auto">
+    <v-icon  @click="closeTravelDialog = false" color="red">mdi-window-close</v-icon>
+  </span>
+</v-card-title>
       <v-card-text>
         <v-row>
           <!-- Vehicle Selection -->
@@ -481,10 +519,66 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn text @click="closeTravelDialog = false">Cancel</v-btn>
-        <v-btn color="primary" @click="closeTravel">Close</v-btn>
+        <v-btn color="primary" @click="closeTravel">Close Request</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
+
+    <!-- Edit Route after we Approve the request dialog-->
+   <v-dialog v-model="editRouteDialog" max-width="500px">
+      <v-card>
+
+        <v-card-title class="text-h6">
+          Edit Routes
+        </v-card-title>
+
+        <v-card-text>
+
+          <!-- EXISTING ROUTES FIELDS -->
+          <div
+            v-for="(route, index) in editableRoutes"
+            :key="index"
+            class="d-flex mb-3"
+          >
+            <v-text-field
+              v-model="editableRoutes[index]"
+              :label="`Route ${index + 1}`"
+              class="flex-grow-1"
+            />
+
+            <v-btn
+              icon
+              variant="text"
+              color="red"
+              @click="removeRoute(index)"
+            >
+              <v-icon>mdi-delete</v-icon>
+            </v-btn>
+          </div>
+
+          <!-- ADD NEW ROUTE BUTTON -->
+          <v-btn
+            variant="text"
+            color="primary"
+            @click="addNewRoute"
+          >
+            <v-icon class="mr-1">mdi-plus</v-icon>
+            Add Route
+          </v-btn>
+
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer />
+          <v-btn variant="text" @click="editRouteDialog = false">Cancel</v-btn>
+          <v-btn color="green" variant="text" @click="saveRouteChanges">
+            Edit
+          </v-btn>
+        </v-card-actions>
+
+      </v-card>
+    </v-dialog>
+
   <v-snackbar
     v-model="showSuccessSnackbar"
     color="success"
@@ -536,6 +630,8 @@ const successMessage = ref("");
 const errorMessage = ref("");
 const approveTravelDialog = ref(false);
 const closeTravelDialog = ref(false);
+const addRouteTravelDialog = ref(false);
+const editRouteDialog = ref(false);
 const selectedVehicleId = ref<number | null>(null);
 const travelDialog = ref(false);
 const selectedReqId = ref(null);
@@ -560,6 +656,7 @@ const {
   travelList,
   getVehicles,
   vehicleAssignedPerDay,
+  updateTravelRequestRoutes,
 } = useReport();
 const selectedStatus = ref(null);
 const filteredRequests = ref([]);
@@ -571,6 +668,8 @@ const otheruses = [
   {id: 1, name: "Garage"},
   {id: 2, name: "Insurance"},
 ];
+const selectedRequest = ref(null);
+const editableRoutes = ref([]);
 // Travel requests table
 // const travelRequests = ref<Array<any>>([])
 const travelRequests = ref([]); // must be an empty array initially
@@ -682,6 +781,54 @@ const openCloseTravelDialog = async (item) => {
 
 };
 
+//add route travel  after approve it 
+// const openEditRouteDialog = async (item) => {
+//   selectedReqId.value = item.id;
+//   selectedReqItem.value = item;    // save the full item (NEEDED!)
+//   editRouteDialog.value = true;
+
+//   // const selectedVehicle = vehicleList.value.find(v => v.id === item.vehicleId);
+
+//   travelcloseForm.value = {
+//     // vehicleId: item.vehicleId ?? null,
+//     endKm:  " ",
+//     // remarks: "",
+//   };
+
+//   // ⬇ CHECK vehicle assignment
+//   assignedCountMessage.value = "";
+
+// };
+
+// function openEditRouteDialog(item) {
+//   selectedRequest.value = item;
+
+//   // Load routes from the row in filteredRequests
+//   //editableRoutes.value = [...item.route];
+//   // editableRoutes.value = item.route.join(",");
+//  route: editableRoutes.value.item.route.join(","),
+
+
+//   editRouteDialog.value = true;
+// }
+
+function openEditRouteDialog(item) {
+  selectedRequest.value = item;
+
+  // ensure item.route is converted to an array if it is a string
+  editableRoutes.value = Array.isArray(item.route)
+    ? [...item.route]
+    : item.route.split(",").map(r => r.trim());
+
+  editRouteDialog.value = true;
+}
+
+// function openEditRouteDialog(item) {
+//   selectedRequest.value = item;
+//   editableRoutes.value = [...item.route]; // clone existing
+//   editRouteDialog.value = true;
+// }
+
 
 // const payload = {
 //   vehicleId: Number(travelApproveForm.value.vehicleId), // convert to number
@@ -698,6 +845,80 @@ const getTravelerNames = (ids) => {
     })
     .join(", ");
 };
+
+//
+function addNewRoute() {
+  editableRoutes.value.push("");
+}
+
+// delete route
+function removeRoute(index) {
+  editableRoutes.value.splice(index, 1);
+}
+
+// save the edit route
+// async function saveRouteChanges() {
+//   const updatedRoutes = editableRoutes.value.filter(r => r.trim() !== "");
+
+//   try {
+//     await $fetch(`YOUR_API_URL_HERE/api/travel-request/${selectedRequest.value.id}/routes`, {
+//       method: "PUT",
+//       body: {
+//         route: updatedRoutes,
+//       },
+//     });
+
+//     // update UI
+//     selectedRequest.value.route = updatedRoutes;
+
+//     editRouteDialog.value = false;
+
+//     console.log("Route updated successfully!");
+
+//   } catch (err) {
+//     console.error("Failed to update route", err);
+//   }
+// }
+// async function saveRouteChanges() {
+//   const updatedRoutes = editableRoutes.value.filter(r => r.trim() !== "");
+
+//   try {
+//     // call repository function
+//     await updateTravelRequestRoutes(selectedRequest.value.id, updatedRoutes);
+
+//     // update UI
+//     selectedRequest.value.route = updatedRoutes;
+
+//     editRouteDialog.value = false;
+
+//     console.log("Route updated successfully!");
+
+//   } catch (err) {
+//     console.error("Failed to update route", err);
+//   }
+// }
+
+async function saveRouteChanges() {
+  const updatedRoutesArray = editableRoutes.value.filter(r => r.trim() !== "");
+
+  // convert array → comma-separated string
+  const updatedRoutesString = updatedRoutesArray.join(",");
+
+  try {
+    await updateTravelRequestRoutes(
+      selectedRequest.value.id,
+      updatedRoutesString
+    );
+
+    // update UI (save string, not array)
+    selectedRequest.value.route = updatedRoutesString;
+
+    editRouteDialog.value = false;
+
+  } catch (err) {
+    console.error("Failed to update route", err);
+  }
+}
 
 // Table headers
 const headers = [
@@ -911,6 +1132,8 @@ const getUsersHandler = async () => {
 const removeDestination = (index) => {
   travelForm.value.route.splice(index, 1);
 };
+
+
 //snackBar messages
 const showSuccessMessage = (message) => {
   successMessage.value = message;
