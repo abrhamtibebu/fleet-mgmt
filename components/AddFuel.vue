@@ -2,9 +2,12 @@
     <div>
             <v-dialog  @click:outside="emit('close')" v-model="showFuelEntryDialog" max-width="600px">
       <v-card>
-        <v-card-title class="text-h6 pa-4">
+        <v-card-title class="text-h6 pa-4 d-flex align-center">
                   <v-icon class="me-2  ml-5" color="green">mdi-fuel</v-icon>
-          Add Fuel Entry</v-card-title>
+          Add Fuel Entry
+         <span class="ml-auto ">
+    <v-icon  class="" @click="showFuelEntryDialog = false" color="red">mdi-window-close</v-icon>
+  </span></v-card-title>
         <v-card-text class="pa-4">
           <v-form ref="fuelForm" v-model="fuelFormValid">
             <v-row>
