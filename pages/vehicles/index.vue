@@ -142,6 +142,14 @@
     >
       Fuel
     </v-btn>
+      <v-btn
+      variant="outlined"
+      size="small"
+      class="vehicle-btn"
+  @click="openDepartmentDialog(vehicle.id)"
+    >
+      Department 
+    </v-btn>
      <v-btn
       variant="outlined"
       size="small"
@@ -150,14 +158,7 @@
     >
       Detail
     </v-btn>
-     <v-btn
-      variant="outlined"
-      size="small"
-      class="vehicle-btn"
-  @click="openDepartmentDialog(vehicle.id)"
-    >
-      Department 
-    </v-btn>
+   
      <!-- <v-btn
       variant="outlined"
       size="small"
@@ -179,8 +180,11 @@
     <v-dialog v-model="showAddDialog" max-width="720px" persistent>
       <v-card class="dialog-card">
         <v-card-title class="dialog-title">
-          <span class="title-icon-badge"><v-icon size="20" color="warning">mdi-clipboard-plus-outline</v-icon></span>
-          {{ editingVehicle ? `Edit Vehicle - ${editingVehicle.plateNo}` : "Add New Vehicle" }}
+          <span class="title-icon-badge d-flex align-center"><v-icon size="20" color="warning">mdi-clipboard-plus-outline</v-icon></span>
+          {{ editingVehicle ? `Edit Vehicle - ${editingVehicle.plateNo}` : "Add New Vehicle" }} 
+           <span class="ml-auto">
+      <v-icon  class="" @click="showAddDialog = false" color="red">mdi-window-close</v-icon>
+     </span>
         </v-card-title>
 
         <div class="dialog-subtitle pa-4 pt-2">
@@ -799,9 +803,12 @@
 <!-- detail records dialog  -->
 <v-dialog v-model="vehicleDetailDialog" max-width="1200px" persistent>
   <v-card class="dialog-card">
-    <v-card-title class="dialog-title">
+    <v-card-title class="dialog-title d-flex align-center">
       <v-icon class="me-2" color="primary">mdi-truck</v-icon>
       Vehicle Details - {{ selectedVehicle?.plateNo }}
+       <span class="ml-auto">
+    <v-icon   @click="vehicleDetailDialog = false" color="red">mdi-window-close</v-icon>
+  </span>
     </v-card-title>
 
     <v-card-text class="pa-0">
@@ -1511,8 +1518,13 @@
 
             <div class="fuel-detail-item">
               <v-icon size="small" class="me-2">mdi-calendar</v-icon>
-              <span class="fuel-label"> Request Date:</span>
+              <span class="fuel-label"> Travel Date:</span>
               <span class="fuel-value">{{ travel.travelDate }} </span>
+            </div>
+              <div class="fuel-detail-item">
+              <v-icon size="small" class="me-2">mdi-calendar</v-icon>
+              <span class="fuel-label"> Status :</span>
+              <span class="fuel-value">{{ getStatusName(travel.status)}} </span>
             </div>
 
           </div>
@@ -1546,9 +1558,12 @@
          <!---Department dialog---->
  <v-dialog v-model="vehicleDepartmentDialog" max-width="600px">
       <v-card class="dialog-card">
-        <v-card-title class="dialog-title">
-          <span class="title-icon-badge"><v-icon size="20" color="warning">mdi-account-group</v-icon></span>
-          Assign Department 
+        <v-card-title class="dialog-title" flat>
+          <span class="title-icon-badge d-flex align-center"><v-icon size="20" color="warning">mdi-account-group</v-icon></span>
+          Assign Department  
+          <span class="ml-auto">
+    <v-icon  class="" @click="vehicleDepartmentDialog = false" color="red">mdi-window-close</v-icon>
+  </span>
         </v-card-title>
         <v-card-text class="pa-4">
           <v-form ref="fuelForm" v-model="DepartmentFormValid">
@@ -1644,9 +1659,11 @@
     <!--Travels dialog -->
      <v-dialog v-model="vehicleTravelsDialog" max-width="600px">
       <v-card class="dialog-card">
-        <v-card-title class="dialog-title">
+        <v-card-title class="dialog-title d-flex align-center">
           <span class="title-icon-badge"><v-icon size="20" color="warning">mdi-train-car</v-icon></span>
-           Travels 
+           Travels    <span class="ml-auto">
+    <v-icon  class="" @click="vehicleTravelsDialog = false" color="red">mdi-window-close</v-icon>
+  </span>
         </v-card-title>
         <v-card-text class="pa-4">
           <v-form ref="fuelForm" v-model="DepartmentFormValid">
@@ -1852,6 +1869,14 @@ const roadFundStatusOptions = [
   { id: 4, name: 'Not Required' },
   { id: 5, name: 'Under Review' }
 ]
+// status of the requests
+const  statuses =[
+        { id: 1, name: "Pending" },
+        { id: 2, name: "Approved" },
+        { id: 3, name: "Rejected" },
+        { id: 4, name: "Canceled" },
+        { id: 5, name: "closed" },
+      ];
 const { getCard, getUsers, cardList, usersList } = useCard();
 const { getByVendor, modelList } = useModel();
 const {
@@ -1949,6 +1974,13 @@ const vehicleForm = ref({
     }
   
 });
+
+// get status name 
+
+const getStatusName = (statusId) => {
+  const status = statuses.find((s) => s.id === statusId);
+  return status ? status.name : "-";
+};
 // Save Department 
 const saveDepartmentEntryy = async () => {
   saving.value = true
