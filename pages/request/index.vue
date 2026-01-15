@@ -68,7 +68,7 @@
       >
         <!-- Display multiple Route as comma-separated -->
         <!-- Route Display -->
-        <template #item.route="{ item }">
+        <!-- <template #item.route="{ item }">
               <v-btn
     icon
     size="small"
@@ -80,11 +80,46 @@
   </v-btn>
           {{ item.route.join(", ") }} 
        
+        </template> -->
+
+<template #item.id="{ item }">
+{{ item.id }}
         </template>
+        <template #item.route="{ item }">
+  <div class="route-cell">
+    <v-btn
+      icon
+      size="small"
+      variant="text"
+      color="blue"
+      @click="openEditRouteDialog(item)"
+    >
+      <v-icon>mdi-pencil</v-icon>
+    </v-btn>
+
+    <span class="route-text">
+      {{ item.route.join(', ') }}
+    </span>
+  </div>
+</template>
 
         <!-- Travelers Display (names) -->
-        <template #item.travelers="{ item }">
-          {{ getTravelerNames(item.travelers) }}
+       <template #item.travelers="{ item }">
+  <v-tooltip location="top">
+    <template #activator="{ props }">
+      <span
+        class="traveler-text"
+        v-bind="props"
+      >
+        {{ getTravelerNames(item.travelers) }}
+      </span>
+    </template>
+    {{ getTravelerNames(item.travelers) }}
+  </v-tooltip>
+</template>
+
+        <template #item.driver="{ item }">
+{{ getDriverNames(item.vehicle?.driver) }}
         </template>
         <!-- selected department for the travel request-->
         
@@ -94,7 +129,10 @@
 
         <template #item.department="{ item }">
       {{ getDepartmentName(item.department, item.purpose) }}
-     </template>
+     </template> 
+    <template #item.plateNo="{ item }">
+  {{ item.vehicle?.plateNo || "-" }}
+</template>
         <!-- Actions column -->
          <!-- @click="openApproveTravelDialog(item.id, 'approve')"  -->
        <template #item.actions="{ item }">
@@ -658,6 +696,7 @@ const {
   vehicleAssignedPerDay,
   updateTravelRequestRoutes,
 } = useReport();
+
 const selectedStatus = ref(null);
 const filteredRequests = ref([]);
 const purposes= [
@@ -846,6 +885,13 @@ const getTravelerNames = (ids) => {
     .join(", ");
 };
 
+const getDriverNames = (id) => {
+  if (!id || typeof id !== "string") return "-";
+
+  const user = usersList.value.find((u) => u.id === id);
+  return user ? user.name : "Unknown";
+};
+
 //
 function addNewRoute() {
   editableRoutes.value.push("");
@@ -925,6 +971,9 @@ const headers = [
   { title: "Request Date", value: "travelDate" },
   { title: "Traveler", value: "travelers" },
   { title: "Department", value: "department" },
+  { title: "Vehicle", value: "plateNo" }, 
+  { title: "Driver", value: "driver" },
+  { title: "id", value: "id" },
   { title: "Route", value: "route" },
   { title: "Actions", value: "actions", sortable: false },
 ];
@@ -1427,4 +1476,32 @@ onMounted(async () => {
 });
 </script>
 
-<style></style>
+<style scoped>
+  .route-cell {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  max-width: 280px; /* control column width */
+}
+
+/*.route-text {
+  white-space: normal;    
+  word-break: break-word;
+  line-height: 1.4;
+}
+*/
+.route-text {
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.traveler-text {
+  max-width: 150px;   /* adjust width as needed */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+}
+
+</style>
